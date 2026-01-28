@@ -1,0 +1,35 @@
+volumes:
+  tims_local_postgres_data: {}
+  tims_local_postgres_data_backups: {}
+  
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: tims_local_django
+    container_name: tims_local_django
+    depends_on:
+      - postgres
+    volumes:
+      - /app/.venv
+      - .:/app:z
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    ports:
+      - '8000:8000'
+    command: /start
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: tims_production_postgres
+    container_name: tims_local_postgres
+    volumes:
+      - tims_local_postgres_data:/var/lib/postgresql/data
+      - tims_local_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.local/.postgres
