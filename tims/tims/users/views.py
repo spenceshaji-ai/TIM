@@ -44,3 +44,66 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 
 user_redirect_view = UserRedirectView.as_view()
+
+class TrainingSessionCreate(View):
+    template_name = 'training/create_session.html'
+
+    def get(self, request):
+        return render(request, self.template_name, {
+            'form': TrainingSessionForm(),
+            'title': 'Create Training Session'
+        })
+
+    def post(self, request):
+        form = TrainingSessionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('training_list')
+        return render(request, self.template_name, {
+            'form': form,
+            'title': 'Create Training Session'
+        })
+class TrainingSessionList(View):
+    template_name = 'Session_list.html'
+
+    def get(self, request):
+        sessions = (
+            TrainingSession.objects
+            .select_related('batch', 'faculty')
+            .order_by('-session_date')
+        )
+        return render(request, self.template_name, {
+            'sessions': sessions
+        })
+class TrainingSessionUpdate(View):
+    template_name = 'update_session.html'
+
+    def get(self, request, pk):
+        session = get_object_or_404(TrainingSession, pk=pk)
+        return render(request, self.template_name, {
+            'form': TrainingSessionForm(instance=session),
+            'title': 'Update Training Session'
+        })
+
+    def post(self, request, pk):
+        session = get_object_or_404(TrainingSession, pk=pk)
+        form = TrainingSessionForm(request.POST, instance=session)
+        if form.is_valid():
+            form.save()
+            return redirect('training_list')
+        return render(request, self.template_name, {
+            'form': form,
+            'title': 'Update Training Session'
+        })
+                
+class TrainingSessionDelete(View):
+
+    def post(self, request, pk):
+        session = get_object_or_404(TrainingSession, pk=pk)
+        session.delete()
+        return redirect('training_list')
+
+
+training_session_delete_view = TrainingSessionDelete.as_view()
+       
+

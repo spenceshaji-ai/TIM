@@ -38,3 +38,41 @@ class UserSocialSignupForm(SocialSignupForm):
     Default fields will be added automatically.
     See UserSignupForm otherwise.
     """
+
+from django import forms
+from .models import TrainingSession
+
+
+class TrainingSessionForm(forms.ModelForm):
+    class Meta:
+        model = TrainingSession
+        fields = [
+            'batch',
+            'faculty',
+            'session_date',
+            'topic_covered',
+            'hours_taken',
+            'status',
+            'approval_status',   
+        ]
+
+        widgets = {
+            'batch': forms.Select(attrs={'class': 'form-control'}),
+            'faculty': forms.Select(attrs={'class': 'form-control'}),
+            'session_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'topic_covered': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter topics covered',
+                'rows': 4
+            }),
+            'hours_taken': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.5',
+                'placeholder': 'Hours taken'
+            }),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'approval_status': forms.Select(attrs={'class': 'form-control'}),
+        }
