@@ -1,11 +1,11 @@
-{% extends "forms/forms.html" %}
+{% extends "forms.html" %}
 
 {% block form_title %}
 Add Training Session
 {% endblock %}
 
 {% block form_action %}
-{% url 'training_create' %}
+{% url 'users:training_create' %}
 {% endblock %}
 
 {% block form_body %}
@@ -14,10 +14,10 @@ Add Training Session
 
 {% block form_button %}
 <button type="submit" class="btn btn-primary">
-    Save
+    Submit
 </button>
 
-<a href="{% url 'training_list' %}" class="btn btn-secondary ms-2">
+<a href="{% url 'users:training_list' %}" class="btn btn-secondary ms-2">
     Cancel
 </a>
 {% endblock %}

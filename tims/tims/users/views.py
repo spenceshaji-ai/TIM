@@ -45,8 +45,13 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 user_redirect_view = UserRedirectView.as_view()
 
+from django.views import View
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import TrainingSession
+from .forms import TrainingSessionForm
+
 class TrainingSessionCreate(View):
-    template_name = 'training/create_session.html'
+    template_name = 'create_session.html'
 
     def get(self, request):
         return render(request, self.template_name, {
@@ -105,5 +110,65 @@ class TrainingSessionDelete(View):
 
 
 training_session_delete_view = TrainingSessionDelete.as_view()
-       
 
+class AttendanceCreate(View):
+    template_name = 'create_attendance.html'
+
+    def get(self, request):
+        return render(request, self.template_name, {
+            'form': StudentAttendanceForm(),
+            'title': 'Add Attendance'
+        })
+
+    def post(self, request):
+        form = StudentAttendanceForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('attendance_list')
+        return render(request, self.template_name, {
+            'form': form,
+            'title': 'Add Attendance'
+        })
+     
+
+class AttendanceList(View):
+    template_name = 'attendance_list.html'
+
+    def get(self, request):
+        attendance_list = StudentAttendance.objects.select_related(
+            'student', 'faculty', 'batch'
+        ).order_by('-attendance_date')
+
+        return render(request, self.template_name, {
+            'attendance_list': attendance_list,
+            'title': 'Attendance List'
+        })
+
+class AttendanceUpdate(View):
+    template_name = 'update_attendance.html'
+
+    def get(self, request, pk):
+        attendance = get_object_or_404(StudentAttendance, pk=pk)
+        return render(request, self.template_name, {
+            'form': StudentAttendanceForm(instance=attendance),
+            'title': 'Update Attendance'
+        })
+
+    def post(self, request, pk):
+        attendance = get_object_or_404(StudentAttendance, pk=pk)
+        form = StudentAttendanceForm(request.POST, instance=attendance)
+        if form.is_valid():
+            form.save()
+            return redirect('attendance_list')
+        return render(request, self.template_name, {
+            'form': form,
+            'title': 'Update Attendance'
+        })
+
+
+class AttendanceDelete(View):
+
+    def post(self, request, pk):
+        attendance = get_object_or_404(StudentAttendance, pk=pk)
+        attendance.delete()
+        return redirect('attendance_list')

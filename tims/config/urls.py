@@ -22,6 +22,9 @@ urlpatterns = [
     # ...
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
+
+    path("users/", include("tims.users.urls")),
+    path("", include("tims.users.urls")),
 ]
 
 
@@ -53,3 +56,4 @@ if settings.DEBUG:
             path("__debug__/", include(debug_toolbar.urls)),
             *urlpatterns,
         ]
+
