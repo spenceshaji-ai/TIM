@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Application</title>
+</head>
+<body>
+
+<h2>Edit Application</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <label>Job:</label><br>
+    {{ form.job }}<br><br>
+
+    <label>Student:</label><br>
+    {{ form.student }}<br><br>
+
+    <label>Resume:</label><br>
+    {{ form.resume }}<br><br>
+
+    <label>Applied Date:</label><br>
+    {{ form.applied_date }}<br><br>
+
+    <button type="submit">Update</button>
+</form>
+
+</body>
+</html>

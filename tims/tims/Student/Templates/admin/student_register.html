@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Registration</title>
+</head>
+<body>
+
+<h2>Student Registration</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label>Name:</label><br>
+    {{ form.name }}<br><br>
+
+    <label>Email:</label><br>
+    {{ form.email }}<br><br>
+
+    <label>Phone:</label><br>
+    {{ form.phone }}<br><br>
+
+    <label>Course:</label><br>
+    {{ form.course }}<br><br>
+
+    <label>Passout Year:</label><br>
+    {{ form.passout_year }}<br><br>
+
+    <label>Qualification:</label><br>
+    {{ form.qualification }}<br><br>
+
+    <button type="submit">Register</button>
+</form>
+
+</body>
+</html>
