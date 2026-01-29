@@ -3,11 +3,17 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse_lazy
 from django.views.generic import DetailView
 from django.views.generic import RedirectView
 from django.views.generic import UpdateView
-
+from django.views.generic import ListView, CreateView, DeleteView
 from tims.users.models import User
+from .forms import UserForm
+from django.views.generic import TemplateView
+from .models import Enquiry
+from .forms import EnquiryForm
+
 
 
 class UserDetailView(LoginRequiredMixin, DetailView):
@@ -44,3 +50,87 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 
 user_redirect_view = UserRedirectView.as_view()
+
+#Role based redirect view
+
+class RoleBasedRedirectView(LoginRequiredMixin, RedirectView):
+    permanent = False
+
+    def get_redirect_url(self):
+
+        role = self.request.user.role.role_name
+
+        # SAME template for Admin, SuperAdmin, Faculty
+        if role in ["Super Admin", "Admin", "Faculty", "HR", "Manager"]:
+            return reverse("staff_dashboard")
+
+        # DIFFERENT template for Student
+        elif role == "Student":
+            return reverse("student_dashboard")
+
+        return reverse("home")
+role_redirect_view = RoleBasedRedirectView.as_view()
+
+#for view admindashboard
+class StaffDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboards/staff_dashboard.html"
+
+# for student dashboard
+class StudentDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboards/student_dashboard.html"
+
+
+
+
+
+
+
+# ✅ User List View
+class UserListView(LoginRequiredMixin, ListView):
+    model = User
+    template_name = "users/user_list.html"
+    context_object_name = "users"
+
+# ✅ Add User View
+class UserCreateView(LoginRequiredMixin, CreateView):
+    model = User
+    form_class = UserForm
+    template_name = "users/user_form.html"
+    success_url = reverse_lazy("users:user_list")
+
+
+# ✅ edit User View
+
+class UserEditView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = UserForm
+    template_name = "users/user_form.html"
+    success_url = reverse_lazy("users:user_list")
+
+
+# ✅ Delete User View
+class UserDeleteView(DeleteView):
+    model = User
+    template_name = "users/user_confirm_delete.html"
+    success_url = reverse_lazy("user_list")
+
+class EnquiryListView(LoginRequiredMixin, ListView):
+    model = Enquiry
+    template_name = "enquiry/enquiry_list.html"
+    context_object_name = "enquiries"
+
+class EnquiryCreateView(LoginRequiredMixin, CreateView):
+    model = Enquiry
+    form_class = EnquiryForm
+    template_name = "enquiry/enquiry_form.html"
+    success_url = reverse_lazy("users:enquiry_list")
+
+class EnquiryDetailView(LoginRequiredMixin, DetailView):
+    model = Enquiry
+    template_name = "enquiry/enquiry_detail.html"
+
+class EnquiryUpdateView(LoginRequiredMixin, UpdateView):
+    model = Enquiry
+    form_class = EnquiryForm
+    template_name = "enquiry/enquiry_form.html"
+    success_url = reverse_lazy("users:enquiry_list")

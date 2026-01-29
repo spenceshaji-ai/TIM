@@ -1,44 +1,28 @@
 {% extends "base.html" %}
 
-{% load static %}
-
-{% block title %}
-  User: 
-  
-    {{ object.username }}
-  
-  
-{% endblock title %}
 {% block content %}
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-12">
-        <h2>
-        
-        
-          {{ object.username }}
-        
-      </h2>
-      {% if object.name %}
-        <p>{{ object.name }}</p>
-      {% endif %}
-    </div>
-  </div>
-  {% if object == request.user %}
-    <!-- Action buttons -->
-    <div class="row">
-      <div class="col-sm-12">
-        <a class="btn btn-primary" href="{% url 'users:update' %}" role="button">My Info</a>
-        <a class="btn btn-primary"
-           href="{% url 'account_email' %}"
-           role="button">E-Mail</a>
-        <a class="btn btn-primary"
-           href="{% url 'mfa_index' %}"
-           role="button">MFA</a>
-        <!-- Your Stuff: Custom user template urls -->
-      </div>
-    </div>
-    <!-- End Action buttons -->
-  {% endif %}
+<div class="container mt-4">
+
+  <h2>User Details</h2>
+
+  <p><b>Username:</b> {{ object.username }}</p>
+  <p><b>Email:</b> {{ object.email }}</p>
+  <p><b>Phone:</b> {{ object.phone }}</p>
+
+  <!-- ✅ Updated Role Section -->
+  <p>
+    <b>Role:</b> {{ object.role.role_name }}
+    <br>
+    <small class="text-muted">
+      {{ object.role.description }}
+    </small>
+  </p>
+
+  <p><b>Status:</b> {{ object.status }}</p>
+
+  <a href="{% url 'user_edit' object.id %}" class="btn btn-warning">
+    Edit
+  </a>
+
 </div>
-{% endblock content %}
+{% endblock %}
