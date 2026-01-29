@@ -7,11 +7,11 @@ class Student(models.Model):
     phone = models.CharField(max_length=15)
 
     # Foreign Key
-    course = models.ForeignKey(
-        Course,
-        on_delete=models.CASCADE,
-        related_name='students'
-    )
+    # course = models.ForeignKey(
+    #     Course,
+    #     on_delete=models.CASCADE,
+    #     related_name='students'
+    # )
 
     passout_year = models.IntegerField()
     qualification = models.CharField(max_length=100)
@@ -35,12 +35,12 @@ class JobApplication(models.Model):
         related_name='applications'
     )
 
-    # ✅ ForeignKey to Student
-    student = models.ForeignKey(
-        Student,
-        on_delete=models.CASCADE,
-        related_name='applications'
-    )
+    # # ✅ ForeignKey to Student
+    # student = models.ForeignKey(
+    #     Student,
+    #     on_delete=models.CASCADE,
+    #     related_name='applications'
+    # )
 
     # ✅ Resume upload
     resume = models.FileField(
