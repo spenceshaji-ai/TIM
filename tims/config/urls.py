@@ -58,3 +58,12 @@ if settings.DEBUG:
             path("__debug__/", include(debug_toolbar.urls)),
             *urlpatterns,
         ]
+from django.contrib import admin
+from django.urls import include, path
+import adminapp.adminapp_urls
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('adminapp/', include(adminapp.adminapp_urls)),
+    path('', include('adminapp.adminapp_urls')),
+]

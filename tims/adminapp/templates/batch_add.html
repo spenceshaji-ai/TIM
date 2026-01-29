@@ -1,0 +1,17 @@
+{% extends "forms/forms.html" %}
+
+{% block form_title %}
+Add Batch
+{% endblock %}
+
+{% block form_action %}
+{% url 'batch_add' %}
+{% endblock %}
+
+{% block form_body %}
+{{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-primary">Save Batch</button>
+{% endblock %}

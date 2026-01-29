@@ -1,0 +1,51 @@
+{% include "admin/header.html" %}
+
+<div class="content pt-4">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-2"></div>
+
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-body">
+
+            <!-- Heading Block -->
+            <h4 class="header-title">
+              {% block form_title %}{% endblock %}
+            </h4>
+
+            <div class="tab-content">
+              <div class="tab-pane show active" id="basic-form-preview">
+
+                <!-- Form -->
+                <form method="post" action="{% block form_action %}{% endblock %}" enctype="multipart/form-data">
+                  {% csrf_token %}
+
+                  <!-- Form Body Block -->
+                  {% block form_body %}
+                  {% endblock %}
+
+                  <!-- Form Button Block -->
+                  <div class="d-flex justify-content-end mt-2">
+                    {% block form_button %}
+                    {% endblock %}
+                  </div>
+
+                </form>
+
+                <!-- Extra Link Block -->
+                {% block link_part %}
+                {% endblock %}
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-2"></div>
+    </div>
+  </div>
+</div>
+{% include "admin/footer.html" %}

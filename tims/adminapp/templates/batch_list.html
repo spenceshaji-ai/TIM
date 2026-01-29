@@ -1,0 +1,53 @@
+{% include "admin/header.html" %}
+
+<div class="content pt-4">
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="d-flex justify-content-between mb-3">
+          <h4>Batch List</h4>
+          <a href="{% url 'batch_add' %}" class="btn btn-primary">Add Batch</a>
+        </div>
+
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Batch</th>
+              <th>Course</th>
+              <th>Faculty</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Capacity</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in batches %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ b.batch_name }}</td>
+              <td>{{ b.course.course_name }}</td>
+              <td>{{ b.faculty }}</td>
+              <td>{{ b.start_date }}</td>
+              <td>{{ b.end_date }}</td>
+              <td>{{ b.capacity }}</td>
+              <td>
+                <a href="{% url 'batch_edit' b.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <form method="post" action="{% url 'batch_delete' b.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn-danger btn-sm">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include "admin/footer.html" %}
