@@ -71,6 +71,11 @@ DJANGO_APPS = [
     "django.contrib.admin",
     "django.forms",
 ]
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+    "0.0.0.0",
+]
 THIRD_PARTY_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
@@ -142,6 +147,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 # STATIC
