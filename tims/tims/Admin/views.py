@@ -3,7 +3,7 @@
 # Create your views here.
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Job
+from Admin.models import Job
 from .forms import JobForm
 
 # Manual CBVs using View
@@ -15,7 +15,7 @@ class JobCreateView(View):
         form = JobForm()
         return render(
             request,
-            'job_create.html',
+            'admin/job_create.html',
             {'form': form}
         )
 
@@ -27,7 +27,7 @@ class JobCreateView(View):
 
         return render(
             request,
-            'job_create.html',
+            'admin/job_create.html',
             {'form': form}
         )
 
@@ -39,7 +39,7 @@ class JobListView(View):
         jobs = Job.objects.all()
         return render(
             request,
-            'job_list.html',
+            'admin/job_list.html',
             {'jobs': jobs}
         )
 
@@ -52,7 +52,7 @@ class JobEditView(View):
         form = JobForm(instance=job)
         return render(
             request,
-            'job_edit.html',
+            'admin/job_edit.html',
             {'form': form, 'job': job}
         )
 
@@ -66,7 +66,7 @@ class JobEditView(View):
 
         return render(
             request,
-            'job_edit.html',
+            'admin/job_edit.html',
             {'form': form, 'job': job}
         )
 
@@ -78,7 +78,7 @@ class JobDeleteView(View):
         job = get_object_or_404(Job, id=id)
         return render(
             request,
-            'job_delete.html',
+            'admin/job_delete.html',
             {'job': job}
         )
 

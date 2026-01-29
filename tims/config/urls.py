@@ -26,8 +26,8 @@ urlpatterns = [
 ]
 #my apps
 urlpatterns = [
-    path('admin/', include("tims.Admin.admin_urls")),
-    path('student/',include("tims.Student.student_urls")),
+    path('Admin/', include("tims.Admin.admin_urls")),
+    path('Student/',include("tims.Student.student_urls")),
 ]
 
 if settings.DEBUG:

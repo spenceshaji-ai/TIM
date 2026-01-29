@@ -1,5 +1,5 @@
 from django import forms
-from .models import Student,JobApplication
+from Student.models import Student,JobApplication
 
 class StudentForm(forms.ModelForm):
     class Meta:
@@ -8,7 +8,7 @@ class StudentForm(forms.ModelForm):
             'name',
             'email',
             'phone',
-            'course',
+            # 'course',
             'passout_year',
             'qualification',
         ]
@@ -27,10 +27,10 @@ class StudentForm(forms.ModelForm):
                 'class': 'form-control'
             }),
 
-            # ✅ ForeignKey → Dropdown
-            'course': forms.Select(attrs={
-                'class': 'form-control'
-            }),
+            # # ✅ ForeignKey → Dropdown
+            # 'course': forms.Select(attrs={
+            #     'class': 'form-control'
+            # }),
 
             'passout_year': forms.NumberInput(attrs={
                 'placeholder': 'Enter passout year',
@@ -45,7 +45,7 @@ class StudentForm(forms.ModelForm):
 class JobApplicationForm(forms.ModelForm):
     class Meta:
         model = JobApplication
-        fields = ['job', 'student', 'resume', 'applied_date']
+        fields = ['job', 'resume', 'applied_date']
 
         widgets = {
             'job': forms.Select(attrs={'class': 'form-control'}),
