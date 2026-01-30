@@ -1,6 +1,6 @@
 # Translations for the TIMS project
-# Copyright (C) 2026 spence
-# spence <spenceshaji@gmail.com>, 2026.
+# Copyright (C) 2026 Akhil
+# Akhil <akhilbijumon03@gmail.com>, 2026.
 #
 #, fuzzy
 msgid ""
