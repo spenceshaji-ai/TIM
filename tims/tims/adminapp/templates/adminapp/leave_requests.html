@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leave Requests</title>
+</head>
+<body>
+    <h2>All Leave Requests (Admin)</h2>
+
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Faculty</th>
+            <th>Leave Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+
+        {% for leave in leaves %}
+        <tr>
+            <td>{{ leave.user.username }}</td>
+            <td>{{ leave.leave_type }}</td>
+            <td>{{ leave.start_date }}</td>
+            <td>{{ leave.end_date }}</td>
+            <td>{{ leave.reason }}</td>
+            <td>{{ leave.status }}</td>
+            <td>
+                {% if leave.status == "Pending" %}
+                    <a href="{% url 'update_leave_status' leave.id 'Approved' %}">Approve</a> |
+                    <a href="{% url 'update_leave_status' leave.id 'Rejected' %}">Reject</a>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">No leave requests</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

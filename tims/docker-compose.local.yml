@@ -1,7 +1,7 @@
 volumes:
   tims_local_postgres_data: {}
   tims_local_postgres_data_backups: {}
-  
+  tims_local_pgadmin-data : {} 
 
 services:
   django:
@@ -33,3 +33,15 @@ services:
       - tims_local_postgres_data_backups:/backups
     env_file:
       - ./.envs/.local/.postgres
+
+  pgadmin:
+      image: dpage/pgadmin4
+      container_name: pgadmin4_container
+      restart: always
+      ports:
+        - "8888:80"
+      environment:
+        PGADMIN_DEFAULT_EMAIL: akashsabu66@gmail.com
+        PGADMIN_DEFAULT_PASSWORD: akash
+      volumes:
+        - tims_local_pgadmin-data:/var/lib/pgadmin
