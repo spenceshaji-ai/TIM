@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+app_name = "adminapp"
 
 urlpatterns = [
     path("courses/", CourseListView.as_view(), name="course_list"),
@@ -10,4 +11,4 @@ urlpatterns = [
     path("batches/add/", BatchCreateView.as_view(), name="batch_add"),
     path("batches/edit/<int:id>/", BatchEditView.as_view(), name="batch_edit"),
     path("batches/delete/<int:id>/", BatchDeleteView.as_view(), name="batch_delete"),
-] 
+]   

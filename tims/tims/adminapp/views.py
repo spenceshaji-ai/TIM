@@ -3,12 +3,12 @@ from django.shortcuts import render
 # Create your views here.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from .models import Course,Batch
+from adminapp.models import Course,Batch
 from .forms import CourseForm,BatchForm
 
 # List
 class CourseListView(View):
-    template_name = "course_list.html"
+    template_name="course_list.html"
 
     def get(self, request):
         courses = Course.objects.all()
@@ -26,7 +26,7 @@ class CourseCreateView(View):
         form = CourseForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('course_list')
+            return redirect('adminapp:course_list')
         return render(request, self.template_name, {"form": form})
 
 # EDIT
@@ -46,7 +46,7 @@ class CourseEditView(View):
         form = CourseForm(request.POST, instance=course)
         if form.is_valid():
             form.save()
-            return redirect('course_list')
+            return redirect('adminapp:course_list')
         return render(request, self.template_name, {
             "form": form,
             "course": course
@@ -58,31 +58,38 @@ class CourseDeleteView(View):
     def post(self, request, id):
         course = get_object_or_404(Course, id=id)
         course.delete()
-        return redirect('course_list')
+        return redirect('adminapp:course_list')
 
 
 class BatchCreateView(View):
+    template_name="batch_add.html"
+
     def get(self, request):
         form = BatchForm()
-        return render(request, "batch_add.html", {"form": form})
+        return render(request, self.template_name, {"form": form})
 
     def post(self, request):
         form = BatchForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect("batch_list")
-        return render(request, "batch_add.html", {"form": form})
+            return redirect("adminapp:batch_list")
+        return render(request, self.template_name, {"form": form})
 
 class BatchListView(View):
+    template_name="batch_list.html"
+
     def get(self, request):
-        batches = Batch.objects.select_related("course", "faculty")
-        return render(request, "batch_list.html", {"batches": batches})
+        batches = Batch.objects.select_related("course")
+        return render(request, self.template_name, {"batches": batches})
+
 
 class BatchEditView(View):
+    template_name = "batch_add.html"
+
     def get(self, request, id):
         batch = get_object_or_404(Batch, id=id)
         form = BatchForm(instance=batch)
-        return render(request, "batch_edit.html", {
+        return render(request, self.template_name, {
             "form": form,
             "batch": batch
         })
@@ -90,10 +97,12 @@ class BatchEditView(View):
     def post(self, request, id):
         batch = get_object_or_404(Batch, id=id)
         form = BatchForm(request.POST, instance=batch)
+
         if form.is_valid():
             form.save()
-            return redirect("batch_list")
-        return render(request, "batch_edit.html", {
+            return redirect("adminapp:batch_list")
+
+        return render(request, self.template_name, {
             "form": form,
             "batch": batch
         })
@@ -102,4 +111,22 @@ class BatchDeleteView(View):
     def post(self, request, id):
         batch = get_object_or_404(Batch, id=id)
         batch.delete()
-        return redirect("batch_list")
+        return redirect("adminapp:batch_list")
+
+
+#class FacultyAssignmentCreateView(View):
+  #  def get(self, request):
+        form = FacultyAssignmentForm()
+        return render(request, "adminapp/faculty_assignment.html", {
+            "form": form
+        })
+
+   # def post(self, request):
+        form = FacultyAssignmentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("adminapp:faculty_assignment")
+
+        return render(request, "adminapp/faculty_assignment.html", {
+            "form": form
+        })

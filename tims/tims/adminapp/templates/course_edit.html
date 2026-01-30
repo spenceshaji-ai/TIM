@@ -1,11 +1,11 @@
-{% extends "forms/forms.html" %}
+{% extends "forms.html" %}
 
 {% block form_title %}
 Edit Course
 {% endblock %}
 
 {% block form_action %}
-{% url 'course_edit' course.id %}
+{% url 'adminapp:course_edit' course.id %}
 {% endblock %}
 
 {% block form_body %}

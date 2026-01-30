@@ -8,16 +8,23 @@ class Course(models.Model):
     syllabus = models.TextField()
     fee = models.DecimalField(max_digits=10, decimal_places=2)
 
-    def _str_(self):
+    def __str__(self):
         return self.course_name
 
 class Batch(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    faculty = models.ForeignKey(Role, on_delete=models.CASCADE)
-    batch_name = models.CharField(max_length=100)
+    batch_name = models.CharField(max_length=100) 
     start_date = models.DateField()
     end_date = models.DateField()
     capacity = models.IntegerField()
 
     def __str__(self):
         return self.batch_name
+
+#class FacultyAssignment(models.Model):
+   # faculty = models.ForeignKey(User, on_delete=models.CASCADE)
+    #course = models.ForeignKey(Course, on_delete=models.CASCADE)
+  #  batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+
+    #def __str__(self):
+        #return f"{self.faculty} - {self.course} - {self.batch}"

@@ -1,4 +1,4 @@
-{% include "admin/header.html" %}
+{% include "pages/header.html" %}
 
 <div class="content pt-4">
   <div class="container-fluid">
@@ -10,7 +10,7 @@
 
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h4 class="header-title">Course List</h4>
-              <a href="{% url 'course_add' %}" class="btn btn-primary">
+              <a href="{% url 'adminapp:course_add' %}" class="btn btn-primary">
                 Add Course
               </a>
             </div>
@@ -34,13 +34,13 @@
                     <td>{{ course.duration }}</td>
                     <td>{{ course.fee }}</td>
                     <td>
-                      <a href="{% url 'course_edit' course.id %}"
+                      <a href="{% url 'adminapp:course_edit' course.id %}"
                          class="btn btn-sm btn-warning">
                         Edit
                       </a>
 
                       <form method="post"
-                            action="{% url 'course_delete' course.id %}"
+                            action="{% url 'adminapp:course_delete' course.id %}"
                             style="display:inline;">
                         {% csrf_token %}
                         <button type="submit"
@@ -70,4 +70,4 @@
   </div>
 </div>
 
-{% include "admin/footer.html" %}
+{% include "pages/footer.html" %}

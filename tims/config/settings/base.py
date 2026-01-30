@@ -71,6 +71,12 @@ DJANGO_APPS = [
     "django.contrib.admin",
     "django.forms",
 ]
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+    "0.0.0.0",
+]
+
 THIRD_PARTY_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
@@ -82,10 +88,12 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "tims.users",
+    "tims.adminapp",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS 
+
 
 # MIGRATIONS
 # ------------------------------------------------------------------------------
@@ -140,6 +148,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 # STATIC
