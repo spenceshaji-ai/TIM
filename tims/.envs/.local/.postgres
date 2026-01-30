@@ -6,4 +6,3 @@ POSTGRES_DB=tims
 POSTGRES_USER=debug
 POSTGRES_PASSWORD=debug
 
-DATABASE_URL=postgres://debug:debug@postgres:5432/tims

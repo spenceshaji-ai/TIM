@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Leaves</title>
+</head>
+<body>
+    <h2>My Leave Applications</h2>
+
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Leave Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+
+        {% for leave in leaves %}
+        <tr>
+            <td>{{ leave.leave_type }}</td>
+            <td>{{ leave.start_date }}</td>
+            <td>{{ leave.end_date }}</td>
+            <td>{{ leave.status }}</td>
+            <td>
+                {% if leave.status == "Pending" %}
+                    <a href="{% url 'delete_leave' leave.id %}">Delete</a>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No leave applications found</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <a href="{% url 'apply_leave' %}">Apply New Leave</a>
+</body>
+</html>
