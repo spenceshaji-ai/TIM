@@ -5,7 +5,7 @@ from django.urls import include
 from django.urls import path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
-
+import tims.faculty.faculty_urls
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
     path(
@@ -23,8 +23,8 @@ urlpatterns = [
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 
-    path("users/", include("tims.users.urls")),
-    path("", include("tims.users.urls")),
+    path("faculty/", include("tims.faculty.faculty_urls")),
+    path("", include("tims.faculty.faculty_urls")),
 ]
 
 

@@ -53,13 +53,14 @@
                             <div class="tab-pane show active" id="input-types-preview">
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <form {% block form_action %}{% endblock %}>
-                                            
-                                                {% block form_body %}{% endblock %}
-                                                
-                                                {% block form_button %}{% endblock %}
-                                            
+                                        <form method="post" action="{% block form_action %}{% endblock %}">
+                                           {% csrf_token %}
+
+                                           {% block form_body %}{% endblock %}
+
+                                           {% block form_button %}{% endblock %}
                                         </form>
+ 
                                     </div> <!-- end col -->
 
 
@@ -72,25 +73,7 @@
                     </div> <!-- end card-body -->
                 </div> <!-- end card -->
             </div><!-- end col -->
-        </div><!-- end row -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ </div><!-- end row -->
     </div> <!-- container -->
 
 </div> <!-- content -->

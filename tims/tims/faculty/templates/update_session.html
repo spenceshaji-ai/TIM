@@ -5,7 +5,7 @@ Update Training Session
 {% endblock %}
 
 {% block form_action %}
-{% url 'training_update' form.instance.pk %}
+{% url 'faculty:training_update' form.instance.pk %}
 {% endblock %}
 
 {% block form_body %}
@@ -17,7 +17,7 @@ Update Training Session
     Update
 </button>
 
-<a href="{% url 'training_list' %}" class="btn btn-secondary ms-2">
+<a href="{% url 'faculty:training_list' %}" class="btn btn-secondary ms-2">
     Cancel
 </a>
 {% endblock %}

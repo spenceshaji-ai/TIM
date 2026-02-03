@@ -5,7 +5,7 @@ Add Training Session
 {% endblock %}
 
 {% block form_action %}
-{% url 'users:training_create' %}
+{% url 'faculty:training_create' %}
 {% endblock %}
 
 {% block form_body %}
@@ -17,7 +17,7 @@ Add Training Session
     Submit
 </button>
 
-<a href="{% url 'users:training_list' %}" class="btn btn-secondary ms-2">
+<a href="{% url 'faculty:training_list' %}" class="btn btn-secondary ms-2">
     Cancel
 </a>
 {% endblock %}
