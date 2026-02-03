@@ -1,11 +1,15 @@
-{% extends "forms/forms.html" %}
+{% extends "forms.html" %}
 
 {% block form_title %}
-Add Batch
+{% if batch %}Edit Batch{% else %}Add Batch{% endif %}
 {% endblock %}
 
 {% block form_action %}
-{% url 'batch_add' %}
+{% if batch %}
+{% url 'adminapp:batch_edit' batch.id %}
+{% else %}
+{% url 'adminapp:batch_add' %} 
+{% endif %}
 {% endblock %}
 
 {% block form_body %}

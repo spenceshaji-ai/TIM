@@ -4,12 +4,15 @@ from .views import (
     JobApplicationCreateView,
     JobApplicationListView,
     JobApplicationEditView,
+
    
 )
 
 urlpatterns = [
     # Student
     path('students/register/', StudentRegisterView.as_view(), name='student_register'),
+    
+    
 
     # Job Applications
     path('applications/', JobApplicationListView.as_view(), name='application_list'),

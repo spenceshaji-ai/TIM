@@ -63,4 +63,30 @@ class Migration(migrations.Migration):
                 ('enquiry', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='followups', to='adminapp.enquiry')),
             ],
         ),
+    
+           
+            migrations.CreateModel(
+                 name='LeaveType',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('leave_name', models.CharField(max_length=50)),
+                ('max_days', models.PositiveIntegerField()),
+            ],
+            
+        ),
+        migrations.CreateModel(
+            
+            name='LeaveApplication',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('start_date', models.DateField()),
+                ('end_date', models.DateField()),
+                ('reason', models.TextField()),
+                ('status', models.CharField(choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')], default='Pending', max_length=20)),
+                ('applied_at', models.DateTimeField(auto_now_add=True)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('leave_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='adminapp.leavetype')),
+            ],
+        ),
     ]
+  
