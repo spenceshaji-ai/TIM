@@ -20,6 +20,7 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     # Admin App
     path("adminapp/", include("tims.adminapp.adminapp_urls")),
+    path("faculty/", include("tims.faculty.faculty_urls")),
 
     # Your stuff: custom urls includes go here
     # ...

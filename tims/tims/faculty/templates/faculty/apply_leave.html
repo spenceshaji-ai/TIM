@@ -1,0 +1,43 @@
+{% extends "adminapp/forms.html" %}
+
+{% block form_title %}
+Apply Leave
+{% endblock %}
+
+{% block form_action %}
+{% url 'faculty_apply_leave' %}
+{% endblock %}
+
+{% block form_body %}
+
+<div class="mb-3">
+    <label class="form-label">Leave Type</label>
+    {{ form.leave_type }}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Start Date</label>
+    {{ form.start_date }}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">End Date</label>
+    {{ form.end_date }}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Reason</label>
+    {{ form.reason }}
+</div>
+
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-primary">
+    Apply Leave
+</button>
+
+<a href="{% url 'faculty_my_leaves' %}" class="btn btn-light ms-2">
+    My Leaves
+</a>
+{% endblock %}

@@ -1,4 +1,4 @@
-{% load static %}
+
 {% include 'pages/header.html' %}
 <div class="content">
 
@@ -54,13 +54,11 @@
                                 <div class="row">
                                     <div class="col-lg-6">
                                         <form method="post" action="{% block form_action %}{% endblock %}">
-                                           {% csrf_token %}
-
-                                           {% block form_body %}{% endblock %}
-
-                                           {% block form_button %}{% endblock %}
+                                          {% csrf_token %}
+                                          {% block form_body %}{% endblock %}
+                                          {% block form_button %}{% endblock %}
                                         </form>
- 
+
                                     </div> <!-- end col -->
 
 
