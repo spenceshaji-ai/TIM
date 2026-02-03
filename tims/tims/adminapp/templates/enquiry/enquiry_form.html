@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-3">
+        {% if object %} Update Enquiry {% else %} Add Enquiry {% endif %}
+    </h2>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- ✅ Crispy Form Auto Render -->
+        {{ form|crispy }}
+
+        <button type="submit" class="btn btn-success mt-3">
+            Save Enquiry
+        </button>
+
+        <a href="{% url 'enquiry_list' %}" class="btn btn-secondary mt-3">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

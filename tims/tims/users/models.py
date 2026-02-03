@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from django.utils import timezone
-from tims.adminapp.models import Course
+
 
 
 # Role Table    
@@ -47,45 +47,3 @@ class User(AbstractUser):
         return reverse("users:detail", kwargs={"username": self.username})
 
 
-
-class Enquiry(models.Model):
-    """
-    Enquiry Table (Handled by Staff Users)
-    course_id is Foreign Key → Course Table
-    """
-
-    name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=15)
-    email = models.EmailField(blank=True, null=True)
-
-    # ✅ Foreign Key: course_id (Interested Course)
-    course_id = models.ForeignKey(
-        Course,
-        on_delete=models.CASCADE
-    )
-
-    source = models.CharField(
-        max_length=20,
-        choices=[
-            ("Call", "Call"),
-            ("Website", "Website"),
-            ("Walk-in", "Walk-in"),
-            ("Reference", "Reference"),
-        ]
-    )
-
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ("New", "New"),
-            ("Contacted", "Contacted"),
-            ("Converted", "Converted"),
-            ("Closed", "Closed"),
-        ],
-        default="New"
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.name} - {self.course.course_name}"

@@ -4,7 +4,7 @@ from django.contrib.auth import forms as admin_forms
 from django.utils.translation import gettext_lazy as _
 from django import forms
 from .models import User
-from .models import Enquiry
+
 
 
 
@@ -73,7 +73,3 @@ class UserForm(forms.ModelForm):
 
 
 
-class EnquiryForm(forms.ModelForm):
-    class Meta:
-        model = Enquiry
-        fields = "__all__"

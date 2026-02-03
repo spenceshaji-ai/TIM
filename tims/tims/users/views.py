@@ -11,8 +11,7 @@ from django.views.generic import ListView, CreateView, DeleteView
 from tims.users.models import User
 from .forms import UserForm
 from django.views.generic import TemplateView
-from .models import Enquiry
-from .forms import EnquiryForm
+
 
 
 
@@ -113,24 +112,3 @@ class UserDeleteView(DeleteView):
     model = User
     template_name = "users/user_confirm_delete.html"
     success_url = reverse_lazy("user_list")
-
-class EnquiryListView(LoginRequiredMixin, ListView):
-    model = Enquiry
-    template_name = "enquiry/enquiry_list.html"
-    context_object_name = "enquiries"
-
-class EnquiryCreateView(LoginRequiredMixin, CreateView):
-    model = Enquiry
-    form_class = EnquiryForm
-    template_name = "enquiry/enquiry_form.html"
-    success_url = reverse_lazy("users:enquiry_list")
-
-class EnquiryDetailView(LoginRequiredMixin, DetailView):
-    model = Enquiry
-    template_name = "enquiry/enquiry_detail.html"
-
-class EnquiryUpdateView(LoginRequiredMixin, UpdateView):
-    model = Enquiry
-    form_class = EnquiryForm
-    template_name = "enquiry/enquiry_form.html"
-    success_url = reverse_lazy("users:enquiry_list")

@@ -9,12 +9,6 @@ from .views import (
     UserEditView,
     UserDeleteView
 )
-from .views import (
-    EnquiryListView,
-    EnquiryCreateView,
-    EnquiryDetailView,
-    EnquiryUpdateView,
-)
 
 app_name = "users"
 urlpatterns = [
@@ -30,9 +24,6 @@ urlpatterns = [
     path("users/add/", UserCreateView.as_view(), name="user_add"),
     path("users/edit/<int:pk>/", UserEditView.as_view(), name="user_edit"),
     path("users/delete/<int:pk>/", UserDeleteView.as_view(), name="user_delete"),
-    path("enquiry/", EnquiryListView.as_view(), name="enquiry_list"),
-    path("enquiry/add/", EnquiryCreateView.as_view(), name="enquiry_add"),
-    path("enquiry/<int:pk>/", EnquiryDetailView.as_view(), name="enquiry_detail"),
-    path("enquiry/<int:pk>/edit/", EnquiryUpdateView.as_view(), name="enquiry_edit"),
+   
 
 ]

@@ -87,8 +87,9 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "tims.users",
-    "tims.Admin",
-    "tims.Student",
+   
+    
+    "tims.adminapp",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -147,11 +148,12 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    
 ]
 
 # STATIC
-# ------------------------------------------------------------------------------
+# ------------------------------
+# ------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-root
 STATIC_ROOT = str(BASE_DIR / "staticfiles")
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-url

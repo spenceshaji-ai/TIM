@@ -8,7 +8,7 @@ class Student(models.Model):
 
     # Foreign Key
     course = models.ForeignKey(
-        Course,
+        "adminapp.Course",
         on_delete=models.CASCADE,
         related_name='students'
     )
