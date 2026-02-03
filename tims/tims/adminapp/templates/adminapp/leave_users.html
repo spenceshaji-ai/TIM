@@ -1,0 +1,24 @@
+{% extends "adminapp/forms.html" %}
+{% block content %}
+
+<h4>Faculty Leave History</h4>
+
+<table class="table">
+<tr>
+  <th>Faculty</th>
+  <th>Action</th>
+</tr>
+
+{% for user in users %}
+<tr>
+  <td>{{ user.get_full_name|default:user.username }}</td>
+  <td>
+    <a href="{% url 'leave-history-detail' user.id %}">
+      View Leaves
+    </a>
+  </td>
+</tr>
+{% endfor %}
+
+</table>
+{% endblock %}

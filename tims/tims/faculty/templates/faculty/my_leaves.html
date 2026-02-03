@@ -1,15 +1,13 @@
 {% include "pages/header.html" %}
 
 <div class="container-fluid">
-    <h4 class="page-title">Leave Requests</h4>
+    <h4 class="page-title">My Leave Applications</h4>
 
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Faculty</th>
                 <th>Leave Type</th>
                 <th>Dates</th>
-                <th>Reason</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>
@@ -17,17 +15,27 @@
         <tbody>
             {% for leave in leaves %}
             <tr>
-                <td>{{ leave.user }}</td>
                 <td>{{ leave.leave_type }}</td>
                 <td>{{ leave.start_date }} → {{ leave.end_date }}</td>
-                <td>{{ leave.reason }}</td>
-                <td>{{ leave.status }}</td>
+                <td>
+                    <span class="badge 
+                        {% if leave.status == 'Approved' %}bg-success
+                        {% elif leave.status == 'Rejected' %}bg-danger
+                        {% else %}bg-warning{% endif %}">
+                        {{ leave.status }}
+                    </span>
+                </td>
                 <td>
                     {% if leave.status == "Pending" %}
-                    <a href="{% url 'update_leave_status' leave.id 'Approved' %}" class="btn btn-sm btn-success">Approve</a>
-                    <a href="{% url 'update_leave_status' leave.id 'Rejected' %}" class="btn btn-sm btn-danger">Reject</a>
+                    <a href="{% url 'faculty_delete_leave' leave.id %}" class="btn btn-sm btn-danger">
+                        Cancel
+                    </a>
                     {% endif %}
                 </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No leave applications</td>
             </tr>
             {% endfor %}
         </tbody>
