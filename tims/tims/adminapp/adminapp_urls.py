@@ -11,4 +11,12 @@ urlpatterns = [
     path("batches/add/", BatchCreateView.as_view(), name="batch_add"),
     path("batches/edit/<int:id>/", BatchEditView.as_view(), name="batch_edit"),
     path("batches/delete/<int:id>/", BatchDeleteView.as_view(), name="batch_delete"),
-]   
+    path("faculty-assignments/add/", FacultyAssignmentCreateView.as_view(), name="faculty_assignment"),
+    path("faculty-assignments/view/",FacultyCoursesView.as_view(),name="faculty_courses"),
+   #path(
+       # "faculty-assignments/<int:pk>/delete/",
+        #views.faculty_assignment_delete,
+        #name="faculty_assignment_delete",
+    #)
+] 
+  

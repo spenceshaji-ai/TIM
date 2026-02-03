@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.conf import settings
 # Create your models here.
 
 class Course(models.Model):
@@ -21,10 +21,11 @@ class Batch(models.Model):
     def __str__(self):
         return self.batch_name
 
-#class FacultyAssignment(models.Model):
-   # faculty = models.ForeignKey(User, on_delete=models.CASCADE)
-    #course = models.ForeignKey(Course, on_delete=models.CASCADE)
-  #  batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+class FacultyAssignment(models.Model):
+    faculty = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
 
-    #def __str__(self):
-        #return f"{self.faculty} - {self.course} - {self.batch}"
+    def __str__(self):
+        return f"{self.faculty} - {self.course} - {self.batch}"
+
