@@ -1,0 +1,21 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+{% if batch %}Edit Batch{% else %}Add Batch{% endif %}
+{% endblock %}
+
+{% block form_action %}
+{% if batch %}
+{% url 'adminapp:batch_edit' batch.id %}
+{% else %}
+{% url 'adminapp:batch_add' %} 
+{% endif %}
+{% endblock %}
+
+{% block form_body %}
+{{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-primary">Save Batch</button>
+{% endblock %}
