@@ -15,7 +15,8 @@
                     {% for f in faculties %}
                         <option value="{{ f.id }}"
                           {% if request.GET.faculty == f.id|stringformat:"s" %}selected{% endif %}>
-                          {{ f }}
+                          {{ f.name|default:f.username }}
+
                         </option>
                     {% endfor %}
                 </select>
