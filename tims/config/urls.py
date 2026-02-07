@@ -16,10 +16,9 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("users/", include("tims.users.urls", namespace="users")),
 
-    # Admin App
     path("adminapp/", include("tims.adminapp.adminapp_urls")),
+    path("Student/", include("tims.Student.studentapp_urls", namespace="Student")),
 ]
-
 # Media files
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

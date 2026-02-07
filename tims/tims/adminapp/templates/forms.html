@@ -55,8 +55,15 @@
                                     <div class="col-lg-6">
                                         <form method="post" action="{% block form_action %}{% endblock %}">
                                           {% csrf_token %}
-                                          {% block form_body %}{% endblock %}
-                                          {% block form_button %}{% endblock %}
+                                           {% if form.errors %}
+                                          <div class="alert alert-danger">
+                                          {{ form.errors }}
+                                          </div>
+                                    
+                                           {% endif %}
+                                            {% block form_body %}{% endblock %}
+                                            {% block form_button %}{% endblock %}
+
                                         </form>
 
                                     </div> <!-- end col -->

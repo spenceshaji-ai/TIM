@@ -29,3 +29,12 @@ class FacultyAssignment(models.Model):
     def __str__(self):
         return f"{self.faculty} - {self.course} - {self.batch}"
 
+class Assignstudent(models.Model):    
+    student=models.ForeignKey("Student.Student",on_delete=models.CASCADE)  
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.student} - {self.course} ({self.batch})"
+
+

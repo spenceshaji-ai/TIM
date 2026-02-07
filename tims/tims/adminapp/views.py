@@ -138,7 +138,8 @@ class FacultyCoursesView(View):
     def get(self, request):
         faculty_id = request.GET.get("faculty")
 
-        faculties = User.objects.filter(is_staff=True)
+        # Only users with Faculty role
+        faculties = User.objects.filter(role__role_name="Faculty")
 
         assignments = None
         if faculty_id:

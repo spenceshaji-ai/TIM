@@ -42,7 +42,6 @@ class BatchForm(forms.ModelForm):
             "capacity",
             
         ]
-
         widgets = {
             "course": forms.Select(attrs={"class": "form-control"}),
             "batch_name": forms.TextInput(attrs={"class": "form-control"}),
@@ -74,4 +73,4 @@ class FacultyAssignmentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
      super().__init__(*args, **kwargs)
 
-     self.fields["faculty"].queryset = User.objects.filter(is_staff=True)
+     self.fields["faculty"].queryset = User.objects.filter(role__isnull=False)

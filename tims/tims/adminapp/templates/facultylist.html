@@ -15,7 +15,7 @@
                     {% for f in faculties %}
                         <option value="{{ f.id }}"
                           {% if request.GET.faculty == f.id|stringformat:"s" %}selected{% endif %}>
-                          {{ f.get_full_name|default:f.username }}
+                          {{ f }}
                         </option>
                     {% endfor %}
                 </select>
@@ -48,7 +48,7 @@
                     <tbody>
                         {% for item in assignments %}
                         <tr>
-                            <td>{{ item.course.name }}</td>
+                            <td>{{ item.course }}</td>
                             <td>{{ item.batch.batch_name }}</td>
                             <td>{{ item.batch.start_date|date:"d-m-Y" }}</td>
                             <td>{{ item.batch.end_date|date:"d-m-Y" }}</td>
