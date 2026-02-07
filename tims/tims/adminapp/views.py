@@ -130,3 +130,21 @@ class BatchDeleteView(View):
         return render(request, "adminapp/faculty_assignment.html", {
             "form": form
         })
+
+class BatchProgressFilterView(View):
+    def get(self, request):
+        batches = Batch.objects.all()
+        selected_batch = None
+        courses = None
+
+        batch_id = request.GET.get("batch")
+
+        if batch_id:
+            selected_batch = Batch.objects.get(id=batch_id)
+            courses = selected_batch.courses.prefetch_related("students")
+
+        return render(request, "admin/batch_progress_filter.html", {
+            "batches": batches,
+            "selected_batch": selected_batch,
+            "courses": courses
+        })

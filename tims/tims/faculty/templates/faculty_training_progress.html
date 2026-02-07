@@ -1,0 +1,47 @@
+<div class="container mt-4">
+  <h4>Faculty Training Progress</h4>
+
+  <!-- BATCH FILTER -->
+  <form method="get" class="row mb-4">
+    <div class="col-md-4">
+      <label>Batch</label>
+      <select name="batch" class="form-select">
+        <option value="">All Batches</option>
+        {% for batch in batches %}
+          <option value="{{ batch.id }}"
+            {% if selected_batch == batch.id|stringformat:"s" %}selected{% endif %}>
+            {{ batch.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-2 d-flex align-items-end">
+      <button class="btn btn-primary w-100">
+        Filter
+      </button>
+    </div>
+  </form>
+
+  <!-- TRAINING SESSION TABLE -->
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Batch</th>
+        <th>Total Training Sessions Taken</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in batch_sessions %}
+      <tr>
+        <td>{{ row.batch__name }}</td>
+        <td>{{ row.total_sessions }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="2">No training sessions found</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

@@ -51,3 +51,5 @@ class StudentAttendance(models.Model):
 
     def __str__(self):
         return f"{self.student} - {self.attendance_date} - {self.status}"
+
+

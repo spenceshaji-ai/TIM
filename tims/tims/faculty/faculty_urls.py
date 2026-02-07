@@ -22,4 +22,9 @@ urlpatterns = [
     path('list/', AttendanceList.as_view(), name='attendance_list'),
     path('update/<int:pk>/', AttendanceUpdate.as_view(), name='attendance_update'),
     path('delete/<int:pk>/', AttendanceDelete.as_view(), name='attendance_delete'),
+    path("faculty/attendance-progress/",FacultyAttendanceProgressView.as_view(),name="faculty_attendance_progress"
+)
+    path("faculty/training-progress/",FacultyTrainingProgressView.as_view(),name="faculty_training_progress"
+)
+    
 ]

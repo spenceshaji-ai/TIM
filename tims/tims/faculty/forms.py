@@ -1,6 +1,5 @@
 from django import forms
-from .models import TrainingSession, StudentAttendance
-
+from .models import TrainingSession, StudentAttendance,
 
 
 class TrainingSessionForm(forms.ModelForm):
@@ -49,3 +48,5 @@ class StudentAttendanceForm(forms.ModelForm):
             }),
             'status': forms.Select(attrs={'class': 'form-control'}),
         }
+
+
