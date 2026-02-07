@@ -2,26 +2,43 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models import CharField
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django.db import models
+from django.utils import timezone
 
+class Role(models.Model):
+     role_name = models.CharField(max_length=50)
+     description = models.TextField(blank=True, null=True)
 
+     def __str__(self):
+         return self.role_name
+     
 class User(AbstractUser):
-    """
-    Default custom user model for TIMS.
-    If adding fields that need to be filled at user signup,
-    check forms.SignupForm and forms.SocialSignupForms accordingly.
-    """
+     name = models.CharField(max_length=255)
+     phone_number = models.CharField(
+     max_length=15,
+     unique=True,
+     null=True,
+     blank=True
+     )
+     role = models.ForeignKey(
+     Role,
+     on_delete=models.SET_NULL,  
+     null=True,
+     blank=True
+    )
 
-    # First and last name do not cover name patterns around the globe
-    name = CharField(_("Name of User"), blank=True, max_length=255)
-    first_name = None  # type: ignore[assignment]
-    last_name = None  # type: ignore[assignment]
+     STATUS_CHOICES = (
+         ("active", "Active"),
+         ("inactive", "Inactive"),
+     )
 
-    def get_absolute_url(self) -> str:
-        """Get URL for user's detail view.
+     status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default="active"
+     )
 
-        Returns:
-            str: URL for user detail.
-
-        """
-        return reverse("users:detail", kwargs={"username": self.username})
+     def __str__(self):
+    # Shows full name if available, else username
+      return self.name if self.name else self.username
 

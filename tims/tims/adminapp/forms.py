@@ -1,5 +1,10 @@
 from django import forms
-from adminapp.models import Course,Batch
+from django.contrib.auth import get_user_model
+
+from adminapp.models import Course, Batch, FacultyAssignment
+
+User = get_user_model()
+
 
 class CourseForm(forms.ModelForm):
     class Meta:
@@ -37,7 +42,6 @@ class BatchForm(forms.ModelForm):
             "capacity",
             
         ]
-
         widgets = {
             "course": forms.Select(attrs={"class": "form-control"}),
             "batch_name": forms.TextInput(attrs={"class": "form-control"}),
@@ -52,23 +56,21 @@ class BatchForm(forms.ModelForm):
             "capacity": forms.NumberInput(attrs={"class": "form-control"}),
         }
 
-#class FacultyAssignmentForm(forms.ModelForm):
-   # class Meta:
-      #  model = FacultyAssignment
-        #fields = [
-         #   "faculty",
-           # "course",
-           # "batch",
-       # ]
+class FacultyAssignmentForm(forms.ModelForm):
+    class Meta:
+        model = FacultyAssignment
+        fields = [
+            "faculty",
+            "course",
+            "batch",
+        ]
+        widgets = {
+            "faculty": forms.Select(attrs={"class": "form-control"}),
+            "course": forms.Select(attrs={"class": "form-control"}),
+            "batch": forms.Select(attrs={"class": "form-control"}),
+        }
 
-      # widgets = {
-           # "faculty": forms.Select(attrs={"class": "form-control"}),
-           # "course": forms.Select(attrs={"class": "form-control"}),
-           # "batch": forms.Select(attrs={"class": "form-control"}),
-       # }
+    def __init__(self, *args, **kwargs):
+     super().__init__(*args, **kwargs)
 
-    #def __init__(self, *args, **kwargs):
-       # super().__init__(*args, **kwargs)
-
-        # Optional: only staff as faculty
-       # self.fields["faculty"].queryset = User.objects.filter(is_staff=True)
+     self.fields["faculty"].queryset = User.objects.filter(role__isnull=False)

@@ -1,5 +1,8 @@
 from django.urls import path
+from .views import *
+app_name="users"
 
+<<<<<<< HEAD
 
 
 
@@ -14,6 +17,15 @@ urlpatterns = [
     path("<str:username>/", view=user_detail_view, name="detail"),
     path( "my-progress/", views.my_progress, name="my_progress"),
 
+=======
+urlpatterns = [
+
+    #path("~redirect/", view=user_redirect_view, name="redirect"),
+    #path("~update/", view=user_update_view, name="update"),
+    #path("<str:username>/", view=user_detail_view, name="detail"),
+    path("register/", UserRegisterView.as_view(), name="user_register"),
+    path("role/add/", RoleCreateView.as_view(), name="role_add"),
+>>>>>>> akhil/pages
 ]
 
 

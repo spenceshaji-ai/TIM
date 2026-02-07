@@ -1,10 +1,11 @@
-from django.shortcuts import render
-
 # Create your views here.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from adminapp.models import Course,Batch
-from .forms import CourseForm,BatchForm
+from adminapp.models import Course,Batch,FacultyAssignment
+from django.contrib.auth import get_user_model
+User = get_user_model()
+from .forms import CourseForm,BatchForm,FacultyAssignmentForm
+from django.contrib import messages
 
 # List
 class CourseListView(View):
@@ -112,23 +113,45 @@ class BatchDeleteView(View):
         batch = get_object_or_404(Batch, id=id)
         batch.delete()
         return redirect("adminapp:batch_list")
+    
 
+class FacultyAssignmentCreateView(View):
+    template_name = "faculty_assignment.html"
 
-#class FacultyAssignmentCreateView(View):
-  #  def get(self, request):
-        form = FacultyAssignmentForm()
-        return render(request, "adminapp/faculty_assignment.html", {
-            "form": form
+    def get(self, request):
+        return render(request, self.template_name, {
+            "form": FacultyAssignmentForm()
         })
 
-   # def post(self, request):
+    def post(self, request):
         form = FacultyAssignmentForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect("adminapp:faculty_assignment")
+            messages.success(request, "Faculty assigned successfully")
+            return redirect("adminapp:faculty_courses")
 
-        return render(request, "adminapp/faculty_assignment.html", {
-            "form": form
+        return render(request, self.template_name, {"form": form})
+
+class FacultyCoursesView(View):
+    template_name = "facultylist.html"
+
+    def get(self, request):
+        faculty_id = request.GET.get("faculty")
+
+        # Only users with Faculty role
+        faculties = User.objects.filter(role__role_name="Faculty")
+
+        assignments = None
+        if faculty_id:
+            assignments = (
+                FacultyAssignment.objects
+                .filter(faculty_id=faculty_id)
+                .select_related("course", "batch")
+            )
+
+        return render(request, self.template_name, {
+            "faculties": faculties,
+            "assignments": assignments,
         })
 
 class BatchProgressFilterView(View):

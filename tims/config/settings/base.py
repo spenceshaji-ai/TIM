@@ -90,6 +90,7 @@ LOCAL_APPS = [
     "tims.users",
     "tims.faculty",
     "tims.adminapp",
+    "tims.Student"
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -149,7 +150,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 # STATIC

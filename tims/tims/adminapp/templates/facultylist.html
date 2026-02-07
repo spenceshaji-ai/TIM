@@ -1,0 +1,71 @@
+{% include "pages/header.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="mb-3">Faculty – Courses View</h3>
+
+    <!-- Faculty selection -->
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <label class="form-label">Select Faculty</label>
+                <select name="faculty" class="form-select">
+                    <option value="">-- Select Faculty --</option>
+                    {% for f in faculties %}
+                        <option value="{{ f.id }}"
+                          {% if request.GET.faculty == f.id|stringformat:"s" %}selected{% endif %}>
+                          {{ f }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2 align-self-end">
+                <button type="submit" class="btn btn-primary">
+                    View
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Results -->
+    {% if assignments %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Assigned Courses</h5>
+
+                <table class="table table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Batch</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Capacity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in assignments %}
+                        <tr>
+                            <td>{{ item.course }}</td>
+                            <td>{{ item.batch.batch_name }}</td>
+                            <td>{{ item.batch.start_date|date:"d-m-Y" }}</td>
+                            <td>{{ item.batch.end_date|date:"d-m-Y" }}</td>
+                            <td>{{ item.batch.capacity }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    {% elif request.GET.faculty %}
+        <div class="alert alert-warning">
+            No courses assigned to this faculty.
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+{% include "pages/footer.html" %}
