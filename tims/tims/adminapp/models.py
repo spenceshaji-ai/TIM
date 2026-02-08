@@ -61,7 +61,7 @@ class FacultyAssignment(models.Model):
 
 
 class Assignstudent(models.Model):    
-    student=models.ForeignKey("Student.Student",on_delete=models.CASCADE)  
+    student = models.ForeignKey("users.User", on_delete=models.CASCADE)  
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
 

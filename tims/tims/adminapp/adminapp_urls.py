@@ -18,5 +18,15 @@ urlpatterns = [
         #views.faculty_assignment_delete,
         #name="faculty_assignment_delete",
     #)
+    path("assign-students/add/", AssignStudentView.as_view(), name="assign-student"),
+    path("assignments/", AssignStudentListView.as_view(),
+         name="assign-student-list"),
+    
+    path("assignments/edit/<int:pk>/", AssignStudentEditView.as_view(),
+         name="assign-student-edit"),
+
+    path("assignments/delete/<int:pk>/", AssignStudentDeleteView.as_view(),
+         name="assign-student-delete"),
+
 ] 
   

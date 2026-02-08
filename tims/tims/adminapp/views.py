@@ -1,10 +1,10 @@
 # Create your views here.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from adminapp.models import Course,Batch,FacultyAssignment
+from adminapp.models import Course,Batch,FacultyAssignment,Assignstudent
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from .forms import CourseForm,BatchForm,FacultyAssignmentForm
+from .forms import CourseForm,BatchForm,FacultyAssignmentForm,AssignstudentForm
 from django.contrib import messages
 
 # List
@@ -153,3 +153,69 @@ class FacultyCoursesView(View):
             "faculties": faculties,
             "assignments": assignments,
         })
+
+
+class AssignStudentView(View):
+    template_name = "student_assignment.html"
+
+    def get(self, request):
+        form = AssignstudentForm()
+        assignments = Assignstudent.objects.all()
+        return render(request, self.template_name, {
+            "form": form,
+            "assignments": assignments
+        })
+
+    def post(self, request):
+        form = AssignstudentForm(request.POST)
+        assignments = Assignstudent.objects.all()
+
+        if form.is_valid():
+            form.save()
+            return redirect("adminapp:assign-student-list")
+
+        return render(request, self.template_name, {
+            "form": form,
+            "assignments": assignments
+        })
+
+class AssignStudentListView(View):
+    template_name = "assign_studentlist.html"
+
+    def get(self, request):
+        assignments = Assignstudent.objects.select_related(
+            "student", "course", "batch"
+        )
+        return render(request, self.template_name, {
+            "assignments": assignments
+        })
+    
+class AssignStudentEditView(View):
+    template_name = "student_assignment.html"
+
+    def get(self, request, pk):
+        assignment = get_object_or_404(Assignstudent, pk=pk)
+        form = AssignstudentForm(instance=assignment)
+        return render(request, self.template_name, {
+            "form": form,
+            "assignment": assignment
+        })
+
+    def post(self, request, pk):
+        assignment = get_object_or_404(Assignstudent, pk=pk)
+        form = AssignstudentForm(request.POST, instance=assignment)
+
+        if form.is_valid():
+            form.save()
+            return redirect("adminapp:assign-student-list")
+
+        return render(request, self.template_name, {
+            "form": form,
+            "assignment": assignment
+        })
+
+class AssignStudentDeleteView(View):
+    def get(self, request, pk):
+        assignment = get_object_or_404(Assignstudent, pk=pk)
+        assignment.delete()
+        return redirect("adminapp:assign-student-list")
