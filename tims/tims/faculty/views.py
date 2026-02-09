@@ -1,50 +1,42 @@
 from django.shortcuts import render,redirect, get_object_or_404
-
+from django.contrib import messages
 # Create your views here.
 
 from django.views import View
 from .models import TrainingSession,StudentAttendance
+from django.contrib.auth import get_user_model
+User = get_user_model()
+from adminapp.models import Batch
 from .forms import TrainingSessionForm,StudentAttendanceForm
 
-class TrainingSessionCreate(View):
+class TrainingSessionCreateView(View):
     template_name = 'create_session.html'
 
     def get(self, request):
-        return render(request, self.template_name, {
-            'form': TrainingSessionForm(),
-            'title': 'Create Training Session'
-        })
+        form = TrainingSessionForm()
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request):
         form = TrainingSessionForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('faculty:training_list')
-        return render(request, self.template_name, {
-            'form': form,
-            'title': 'Create Training Session'
-        })
-class TrainingSessionList(View):
+        return render(request, self.template_name, {'form': form})
+
+class TrainingSessionListView(View):
     template_name = 'Session_list.html'
 
     def get(self, request):
-        sessions = (
-            TrainingSession.objects
-            #.select_related('batch', 'faculty')
-            .order_by('-session_date')
-        )
-        return render(request, self.template_name, {
-            'sessions': sessions
-        })
-class TrainingSessionUpdate(View):
-    template_name = 'update_session.html'
+        sessions = TrainingSession.objects.all()
+        return render(request, self.template_name, {'sessions': sessions})
+
+class TrainingSessionUpdateView(View):
+    template_name = 'create_session.html'
 
     def get(self, request, pk):
         session = get_object_or_404(TrainingSession, pk=pk)
-        return render(request, self.template_name, {
-            'form': TrainingSessionForm(instance=session),
-            'title': 'Update Training Session'
-        })
+        form = TrainingSessionForm(instance=session)
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request, pk):
         session = get_object_or_404(TrainingSession, pk=pk)
@@ -52,89 +44,71 @@ class TrainingSessionUpdate(View):
         if form.is_valid():
             form.save()
             return redirect('faculty:training_list')
-        return render(request, self.template_name, {
-            'form': form,
-            'title': 'Update Training Session'
-        })
+        return render(request, self.template_name, {'form': form})
                 
-class TrainingSessionDelete(View):
+class TrainingSessionDeleteView(View):
 
     def post(self, request, pk):
         session = get_object_or_404(TrainingSession, pk=pk)
         session.delete()
         return redirect('faculty:training_list')
 
-
-training_session_delete_view = TrainingSessionDelete.as_view()
-
-class AttendanceCreate(View):
+class StudentAttendanceCreate(View):
     template_name = 'create_attendance.html'
 
     def get(self, request):
-        return render(request, self.template_name, {
-            'form': StudentAttendanceForm(),
-            'title': 'Add Attendance'
-        })
+        form = StudentAttendanceForm()
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request):
         form = StudentAttendanceForm(request.POST)
+
         if form.is_valid():
             form.save()
-            return redirect('faculty:attendance_list')
-        return render(request, self.template_name, {
-            'form': form,
-            'title': 'Add Attendance'
-        })
-     
+            messages.success(request, "Attendance created successfully.")
+            return redirect('faculty:attendance-list')
 
-class AttendanceList(View):
+        return render(request, self.template_name, {'form': form})
+
+class StudentAttendanceList(View):
     template_name = 'attendance_list.html'
 
     def get(self, request):
-        attendance_list = (
-            StudentAttendance.objects
-            # .select_related('student', 'faculty', 'batch')
-            .order_by('-attendance_date')
-        )
+        attendances = StudentAttendance.objects.select_related(
+            'student', 'faculty', 'batch'
+        ).order_by('-attendance_date')
 
-        return render(request, self.template_name, {
-            'attendance_list': attendance_list,
-            'title': 'Attendance List'
-        })
+        return render( request, self.template_name, {'attendances': attendances})
 
-
-class AttendanceUpdate(View):
-    template_name = 'update_attendance.html'
+class StudentAttendanceUpdate(View):
+    template_name = 'create_attendance.html'
 
     def get(self, request, pk):
         attendance = get_object_or_404(StudentAttendance, pk=pk)
-        return render(request, self.template_name, {
-            'form': StudentAttendanceForm(instance=attendance),
-            'title': 'Update Attendance'
-        })
+        form = StudentAttendanceForm(instance=attendance)
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request, pk):
         attendance = get_object_or_404(StudentAttendance, pk=pk)
         form = StudentAttendanceForm(request.POST, instance=attendance)
+
         if form.is_valid():
             form.save()
-            return redirect('attendance_list')
-        return render(request, self.template_name, {
-            'form': form,
-            'title': 'Update Attendance'
-        })
+            messages.success(request, "Attendance updated successfully.")
+            return redirect('faculty:attendance-list')
 
+        return render(request, self.template_name, {'form': form})
 
-class AttendanceDelete(View):
+class StudentAttendanceDelete(View):
 
-    def post(self, request, pk):
+    def get(self, request, pk):
         attendance = get_object_or_404(StudentAttendance, pk=pk)
         attendance.delete()
-        return redirect('faculty:attendance_list')
-
+        messages.success(request, "Attendance deleted successfully.")
+        return redirect('faculty:attendance-list')
          
 class FacultyAttendanceProgressView(View):
-    template_name = "faculty/faculty_attendance_progress.html"
+    template_name = "faculty_attendance_progress.html"
 
     def get(self, request):
         faculty = Faculty.objects.get(user=request.user)

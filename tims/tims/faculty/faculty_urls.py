@@ -1,30 +1,31 @@
 from django.urls import path
 from .views import (
-    TrainingSessionCreate,
-    TrainingSessionUpdate,
-    TrainingSessionList,
-    TrainingSessionDelete,
-    AttendanceCreate,
-    AttendanceList,
-    AttendanceUpdate,
-    AttendanceDelete
+    TrainingSessionCreateView,
+    TrainingSessionListView,
+    TrainingSessionUpdateView,
+    TrainingSessionDeleteView,
+    StudentAttendanceList,
+    StudentAttendanceCreate,
+    StudentAttendanceUpdate,
+    StudentAttendanceDelete,
+    FacultyAttendanceProgressView,
+    FacultyTrainingProgressView
+
 )
 
 
 app_name = "faculty"
 urlpatterns = [
+    path("sessions/", TrainingSessionListView.as_view(), name="training_list"),
+    path("sessions/create/", TrainingSessionCreateView.as_view(), name="training_create"),
+    path("sessions/<int:pk>/update/", TrainingSessionUpdateView.as_view(), name="training_update"),
+    path("sessions/<int:pk>/delete/", TrainingSessionDeleteView.as_view(), name="training_delete"),
+    path('list', StudentAttendanceList.as_view(), name='attendance-list'),
+    path('create/', StudentAttendanceCreate.as_view(), name='attendance-create'),
+    path('update/<int:pk>/', StudentAttendanceUpdate.as_view(), name='attendance-update'),
+    path('delete/<int:pk>/', StudentAttendanceDelete.as_view(), name='attendance-delete'),
+    path("faculty/attendance-progress/",FacultyAttendanceProgressView.as_view(),name="faculty_attendance_progress"),
+    path("faculty/training-progress/",FacultyTrainingProgressView.as_view(),name="faculty_training_progress")
 
-    path('training-sessions/', TrainingSessionList.as_view(), name='training_list'),
-    path('training-sessions/create/', TrainingSessionCreate.as_view(), name='training_create'),
-    path('training-sessions/<int:pk>/update/', TrainingSessionUpdate.as_view(), name='training_update'),
-    path('training-sessions/<int:pk>/delete/', TrainingSessionDelete.as_view(), name='training_delete'),
-    path('add/', AttendanceCreate.as_view(), name='attendance_add'),
-    path('list/', AttendanceList.as_view(), name='attendance_list'),
-    path('update/<int:pk>/', AttendanceUpdate.as_view(), name='attendance_update'),
-    path('delete/<int:pk>/', AttendanceDelete.as_view(), name='attendance_delete'),
-    path("faculty/attendance-progress/",FacultyAttendanceProgressView.as_view(),name="faculty_attendance_progress"
-)
-    path("faculty/training-progress/",FacultyTrainingProgressView.as_view(),name="faculty_training_progress"
-)
     
 ]

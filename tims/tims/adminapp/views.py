@@ -2,6 +2,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from adminapp.models import Course,Batch,FacultyAssignment
+from tims.faculty.models import TrainingSession
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from .forms import CourseForm,BatchForm,FacultyAssignmentForm
@@ -171,3 +172,28 @@ class BatchProgressFilterView(View):
             "selected_batch": selected_batch,
             "courses": courses
         })
+
+class TrainingSessionApprovalListView(View):
+    template_name = "training_approval_list.html"
+
+    def get(self, request):
+        sessions = TrainingSession.objects.all().order_by('-created_at')
+        return render(request, self.template_name, {
+            'sessions': sessions
+        })
+
+
+class TrainingSessionApproveView(View):
+    def post(self, request, pk):
+        session = get_object_or_404(TrainingSession, pk=pk)
+        session.approval_status = 'Approved'
+        session.save()
+        return redirect('adminapp:admin_training_approval_list')
+
+
+class TrainingSessionRejectView(View):
+    def post(self, request, pk):
+        session = get_object_or_404(TrainingSession, pk=pk)
+        session.approval_status = 'Rejected'
+        session.save()
+        return redirect('adminapp:admin_training_approval_list')

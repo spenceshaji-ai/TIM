@@ -1,5 +1,11 @@
 from django.urls import path
 from .views import *
+from adminapp.views import (
+    TrainingSessionApprovalListView,
+    TrainingSessionApproveView,
+    TrainingSessionRejectView,
+)
+
 app_name = "adminapp"
 
 urlpatterns = [
@@ -13,10 +19,14 @@ urlpatterns = [
     path("batches/delete/<int:id>/", BatchDeleteView.as_view(), name="batch_delete"),
     path("faculty-assignments/add/", FacultyAssignmentCreateView.as_view(), name="faculty_assignment"),
     path("faculty-assignments/view/",FacultyCoursesView.as_view(),name="faculty_courses"),
+    path('admin/training-approvals/', TrainingSessionApprovalListView.as_view(), name='admin_training_approval_list'),
+    path('admin/training-approve/<int:pk>/', TrainingSessionApproveView.as_view(), name='training_approve'),
+    path('admin/training-reject/<int:pk>/', TrainingSessionRejectView.as_view(), name='training_reject'),
+]
    #path(
        # "faculty-assignments/<int:pk>/delete/",
         #views.faculty_assignment_delete,
         #name="faculty_assignment_delete",
     #)
-] 
+ 
   

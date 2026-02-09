@@ -1,81 +1,69 @@
 {% include 'pages/header.html' %}
 
-<div class="container-fluid mt-4">
+{% block content %}
 
-    <!-- Card Header -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold text-primary">
-                Attendance
-            </h5>
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Student Attendance</h5>
 
-            <a href="{% url 'faculty:attendance_add' %}" class="btn btn-success btn-sm">
-                <i class="bi bi-plus-circle"></i> Add Attendance
-            </a>
-        </div>
-
-        <!-- Table -->
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th class="text-center" style="width: 180px;">Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                    {% for a in attendance_list %}
-                        <tr>
-                            <td>{{ a.attendance_date|date:"d M Y" }}</td>
-
-                            <td>
-                                {% if a.status == "Present" %}
-                                    <span class="badge bg-success">Present</span>
-                                {% else %}
-                                    <span class="badge bg-danger">Absent</span>
-                                {% endif %}
-                            </td>
-
-                            <td class="text-center">
-                                <a href="{% url 'faculty:attendance_update' a.id %}"
-                                   class="btn btn-sm btn-outline-warning me-1">
-                                    Edit
-                                </a>
-
-                                <form method="post"
-                                      action="{% url 'faculty:attendance_delete' a.id %}"
-                                      class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit"
-                                            class="btn btn-sm btn-outline-danger"
-                                            onclick="return confirm('Are you sure you want to delete this attendance record?');">
-                                        Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="3" class="text-center py-4 text-muted">
-                                No attendance records found
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-
-                </table>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="card-footer text-muted small text-end">
-            Showing {{ attendance_list|length }} record{{ attendance_list|length|pluralize }}
-        </div>
+        <a href="{% url 'faculty:attendance-create' %}" class="btn btn-primary btn-sm">
+            + Add Attendance
+        </a>
     </div>
 
-</div>
+    <div class="card-body">
+        {% if attendances %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Student</th>
+                            <th>Faculty</th>
+                            <th>Batch</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in attendances %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ a.student.username }}</td>
+                                <td>{{ a.faculty.username }}</td>
+                                <td>{{ a.batch }}</td>
+                                <td>{{ a.attendance_date }}</td>
+                                <td>
+                                    {% if a.status == "Present" %}
+                                        <span class="badge bg-success">Present</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Absent</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="{% url 'faculty:attendance-update' a.id %}"
+                                       class="btn btn-sm btn-warning">
+                                        Edit
+                                    </a>
 
+                                    <a href="{% url 'faculty:attendance-delete' a.id %}"
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('Are you sure you want to delete this record?');">
+                                        Delete
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center mb-0">
+                No attendance records found.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
 {% include 'pages/footer.html' %}

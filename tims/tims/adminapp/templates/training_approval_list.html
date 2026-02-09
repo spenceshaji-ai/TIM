@@ -1,11 +1,9 @@
-{% include 'pages/header.html' %}
+{% include "pages/header.html" %}
+
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>Training Sessions</h4>
-    <a href="{% url 'faculty:training_create' %}" class="btn btn-success">
-        + Add Training Session
-    </a>
+    <h4>Training Session Approvals</h4>
 </div>
 
 <table class="table table-bordered table-striped">
@@ -18,7 +16,8 @@
             <th>Hours</th>
             <th>Status</th>
             <th>Approval Status</th>
-            <th width="160">Actions</th>
+            <th>Created At</th>
+            <th width="200">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -31,7 +30,6 @@
             <td>{{ session.hours_taken }}</td>
             <td>{{ session.status }}</td>
 
-            <!-- Approval Status -->
             <td>
                 <span class="
                     {% if session.approval_status == 'Approved' %}badge bg-success
@@ -43,26 +41,35 @@
                 </span>
             </td>
 
-            <td>
-                <a href="{% url 'faculty:training_update' session.id %}"
-                   class="btn btn-sm btn-primary">
-                    Edit
-                </a>
+            <td>{{ session.created_at|date:"d M Y, H:i" }}</td>
 
+            <td>
+                {% if session.approval_status == 'Pending' %}
                 <form method="post"
-                      action="{% url 'faculty:training_delete' session.id %}"
+                      action="{% url 'adminapp:training_approve' session.id %}"
                       class="d-inline">
                     {% csrf_token %}
-                    <button class="btn btn-sm btn-danger"
-                            onclick="return confirm('Are you sure?');">
-                        Delete
+                    <button class="btn btn-sm btn-success">
+                        Approve
                     </button>
                 </form>
+
+                <form method="post"
+                      action="{% url 'adminapp:training_reject' session.id %}"
+                      class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-danger">
+                        Reject
+                    </button>
+                </form>
+                {% else %}
+                <span class="text-muted">No action</span>
+                {% endif %}
             </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="8" class="text-center text-muted">
+            <td colspan="9" class="text-center text-muted">
                 No training sessions found
             </td>
         </tr>
@@ -71,5 +78,4 @@
 </table>
 
 {% endblock %}
-
-{% include 'pages/footer.html' %}
+{% include "pages/footer.html" %}
