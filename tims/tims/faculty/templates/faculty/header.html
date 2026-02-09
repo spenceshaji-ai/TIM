@@ -3,7 +3,7 @@
 <html lang="en" data-layout-mode="detached">
 
 <head>
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
 
     <meta charset="utf-8" />
     <title>Layout Detached | Hyper - Responsive Bootstrap 5 Admin Dashboard</title>
@@ -156,9 +156,7 @@
                             </form>
                         </div>
                     </li>
-                    <li class="dropdown notification-list">
-    <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#">
-        <i class="uil-bell"></i>
+                   
 
 
 
@@ -190,33 +188,37 @@
                             </a>
 
                         </div>
-                   <li class="dropdown notification-list">
+                    </li>
+
+<li class="dropdown notification-list">
     <a class="nav-link dropdown-toggle arrow-none position-relative"
        data-bs-toggle="dropdown" href="#">
 
         <i class="ri-notification-3-line font-22
-           {% if admin_pending_leave_count > 0 %}text-danger{% endif %}">
+           {% if faculty_leave_update %}text-danger{% endif %}">
         </i>
 
-        {% if admin_pending_leave_count > 0 %}
+        {% if faculty_leave_update %}
         <span class="notification-dot"></span>
         {% endif %}
     </a>
 
     <div class="dropdown-menu dropdown-menu-end dropdown-lg py-0">
         <div class="p-2 border-bottom">
-            <h6 class="m-0 font-16 fw-semibold">Leave Notifications</h6>
+            <h6 class="m-0 font-16 fw-semibold">Leave Update</h6>
         </div>
 
         <div class="text-center py-3">
-            <p class="mb-2">New leave request received</p>
+            <p class="mb-2">Your leave status has been updated</p>
 
-            <a href="{% url 'leave_requests' %}" class="btn btn-sm btn-primary">
-                View Requests
+            <a href="{% url 'faculty_my_leaves' %}" class="btn btn-sm btn-primary">
+                View My Leaves
             </a>
         </div>
     </div>
 </li>
+
+
 
 
                     <li class="dropdown d-none d-sm-inline-block">
@@ -421,22 +423,22 @@
                     <li class="side-nav-title">Leave Management</li>
 
                     <li class="side-nav-item">
-                        <a href="{% url 'leave_requests' %}" class="side-nav-link">
+                        <a href="{% url 'faculty_my_leaves' %}" class="side-nav-link">
                             <i class="uil-calender"></i>
-                            <span> Approve </span>
+                            <span> My Leaves </span>
                         </a>
                     </li>
 
                     <li class="side-nav-item">
-                        <a href="{% url 'leave_calendar' %}" class="side-nav-link">
+                        <a href="{% url 'faculty_apply_leave' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
-                            <span> Leave Calendar </span>
+                            <span> Leave Apply </span>
                         </a>
                     </li>
                      <li class="side-nav-item">
                         <a href="{% url 'leave-users' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
-                            <span> Leave History </span>
+                            <span> Leave Calendar </span>
                         </a>
                     </li>
                     <li class="side-nav-item">

@@ -1,11 +1,14 @@
-from django.views.generic import CreateView, ListView, View
+from django.views.generic import CreateView, ListView, View,TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
-
+from django.utils.timezone import now
 from adminapp.models import LeaveApplication, LeaveType
 from .forms import LeaveApplicationForm
 
+
+class FacultyDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = "faculty/home.html"
 
 def ensure_leave_types():
     leave_data = [
@@ -35,13 +38,18 @@ class ApplyLeaveView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
+from django.utils.timezone import now
+
 class MyLeavesView(LoginRequiredMixin, ListView):
     model = LeaveApplication
     template_name = "faculty/my_leaves.html"
     context_object_name = "leaves"
 
     def get_queryset(self):
+        # clear notification
+        self.request.session["leave_last_seen"] = now().isoformat()
         return LeaveApplication.objects.filter(user=self.request.user)
+
 
 
 class DeleteLeaveView(LoginRequiredMixin, View):

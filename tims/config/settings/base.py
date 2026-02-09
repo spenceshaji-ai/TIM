@@ -188,7 +188,9 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
                 "tims.users.context_processors.allauth_settings",
-            ],
+                "tims.adminapp.context_processors.admin_leave_notifications",
+                "tims.adminapp.context_processors.faculty_leave_notification",           
+             ],
         },
     },
 ]

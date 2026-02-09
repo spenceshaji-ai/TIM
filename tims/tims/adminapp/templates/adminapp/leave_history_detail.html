@@ -1,0 +1,27 @@
+{% include "pages/header.html" %}
+
+<div class="container-fluid">
+    <h4 class="page-title">Approved Leave Details</h4>
+
+    <table class="table table-bordered">
+        <tr>
+            <th>Leave Type</th>
+            <th>From</th>
+            <th>To</th>
+        </tr>
+
+        {% for leave in leaves %}
+        <tr>
+            <td>{{ leave.leave_type.leave_name }}</td>
+            <td>{{ leave.start_date }}</td>
+            <td>{{ leave.end_date }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">No approved leaves</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% include "pages/footer.html" %}
