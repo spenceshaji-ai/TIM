@@ -1,0 +1,21 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+Add Role
+{% endblock %}
+
+{% block form_action %}
+{% url 'users:role_add' %}
+{% endblock %}
+
+{% block form_body %}
+{% csrf_token %}
+{{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-success">
+    Save Role
+</button>
+{% endblock %}
+

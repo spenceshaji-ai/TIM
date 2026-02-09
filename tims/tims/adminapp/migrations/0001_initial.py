@@ -35,4 +35,25 @@ class Migration(migrations.Migration):
                 ('leave_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='adminapp.leavetype')),
             ],
         ),
+        migrations.CreateModel(
+            name='Course',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('course_name', models.CharField(max_length=200)),
+                ('duration', models.CharField(max_length=100)),
+                ('syllabus', models.TextField()),
+                ('fee', models.DecimalField(decimal_places=2, max_digits=10)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Batch',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('batch_name', models.CharField(max_length=100)),
+                ('start_date', models.DateField()),
+                ('end_date', models.DateField()),
+                ('capacity', models.IntegerField()),
+                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='adminapp.course')),
+            ],
+        ),
     ]
