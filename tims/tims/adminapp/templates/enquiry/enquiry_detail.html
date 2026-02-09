@@ -18,11 +18,11 @@
     </div>
 
     <!-- ✅ Buttons -->
-    <a href="{% url 'enquiry_list' %}" class="btn btn-secondary mt-3">
+    <a href="{% url 'adminapp:enquiry_list' %}" class="btn btn-secondary mt-3">
         Back to List
     </a>
 
-    <a href="{% url 'enquiry_edit' enquiry.id %}" class="btn btn-warning mt-3">
+    <a href="{% url 'adminapp:enquiry_edit' enquiry.id %}" class="btn btn-warning mt-3">
         Edit
     </a>
 
@@ -32,7 +32,7 @@
     <h4 class="mb-3">Follow Ups</h4>
 
     <!-- ✅ Add FollowUp Button -->
-    <a href="{% url 'followup_add' enquiry.id %}" class="btn btn-primary btn-sm mb-3">
+    <a href="{% url 'adminapp:followup_add' enquiry.id %}" class="btn btn-primary btn-sm mb-3">
         + Add Follow Up
     </a>
 
@@ -56,7 +56,7 @@
     <div class="mt-4">
 
         {% if enquiry.status != "Converted" %}
-        <a href="{% url 'convert_admission' enquiry.id %}" class="btn btn-success">
+        <a href="{% url 'adminapp:convert_admission' enquiry.id %}" class="btn btn-success">
             ✅ Convert to Admission
         </a>
         {% else %}

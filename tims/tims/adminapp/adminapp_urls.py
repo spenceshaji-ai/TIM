@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 from .views import *
 from .views import (
     EnquiryListView,
@@ -11,13 +12,6 @@ from .views import FollowUpCreateView, FollowUpListView
 from .views import ConvertToAdmissionView, AdmissionListView
 
 app_name = "adminapp"
-from .views import (
-    ApplyLeaveView,
-    MyLeavesView,
-    DeleteLeaveView,
-    LeaveRequestsView,
-    UpdateLeaveStatusView,
-)
 
 urlpatterns = [
     path("courses/", CourseListView.as_view(), name="course_list"),
@@ -38,14 +32,5 @@ urlpatterns = [
     path("admissions/", AdmissionListView.as_view(), name="admission_list"),
     path("enquiry/<int:enquiry_id>/convert/",ConvertToAdmissionView.as_view(),name="convert_admission"),
 
-    path("leave/apply/", ApplyLeaveView.as_view(), name="apply_leave"),
-    path("leave/my/", MyLeavesView.as_view(), name="my_leaves"),
-    path("leave/delete/<int:leave_id>/", DeleteLeaveView.as_view(), name="delete_leave"),
-    path("leave/requests/", LeaveRequestsView.as_view(), name="leave_requests"),
-    path(
-        "leave/<int:leave_id>/<str:status>/",
-        UpdateLeaveStatusView.as_view(),
-        name="update_leave_status",
-    ),
 ]   
 

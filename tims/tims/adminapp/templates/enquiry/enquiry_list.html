@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Enquiry List</h2>
 
-        <a href="{% url 'enquiry_add' %}" class="btn btn-primary">
+        <a href="{% url 'adminapp:enquiry_add' %}" class="btn btn-primary">
             + Add Enquiry
         </a>
     </div>
@@ -32,15 +32,15 @@
                 <td>{{ enquiry.source }}</td>
 
                 <td>
-                    <a href="{% url 'enquiry_detail' enquiry.id %}" class="btn btn-info btn-sm">
+                    <a href="{% url 'adminapp:enquiry_detail' enquiry.id %}" class="btn btn-info btn-sm">
                         View
                     </a>
 
-                    <a href="{% url 'enquiry_edit' enquiry.id %}" class="btn btn-warning btn-sm">
+                    <a href="{% url 'adminapp:enquiry_edit' enquiry.id %}" class="btn btn-warning btn-sm">
                         Edit
                     </a>
 
-                    <a href="{% url 'enquiry_delete' enquiry.id %}" class="btn btn-danger btn-sm">
+                    <a href="{% url 'adminapp:enquiry_delete' enquiry.id %}" class="btn btn-danger btn-sm">
                         Delete
                     </a>
                 </td>

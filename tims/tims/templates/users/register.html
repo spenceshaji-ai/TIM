@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<h2>User Registration</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    {% for field in form %}
+    <div>
+        <label>{{ field.label }}</label><br>
+        {{ field }}
+        {% if field.errors %}
+        <div style="color:red;">
+            {{ field.errors }}
+        </div>
+        {% endif %}
+    </div>
+    <br>
+    {% endfor %}
+
+    <button type="submit">Register</button>
+</form>
+
+<p>
+    Already registered?
+    <a href="{% url 'users:login' %}">Login here</a>
+</p>
+{% endblock %}

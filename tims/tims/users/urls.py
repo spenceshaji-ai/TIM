@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import user_detail_view
+"""(from .views import user_detail_view
 from .views import user_redirect_view,role_redirect_view,StaffDashboardView,StudentDashboardView
 from .views import user_update_view
 from .views import (
@@ -8,10 +8,20 @@ from .views import (
     UserCreateView,
     UserEditView,
     UserDeleteView
+))"""
+
+from .views import (
+    RegisterView,
+    LoginView,
+    LogoutView,
+    role_based_redirect,
+    staff_dashboard,
+    student_dashboard,
 )
 
+
 app_name = "users"
-urlpatterns = [
+"""(urlpatterns = [
     path("~redirect/", view=user_redirect_view, name="redirect"),
     path("redirect/", role_redirect_view, name="role_redirect"),
     path("staff-dashboard/",StaffDashboardView.as_view(),name="staff_dashboard"),
@@ -26,4 +36,13 @@ urlpatterns = [
     path("users/delete/<int:pk>/", UserDeleteView.as_view(), name="user_delete"),
    
 
+])"""
+
+urlpatterns = [
+    path("register/", RegisterView.as_view(), name="register"),
+    path("login/", LoginView.as_view(), name="login"),
+    path("logout/", LogoutView.as_view(), name="logout"),
+    path("redirect/", role_based_redirect, name="role_redirect"),
+    path("staff/dashboard/", staff_dashboard, name="staff_dashboard"),
+    path("student/dashboard/", student_dashboard, name="student_dashboard"),
 ]

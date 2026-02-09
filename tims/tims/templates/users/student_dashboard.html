@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 
+{% block title %}Student Dashboard{% endblock %}
+
 {% block content %}
 <h2>Student Dashboard</h2>
-<p>Student Dashboard Page</p>
+
+<p>Welcome {{ request.user.username }}</p>
+<p>Role: {{ request.user.role.role_name }}</p>
+
+<ul>
+    <li>My Courses</li>
+    <li>Attendance</li>
+    <li>Job Applications</li>
+</ul>
 {% endblock %}

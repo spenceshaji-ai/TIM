@@ -3,7 +3,9 @@ from allauth.socialaccount.forms import SignupForm as SocialSignupForm
 from django.contrib.auth import forms as admin_forms
 from django.utils.translation import gettext_lazy as _
 from django import forms
-from .models import User
+from .models import User,Role
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
 
 
 
@@ -41,7 +43,7 @@ class UserSocialSignupForm(SocialSignupForm):
     See UserSignupForm otherwise.
     """
 
-class UserForm(forms.ModelForm):
+"""class UserForm(forms.ModelForm):
 
     class Meta:
         model = User
@@ -67,7 +69,61 @@ class UserForm(forms.ModelForm):
             'status': forms.Select(attrs={
                 'class': 'form-control'
             }),
+        }"""
+
+
+
+class RegisterForm(UserCreationForm):
+    role = forms.ModelChoiceField(
+        queryset=Role.objects.all(),
+        empty_label="Select Role"
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'email',
+            'phone_number',
+            'role',
+            'status'
+        ]
+
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Username'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Email'
+            }),
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Phone Number'
+            }),
+            'role': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'form-control'
+            }),
         }
+
+class LoginForm(forms.Form):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter Username'
+        })
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter Password'
+        })
+    )
+
 
 
 
