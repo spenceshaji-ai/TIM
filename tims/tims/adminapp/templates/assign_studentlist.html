@@ -1,0 +1,37 @@
+{% include "pages/header.html" %}
+<h3>Assigned Students</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Student</th>
+            <th>Course</th>
+            <th>Batch</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for a in assignments %}
+        <tr>
+            <td>{{ a.student }}</td>
+            <td>{{ a.course }}</td>
+            <td>{{ a.batch }}</td>
+            <td>
+                <a href="{% url 'adminapp:assign-student-edit' a.id %}"
+                   class="btn btn-sm btn-warning">Edit</a>
+
+                <a href="{% url 'adminapp:assign-student-delete' a.id %}"
+                   class="btn btn-sm btn-danger"
+                   onclick="return confirm('Are you sure?')">
+                   Delete
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No assignments found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% include "pages/footer.html" %}
