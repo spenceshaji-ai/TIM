@@ -17,7 +17,6 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("users/", include("tims.users.urls", namespace="users")),
 
-    # Admin App
     path("adminapp/", include("tims.adminapp.adminapp_urls")),
     path('Admin/', include("tims.Admin.admin_urls")),
     path('Student/',include("tims.Student.student_urls")),

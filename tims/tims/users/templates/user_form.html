@@ -1,0 +1,20 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+User Registration
+{% endblock %}
+
+{% block form_action %}
+{% url 'users:user_register' %}
+{% endblock %}
+
+{% block form_body %}
+{% csrf_token %}
+{{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-success">
+    Register
+</button>
+{% endblock %}

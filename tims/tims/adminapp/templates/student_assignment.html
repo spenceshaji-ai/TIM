@@ -1,0 +1,24 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+Assign Student to Course & Batch
+{% endblock %}
+
+{% block form_action %}
+{% if assignment %}
+{% url 'adminapp:assign-student-edit' assignment.id %}
+{% else %}
+{% url 'adminapp:assign-student' %}
+{% endif %}
+{% endblock %}
+
+
+{% block form_body %}
+{{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-primary">
+    Assign Student
+</button>
+{% endblock %}

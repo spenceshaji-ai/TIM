@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.conf import settings
 # Create your models here.
 
 class Course(models.Model):
@@ -21,10 +21,51 @@ class Batch(models.Model):
     def __str__(self):
         return self.batch_name
 
-#class FacultyAssignment(models.Model):
-   # faculty = models.ForeignKey(User, on_delete=models.CASCADE)
-    #course = models.ForeignKey(Course, on_delete=models.CASCADE)
-  #  batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+from django.db import models
+from django.core.exceptions import ValidationError
 
-    #def __str__(self):
-        #return f"{self.faculty} - {self.course} - {self.batch}"
+class FacultyAssignment(models.Model):
+    faculty = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    course = models.ForeignKey("adminapp.Course", on_delete=models.CASCADE)
+    batch = models.ForeignKey("adminapp.Batch", on_delete=models.CASCADE)
+
+    class Meta:
+        # Enforce that each faculty can only have one assignment per course & batch
+        constraints = [
+            models.UniqueConstraint(
+                fields=["faculty", "course", "batch"],
+                name="unique_faculty_course_batch_per_faculty"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.faculty} - {self.course} - {self.batch}"
+
+    def clean(self):
+        """
+        Prevent duplicates for the same faculty.
+        Different faculties can have same course & batch.
+        """
+        if FacultyAssignment.objects.filter(
+            faculty=self.faculty,
+            course=self.course,
+            batch=self.batch
+        ).exclude(pk=self.pk).exists():
+            raise ValidationError(
+                f"{self.faculty} is already assigned to this course and batch."
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean()  # enforce validation
+        super().save(*args, **kwargs)
+
+
+class Assignstudent(models.Model):    
+    student = models.ForeignKey("users.User", on_delete=models.CASCADE)  
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.student} - {self.course} ({self.batch})"
+
+
