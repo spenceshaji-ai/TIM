@@ -1,0 +1,37 @@
+{% extends "pages/form.html" %}
+
+{% block form_title %}
+Apply for Job
+{% endblock %}
+
+{% block form_action %}
+{% url 'student_apply_job' job.id %}
+{% endblock %}
+
+{% block form_enctype %}
+enctype="multipart/form-data"
+{% endblock %}
+
+{% block form_body %}
+
+{{ form.errors }}
+
+<div class="mb-3">
+    <label class="form-label">Job</label>
+    <input type="text" class="form-control"
+           value="{{ job.title }} - {{ job.company }}"
+           readonly>
+</div>
+
+<div class="mb-3">
+    {{ form.resume.label_tag }}
+    {{ form.resume }}
+</div>
+
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-primary">
+    Apply
+</button>
+{% endblock %}

@@ -1,44 +1,50 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Job List</title>
-</head>
-<body>
+{% extends "forms.html" %}
 
-<h2>Job List</h2>
+{% block form_title %}
+Job List
+{% endblock %}
 
-<a href="{% url 'job_create' %}">Add Job</a>
+{% block form_body %}
 
-<table border="1" cellpadding="10">
-    <tr>
-        <th>ID</th>
-        <th>Title</th>
-        <th>Company</th>
-        <th>Location</th>
-        <th>Type</th>
-        <th>Salary</th>
-        <th>Actions</th>
-    </tr>
+<a href="{% url 'job_create' %}" class="btn btn-primary mb-3">
+    Add Job
+</a>
 
-    {% for job in jobs %}
-    <tr>
-        <td>{{ job.id }}</td>
-        <td>{{ job.title }}</td>
-        <td>{{ job.company }}</td>
-        <td>{{ job.location }}</td>
-        <td>{{ job.job_type }}</td>
-        <td>{{ job.salary }}</td>
-        <td>
-            <a href="{% url 'job_edit' job.id %}">Edit</a> |
-            <a href="{% url 'job_delete' job.id %}">Delete</a>
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="7">No jobs available</td>
-    </tr>
-    {% endfor %}
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Company</th>
+            <th>Location</th>
+            <th>Type</th>
+            <th>Salary</th>
+            <th>Edit</th>   
+            <th>Delete</th> 
+        </tr>
+    </thead>
+    <tbody>
+        {% for job in jobs %}
+        <tr>
+            <td>{{ job.id }}</td>
+            <td>{{ job.title }}</td>
+            <td>{{ job.company }}</td>
+            <td>{{ job.location }}</td>
+            <td>{{ job.job_type }}</td>
+            <td>{{ job.salary }}</td>
+            <td>
+                <a href="{% url 'job_edit' job.id %}" class="btn btn-sm btn-success w-100">Edit</a>
+            </td>
+            <td>
+                <a href="{% url 'job_delete' job.id %}" class="btn btn-sm btn-danger w-100">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8" class="text-center">No jobs available</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 
-</body>
-</html>
+{% endblock %}

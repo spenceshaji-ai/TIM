@@ -1,6 +1,7 @@
 from django import forms
 from Student.models import Student,JobApplication
 
+#Student Registration
 class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
@@ -42,12 +43,24 @@ class StudentForm(forms.ModelForm):
             }),
         }
 
-class JobApplicationForm(forms.ModelForm):
+#Student Job Application
+
+class ApplicationForm(forms.ModelForm):
     class Meta:
         model = JobApplication
-        fields = ['job', 'resume', 'applied_date']
+        fields = ["resume"]
 
         widgets = {
-            'job': forms.Select(attrs={'class': 'form-control'}),
-            'applied_date': forms.DateInput(attrs={'type': 'date'}),
+            "resume": forms.FileInput(attrs={
+                "class": "form-control",
+                "accept": ".pdf,.doc,.docx"
+            })
+        }
+
+        labels = {
+            "resume": "Upload Resume"
+        }
+
+        help_texts = {
+            "resume": "Allowed formats: PDF, DOC, DOCX"
         }

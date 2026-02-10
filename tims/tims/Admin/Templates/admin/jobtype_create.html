@@ -1,11 +1,11 @@
 {% extends "forms.html" %}
 
 {% block form_title %}
-Create Job
+Create Job Type
 {% endblock %}
 
 {% block form_action %}
-{% url 'job_create' %}
+{% url 'jobtype_create' %}
 {% endblock %}
 
 {% block form_body %}
@@ -14,12 +14,10 @@ Create Job
 
 {% block form_button %}
 <button type="submit" class="btn btn-success">
-    Save Job
+    Save Job Type
 </button>
 
-<a href="{% url 'job_list' %}" class="btn btn-secondary ms-2">
+<a href="{% url 'jobtype_list' %}" class="btn btn-secondary ms-2">
     Cancel
 </a>
 {% endblock %}
-
- 

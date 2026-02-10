@@ -1,32 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Job</title>
-</head>
-<body>
+{% extends "forms.html" %}
 
-<h2>Edit Job</h2>
+{% block form_title %}
+Edit Job
+{% endblock %}
 
-<form method="POST">
-    {% csrf_token %}
+{% block form_action %}
+{% url 'job_edit' job.id %}
+{% endblock %}
 
-    <label>Job Title:</label><br>
-    {{ form.title }}<br><br>
+{% block form_body %}
+{{ form.as_p }}  {# This will render all fields, including job_type as dropdown #}
+{% endblock %}
 
-    <label>Company:</label><br>
-    {{ form.company }}<br><br>
+{% block form_button %}
+<button type="submit" class="btn btn-success">
+    Save Job
+</button>
 
-    <label>Location:</label><br>
-    {{ form.location }}<br><br>
-
-    <label>Job Type:</label><br>
-    {{ form.job_type }}<br><br>
-
-    <label>Salary:</label><br>
-    {{ form.salary }}<br><br>
-
-    <button type="submit">Update Job</button>
-</form>
-
-</body>
-</html>
+<a href="{% url 'job_list' %}" class="btn btn-secondary ms-2">
+    Cancel
+</a>
+{% endblock %}

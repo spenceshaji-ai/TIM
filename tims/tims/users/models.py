@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from django.utils import timezone
-from tims.adminapp.models import Course
+from adminapp.models import Course
 
 
 # Role Table    

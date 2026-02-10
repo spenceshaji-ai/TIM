@@ -1,0 +1,23 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+Delete Job Type
+{% endblock %}
+
+{% block form_action %}
+{% url 'jobtype_delete' jobtype.id %}
+{% endblock %}
+
+{% block form_body %}
+<p>Are you sure you want to delete the job type: <strong>{{ jobtype.job_type }}</strong>?</p>
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-danger">
+    Delete
+</button>
+
+<a href="{% url 'jobtype_list' %}" class="btn btn-secondary ms-2">
+    Cancel
+</a>
+{% endblock %}

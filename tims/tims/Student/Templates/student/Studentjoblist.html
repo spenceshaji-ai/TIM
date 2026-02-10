@@ -1,0 +1,94 @@
+{% include "pages/header.html" %}
+
+
+
+<h3 class="mb-3">Job Opportunities</h3>
+
+<!-- Job type buttons -->
+<div class="mb-4">
+    <a href="{% url 'job_list' %}" 
+       class="btn btn-outline-primary {% if not selected_job_type %}active{% endif %}">
+        All Job Types
+    </a>
+
+    {% for jt in job_types %}
+        <a href="?job_type={{ jt.id }}" 
+           class="btn btn-outline-primary {% if selected_job_type|default:'' == jt.id|stringformat:'s' %}active{% endif %}">
+            {{ jt.job_type }}
+        </a>
+    {% endfor %}
+</div>
+
+<div class="row">
+
+    <!-- Left: Job List -->
+    <div class="col-md-6">
+        {% for job in jobs %}
+        <div class="card mb-3 job-card"
+             data-url="{% url 'student_job_detail' job.id %}"
+             style="cursor:pointer;">
+            <div class="card-body">
+                <h5>{{ job.title }}</h5>
+                <strong>{{ job.company }}</strong><br>
+                {{ job.location }}<br>
+                {{ job.salary }}<br>
+                <span class="badge bg-secondary">
+                    {{ job.job_type.job_type }}
+                </span>
+            </div>
+        </div>
+        {% empty %}
+            <p>No jobs available</p>
+        {% endfor %}
+    </div>
+
+    <!-- Right: Job Details -->
+    <div class="col-md-6">
+        <div id="job-detail" class="border p-4 text-muted">
+            Select a job to view details
+        </div>
+    </div>
+
+</div>
+
+<!-- AJAX Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.job-card');
+    const detailDiv = document.getElementById('job-detail');
+
+    cards.forEach(card => {
+        card.addEventListener('click', function() {
+            const url = this.dataset.url;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error("Network response was not OK");
+                    return response.json();
+                })
+                .then(data => {
+                    detailDiv.innerHTML = `
+                        <div class="card">
+                            <div class="card-body">
+                                <h4>${data.title}</h4>
+                                <strong>${data.company}</strong><br>
+                                Location: ${data.location}<br>
+                                Salary: ${data.salary}<br>
+                                Type: ${data.job_type}<br><br>
+                                <a href="/Student/student/apply/${data.id}/" class="btn btn-success">
+                                    Apply
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                })
+                .catch(err => {
+                    detailDiv.innerHTML = `<p class="text-danger">Failed to load job details</p>`;
+                    console.error(err);
+                });
+        });
+    });
+});
+</script>
+
+{% include "pages/footer.html" %}
