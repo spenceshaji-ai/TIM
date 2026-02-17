@@ -6,7 +6,7 @@ Job List
 
 {% block form_body %}
 
-<a href="{% url 'job_create' %}" class="btn btn-primary mb-3">
+<a href="{% url 'admin_app:job_create' %}" class="btn btn-primary mb-3">
     Add Job
 </a>
 
@@ -33,10 +33,10 @@ Job List
             <td>{{ job.job_type }}</td>
             <td>{{ job.salary }}</td>
             <td>
-                <a href="{% url 'job_edit' job.id %}" class="btn btn-sm btn-success w-100">Edit</a>
+                <a href="{% url 'admin_app:job_edit' job.id %}" class="btn btn-sm btn-success w-100">Edit</a>
             </td>
             <td>
-                <a href="{% url 'job_delete' job.id %}" class="btn btn-sm btn-danger w-100">Delete</a>
+                <a href="{% url 'admin_app:job_delete' job.id %}" class="btn btn-sm btn-danger w-100">Delete</a>
             </td>
         </tr>
         {% empty %}

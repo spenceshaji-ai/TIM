@@ -5,6 +5,7 @@ from .views import (
     StudentJobDetailView,
     StudentApplyJobView,
     StudentApplicationTrackingView,
+    HomeView1,
 )
 urlpatterns = [
     # Student
@@ -20,6 +21,8 @@ urlpatterns = [
     path("studentjobs/<int:pk>/", StudentJobDetailView.as_view(), name="student_job_detail"),
 
     path('studentjobtrack/', StudentApplicationTrackingView.as_view(), name='track_applications'),
+
+    path('std/', HomeView1.as_view(), name='studenthome'),
 
 
 

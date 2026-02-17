@@ -1,6 +1,8 @@
 {% load static %}
 {% include 'pages/header.html' %}
+
 <!DOCTYPE html>
+
 <html>
 <head>
     <title>Delete Job</title>
@@ -15,10 +17,10 @@
 
 <form method="POST">
     {% csrf_token %}
-    <button type="submit">Yes, Delete</button>
+    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+    <a href="{% url 'admin_app:job_list' %}" class="btn btn-secondary ms-2">Cancel</a>
 </form>
-
-<a href="{% url 'job_list' %}">Cancel</a>
 
 </body>
 </html>
+

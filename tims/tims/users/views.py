@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import authenticate, login
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import QuerySet
 from django.urls import reverse
@@ -12,7 +13,7 @@ from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from tims.users.models import User
-from .forms import UserForm
+from .forms import UserForm,LoginForm
 from django.views.generic import TemplateView
 from tims.users.models import User,Role
 
@@ -90,5 +91,39 @@ class RoleCreateView(View):
             form.save()
             messages.success(request, "Role created successfully")
             return redirect("users:role_add")
+
+        return render(request, self.template_name, {"form": form})
+
+class LoginView(View):
+    template_name = "login.html"
+
+    def get(self, request):
+        form = LoginForm()
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request):
+        form = LoginForm(request, data=request.POST)
+
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
+
+            user = authenticate(username=username, password=password)
+
+            if user is not None:
+                login(request, user)
+
+                # 🔥 Role Based Redirection
+                if user.role and user.role.role_name in ["Admin", "HR"]:
+                    return redirect("home")
+
+                #elif user.role and user.role.role_name == "Faculty":
+                    return redirect("faculty:home1")
+
+                elif user.role and user.role.role_name == "Student":
+                    return redirect("studenthome")
+
+                else:
+                    return redirect("login")
 
         return render(request, self.template_name, {"form": form})

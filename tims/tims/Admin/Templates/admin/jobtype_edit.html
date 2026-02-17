@@ -5,7 +5,7 @@ Edit Job Type
 {% endblock %}
 
 {% block form_action %}
-{% url 'jobtype_edit' jobtype.id %}
+{% url 'admin_app:jobtype_edit' jobtype.id %}
 {% endblock %}
 
 {% block form_body %}
@@ -17,7 +17,8 @@ Edit Job Type
     Update Job Type
 </button>
 
-<a href="{% url 'jobtype_list' %}" class="btn btn-secondary ms-2">
+<a href="{% url 'admin_app:jobtype_list' %}" class="btn btn-secondary ms-2">
     Cancel
 </a>
 {% endblock %}
+

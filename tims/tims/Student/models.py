@@ -1,10 +1,19 @@
 from django.db import models
 
 
+
+
 class Student(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=15)
+
+    course = models.ForeignKey(
+        'adminapp.Course',
+        on_delete=models.CASCADE,
+        related_name='students',
+    )
+
     passout_year = models.IntegerField()
     qualification = models.CharField(max_length=100)
 
@@ -21,7 +30,7 @@ class JobApplication(models.Model):
         ('Interview', 'Interview'),
     ]
 
-    # ✅ Use string reference instead of import
+    
     job = models.ForeignKey(
         'Admin.Job',
         on_delete=models.CASCADE,

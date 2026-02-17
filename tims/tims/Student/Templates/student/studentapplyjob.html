@@ -1,4 +1,5 @@
-{% extends "pages/form.html" %}
+{% extends "student/form.html" %}
+{% include 'student/header.html' %}
 
 {% block form_title %}
 Apply for Job
@@ -35,3 +36,4 @@ enctype="multipart/form-data"
     Apply
 </button>
 {% endblock %}
+{% include 'student/footer.html' %}

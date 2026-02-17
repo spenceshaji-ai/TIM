@@ -1,3 +1,5 @@
+
+
 from django.urls import path
 from .views import (
     JobCreateView,
@@ -17,7 +19,7 @@ from .views import (
     
 
 )
-
+app_name = 'admin_app' 
 
 
 urlpatterns = [
@@ -29,7 +31,7 @@ urlpatterns = [
 
 
     path('jobview/', JobListView.as_view(), name='job_list'),
-    path('create/', JobCreateView.as_view(), name='job_create'),
+    path('companyjobcreate/', JobCreateView.as_view(), name='job_create'),
     path('edit/<int:id>/', JobEditView.as_view(), name='job_edit'),
     path('delete/<int:id>/', JobDeleteView.as_view(), name='job_delete'),
 
@@ -37,17 +39,15 @@ urlpatterns = [
 
    
     
-]
-   
-from . import views
 
-urlpatterns = [
-    path('application/', views.AdminApplicationListView.as_view(), name='admin_application_list'),
-    path('applications/<int:id>/shortlist/', views.AdminApplicationShortlistView.as_view(), name='admin_application_approve'),
-    path('applications/<int:id>/reject/', views.AdminApplicationRejectView.as_view(), name='admin_application_reject'),
+   
+
+    path('applications/', AdminApplicationListView.as_view(), name='admin_application_list'),
+    path('applications/<int:id>/shortlist/', AdminApplicationShortlistView.as_view(), name='admin_application_approve'),
+    path('applications/<int:id>/reject/', AdminApplicationRejectView.as_view(), name='admin_application_reject'),
 
     path('applications/<int:application_id>/schedule-interview/', ScheduleInterviewView.as_view(), name='schedule_interview'),
-    path( 'applications/<int:id>/select/', views.AdminApplicationSelectView.as_view(),name='admin_application_select'),
+    path( 'applications/<int:id>/select/', AdminApplicationSelectView.as_view(),name='admin_application_select'),
 ]
 
   

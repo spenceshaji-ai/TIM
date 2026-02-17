@@ -5,19 +5,17 @@ Edit Job
 {% endblock %}
 
 {% block form_action %}
-{% url 'job_edit' job.id %}
+{% url 'admin_app:job_edit' job.id %}
 {% endblock %}
 
 {% block form_body %}
-{{ form.as_p }}  {# This will render all fields, including job_type as dropdown #}
+{{ form.as_p }}  {# Renders all fields including job_type dropdown #}
 {% endblock %}
 
-{% block form_button %}
-<button type="submit" class="btn btn-success">
-    Save Job
-</button>
+{% block form_button %} <button type="submit" class="btn btn-success">
+Save Job </button>
 
-<a href="{% url 'job_list' %}" class="btn btn-secondary ms-2">
+<a href="{% url 'admin_app:job_list' %}" class="btn btn-secondary ms-2">
     Cancel
 </a>
 {% endblock %}

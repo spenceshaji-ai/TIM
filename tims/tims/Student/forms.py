@@ -1,7 +1,12 @@
 from django import forms
 from Student.models import Student,JobApplication
 
-#Student Registration
+from adminapp.models import Course  
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
+
+# Student Registration
 class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
@@ -9,7 +14,7 @@ class StudentForm(forms.ModelForm):
             'name',
             'email',
             'phone',
-            # 'course',
+            'course',          
             'passout_year',
             'qualification',
         ]
@@ -28,10 +33,10 @@ class StudentForm(forms.ModelForm):
                 'class': 'form-control'
             }),
 
-            # # ✅ ForeignKey → Dropdown
-            # 'course': forms.Select(attrs={
-            #     'class': 'form-control'
-            # }),
+            
+            'course': forms.Select(attrs={
+                'class': 'form-control'
+            }),
 
             'passout_year': forms.NumberInput(attrs={
                 'placeholder': 'Enter passout year',

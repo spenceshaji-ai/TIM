@@ -1,77 +1,57 @@
-{% extends "forms.html" %}
+{% extends "student/form.html" %}
+{% include "student/header.html" %}
 
 {% block form_title %}
-Track Your Job Applications
-{% endblock %}
-
-{% block form_action %}
-{% url 'track_applications' %}
+My Job Applications
 {% endblock %}
 
 {% block form_body %}
 
-<form method="post" action="{% url 'track_applications' %}">
-    {% csrf_token %}
+{% if applications %}
 
-    <!-- Search Field -->
-    <div class="mb-3">
-        <label class="form-label">Enter Your Name</label>
-        <input type="text"
-               name="name"
-               class="form-control"
-               value="{{ searched_name }}"
-               placeholder="Enter your name"
-               required>
-    </div>
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Job</th>
+            <th>Company</th>
+            <th>Status</th>
+            <th>Applied Date</th>
+        </tr>
+    </thead>
 
-    <!-- Results -->
-    {% if applications %}
-    <hr>
 
-    <h5 class="mb-3">Application Status</h5>
+<tbody>
+    {% for app in applications %}
+    <tr>
+        <td><strong>{{ app.job.title }}</strong></td>
+        <td>{{ app.job.company }}</td>
 
-    <table class="table table-hover align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>Job</th>
-                <th>Company</th>
-                <th>Status</th>
-                <th>Applied Date</th>
-            </tr>
-        </thead>
+        <td>
+            {% if app.status == "Applied" %}
+                <span class="badge bg-warning text-dark">Applied</span>
+            {% elif app.status == "Shortlisted" %}
+                <span class="badge bg-info text-dark">Shortlisted</span>
+            {% elif app.status == "Interview" %}
+                <span class="badge bg-primary">Interview</span>
+            {% elif app.status == "Selected" %}
+                <span class="badge bg-success">Selected</span>
+            {% elif app.status == "Rejected" %}
+                <span class="badge bg-danger">Rejected</span>
+            {% endif %}
+        </td>
 
-        <tbody>
-            {% for app in applications %}
-            <tr>
-                <td><strong>{{ app.job.title }}</strong></td>
-                <td>{{ app.job.company }}</td>
+        <td>{{ app.applied_date }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
 
-                <td>
-                    {% if app.status == "Applied" %}
-                        <span class="badge bg-warning text-dark">Applied</span>
-                    {% elif app.status == "Shortlisted" %}
-                        <span class="badge bg-info text-dark">Shortlisted</span>
-                    {% elif app.status == "Interview" %}
-                        <span class="badge bg-primary">Interview</span>
-                    {% elif app.status == "Selected" %}
-                        <span class="badge bg-success">Selected</span>
-                    {% elif app.status == "Rejected" %}
-                        <span class="badge bg-danger">Rejected</span>
-                    {% endif %}
-                </td>
 
-                <td>{{ app.applied_date }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    {% elif searched_name %}
-    <div class="alert alert-warning">
-        No applications found for "{{ searched_name }}"
-    </div>
-    {% endif %}
-
-</form>
+</table>
+{% else %}
+<div class="alert alert-info">
+    You have not applied for any jobs yet.
+</div>
+{% endif %}
 
 {% endblock %}
+{% include "student/footer.html" %}
