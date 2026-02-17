@@ -17,7 +17,6 @@ class Course(models.Model):
 
 class Batch(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    faculty = models.ForeignKey( "users.Role", on_delete=models.CASCADE)
     batch_name = models.CharField(max_length=100)
     start_date = models.DateField()
     end_date = models.DateField()
@@ -54,7 +53,9 @@ class Enquiry(models.Model):
             ("New", "New"),
             ("Contacted", "Contacted"),
             ("Converted", "Converted"),
+            ("Not Interested", "Not Interested"),
             ("Closed", "Closed"),
+
         ],
         default="New"
     )
@@ -130,7 +131,7 @@ class Admission(models.Model):
         blank=True
     )
 
-    fees_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
     total_fees = models.DecimalField(max_digits=10, decimal_places=2)
 
     status = models.CharField(
@@ -140,6 +141,41 @@ class Admission(models.Model):
 
     def __str__(self):
         return self.student_name
+    
+
+
+class Payment(models.Model):
+
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Paid', 'Paid'),
+    )
+
+    admission = models.ForeignKey(
+        Admission,
+        on_delete=models.CASCADE,
+        related_name="payments"
+    )
+
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    payment_date = models.DateField(
+        auto_now_add=True
+    )
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='Pending'
+    )
+
+    def __str__(self):
+        return f"{self.admission.student_name} - {self.amount}"
+
+
 
 from django.db import models
 from django.core.exceptions import ValidationError

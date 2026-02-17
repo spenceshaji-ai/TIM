@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% include "pages/header.html" %}
+
 
 {% block content %}
 
@@ -32,29 +34,25 @@
                 <td>{{ enquiry.source }}</td>
 
                 <td>
-                    <a href="{% url 'adminapp:enquiry_detail' enquiry.id %}" class="btn btn-info btn-sm">
+                    <a href="{% url 'adminapp:enquiry_detail' enquiry.id %}" class="btn btn-info btn-info">
                         View
                     </a>
 
-                    <a href="{% url 'adminapp:enquiry_edit' enquiry.id %}" class="btn btn-warning btn-sm">
+                    <a href="{% url 'adminapp:enquiry_edit' enquiry.id %}" class="btn btn-warning btn-warning">
                         Edit
                     </a>
 
-                    <a href="{% url 'adminapp:enquiry_delete' enquiry.id %}" class="btn btn-danger btn-sm">
+                    <a href="{% url 'adminapp:enquiry_delete' enquiry.id %}" class="btn btn-danger btn-danger">
                         Delete
                     </a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5" class="text-center">
-                    No Enquiries Found
+                   
                 </td>
             </tr>
             {% endfor %}
-        </tbody>
+        </tbody> 
     </table>
 
 </div>
 
 {% endblock %}
+{% include "pages/footer.html" %}

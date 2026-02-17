@@ -10,6 +10,7 @@ from django.contrib.auth.forms import UserCreationForm
 
 from django import forms
 from django.contrib.auth.forms import  UserChangeForm
+from django.contrib.auth.forms import AuthenticationForm
 
 
 
@@ -139,6 +140,7 @@ class RegisterForm(UserCreationForm):
                 'class': 'form-control'
             }),
         }
+        
 
 class LoginForm(forms.Form):
     username = forms.CharField(

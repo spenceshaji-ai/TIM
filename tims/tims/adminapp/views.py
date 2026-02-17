@@ -2,15 +2,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 
-from adminapp.models import Course, Batch, Enquiry, FollowUp, Admission
-from .forms import CourseForm, BatchForm, EnquiryForm, FollowUpForm, AdmissionForm
+from tims.adminapp.models import Course, Batch, Enquiry, FollowUp, Admission,Payment
+from .forms import CourseForm, BatchForm, EnquiryForm, FollowUpForm, AdmissionForm,PaymentForm
 
 
-from adminapp.models import Course,Batch,FacultyAssignment,Assignstudent
+from tims.adminapp.models import FacultyAssignment,Assignstudent
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from .forms import CourseForm,BatchForm,FacultyAssignmentForm,AssignstudentForm
+from .forms import FacultyAssignmentForm,AssignstudentForm
 from django.contrib import messages
+from django.db import models
+from django.db.models import Sum
+
+
 
 # List
 class CourseListView(View):
@@ -138,7 +142,7 @@ class EnquiryCreateView(View):
 
         if form.is_valid():
             form.save()
-            return redirect("enquiry_list")
+            return redirect("adminapp:enquiry_list")
 
         return render(request, self.template_name, {"form": form})
 
@@ -179,6 +183,17 @@ class EnquiryDeleteView(View):
         enquiry.delete()
         return redirect("enquiry_list")
     
+class MarkNotInterestedView(View):
+
+    def get(self, request, enquiry_id):
+        enquiry = get_object_or_404(Enquiry, id=enquiry_id)
+
+        enquiry.status = "Not Interested"
+        enquiry.save()
+
+        return redirect("adminapp:enquiry_detail", pk=enquiry.id)
+
+    
 #FOLLOWUP
 class FollowUpCreateView(View):
     template_name = "followup/followup_form.html"
@@ -201,7 +216,8 @@ class FollowUpCreateView(View):
             followup.enquiry = enquiry
             followup.save()
 
-            return redirect("enquiry_detail", pk=enquiry.id)
+            return redirect("adminapp:" \
+            "enquiry_detail", pk=enquiry.id)
 
         return render(request, self.template_name, {
             "form": form,
@@ -250,7 +266,7 @@ class ConvertToAdmissionView(View):
             enquiry.status = "Converted"
             enquiry.save()
 
-            return redirect("admission_list")
+            return redirect("adminapp:admission_list")
 
         return render(request, self.template_name, {
             "form": form,
@@ -262,11 +278,117 @@ class AdmissionListView(View):
 
     def get(self, request):
         admissions = Admission.objects.all().order_by("-admission_date")
-        return render(request, self.template_name, {
-            "admissions": admissions
-        })
+        for adm in admissions:
+            paid = adm.payments.aggregate(
+                total=models.Sum("amount")
+              )["total"] or 0
 
-        return redirect("adminapp:batch_list")
+            adm.paid_amount = paid
+            adm.pending_amount = adm.course.fee - paid
+
+        return render(request, self.template_name, {
+             "admissions": admissions
+         })
+
+
+    
+
+
+
+# -----------------------------
+# Payment Create View
+# -----------------------------
+
+
+class PaymentCreateView(View):
+
+    def post(self, request):
+        form = PaymentForm(request.POST)
+
+        if form.is_valid():
+            payment = form.save(commit=False)
+
+            admission = payment.admission
+            total_fee = admission.course.fee
+
+            paid_total = admission.payments.aggregate(
+                total=Sum("amount")
+            )["total"] or 0
+
+            new_amount = payment.amount
+
+            # 🚨 VALIDATION
+            if paid_total >= total_fee:
+                form.add_error(None, "Fees already fully paid.")
+                return render(request, "payment/payment_form.html", {"form": form})
+
+            if paid_total + new_amount > total_fee:
+                remaining = total_fee - paid_total
+                form.add_error(
+                    "amount",
+                    f"Amount exceeds pending fee. Remaining: {remaining}"
+                )
+                return render(request, "payment/payment_form.html", {"form": form})
+
+            payment.save()
+            return redirect("adminapp:payment_list")
+
+        return render(request, "payment/payment_form.html", {"form": form})
+
+
+
+# -----------------------------
+# Payment List View
+# -----------------------------
+class PaymentListView(View):
+
+    def get(self, request):
+        payments = Payment.objects.select_related("admission").all()
+        # 🔥 Add calculations for each payment row
+        for p in payments:
+
+            total_fee = p.admission.course.fee   # Total course fee
+
+            paid = p.admission.payments.aggregate(
+                total=Sum("amount")
+            )["total"] or 0   # Total paid so far
+
+            p.total_fee = total_fee
+            p.paid_amount = paid
+            p.pending_fee = total_fee - paid
+
+        return render(
+            request,
+            "payment/payment_list.html",
+            {"payments": payments}
+        )
+
+class PaymentUpdateView(View):
+    template_name = "payment/payment_form.html"
+
+    def get(self, request, pk):
+        payment = get_object_or_404(Payment, pk=pk)
+        form = PaymentForm(instance=payment)
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request, pk):
+        payment = get_object_or_404(Payment, pk=pk)
+        form = PaymentForm(request.POST, instance=payment)
+
+        if form.is_valid():
+            form.save()
+            return redirect("adminapp:payment_list")
+
+        return render(request, self.template_name, {"form": form})
+
+
+class PaymentDeleteView(View):
+
+    def get(self, request, pk):
+        payment = get_object_or_404(Payment, pk=pk)
+        payment.delete()
+        return redirect("adminapp:payment_list")
+
     
 
 class FacultyAssignmentCreateView(View):

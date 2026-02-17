@@ -1,5 +1,5 @@
 {% load static %}
-{% include 'pages/header.html' %}
+{% include 'student/header.html' %}
 <div class="content">
 
     <!-- Start Content-->
@@ -53,13 +53,17 @@
                             <div class="tab-pane show active" id="input-types-preview">
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <form method="post"action=" {% block form_action %}{% endblock %}">
-                                            {% csrf_token %}
-                                                {% block form_body %}{% endblock %}
-                                                
-                                                {% block form_button %}{% endblock %}
+
+                                        <form method="POST" action="{% block form_action %}{% endblock %}" 
+                                             enctype="multipart/form-data">
                                             
+
+                                            {% csrf_token %}
+                                            {% block form_body %}{% endblock %}
+                                            {% block form_button %}{% endblock %}
+
                                         </form>
+
                                     </div> <!-- end col -->
 
 
@@ -76,4 +80,4 @@
     </div> <!-- container -->
 
 </div> <!-- content -->
-{% include 'pages/footer.html' %}
+{% include 'student/footer.html' %}

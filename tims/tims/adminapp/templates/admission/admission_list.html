@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% include "pages/header.html" %}
+
 
 {% block content %}
 
@@ -14,31 +16,43 @@
                 <th>Batch</th>
                 <th>Total Fees</th>
                 <th>Paid</th>
+                <th>Pending</th>
                 <th>Date</th>
             </tr>
         </thead>
-
         <tbody>
             {% for a in admissions %}
             <tr>
                 <td>{{ a.student_name }}</td>
                 <td>{{ a.course.course_name }}</td>
                 <td>{{ a.batch }}</td>
-                <td>{{ a.total_fees }}</td>
-                <td>{{ a.fees_paid }}</td>
+
+                <!-- ✅ Total Fee -->
+                <td>{{ a.course.fee }}</td>
+
+                <!-- ✅ Paid Amount -->
+                <td>{{ a.paid_amount }}</td>
+
+                <!-- ✅ Pending -->
+                <td>{{ a.pending_amount }}</td>
+
                 <td>{{ a.admission_date }}</td>
             </tr>
+
             {% empty %}
             <tr>
-                <td colspan="6" class="text-center">
+                <td colspan="7" class="text-center">
                     No Admissions Found
                 </td>
             </tr>
             {% endfor %}
         </tbody>
 
+
+
     </table>
 
 </div>
 
 {% endblock %}
+{% include "pages/foooter.html" %}

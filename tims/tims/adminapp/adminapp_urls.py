@@ -10,6 +10,7 @@ from .views import (
 )
 from .views import FollowUpCreateView, FollowUpListView
 from .views import ConvertToAdmissionView, AdmissionListView
+from .views import PaymentCreateView, PaymentListView,MarkNotInterestedView
 
 app_name = "adminapp"
 
@@ -29,8 +30,15 @@ urlpatterns = [
     path("enquiries/<int:pk>/delete/", EnquiryDeleteView.as_view(), name="enquiry_delete"),
     path("followups/", FollowUpListView.as_view(), name="followup_list"),
     path("enquiry/<int:enquiry_id>/followup/add/",FollowUpCreateView.as_view(),name="followup_add"),
+    path("enquiry/<int:enquiry_id>/not-interested/",MarkNotInterestedView.as_view(),name="not_interested"),
+
     path("admissions/", AdmissionListView.as_view(), name="admission_list"),
     path("enquiry/<int:enquiry_id>/convert/",ConvertToAdmissionView.as_view(),name="convert_admission"),
+    path("payments/add/", PaymentCreateView.as_view(), name="payment_create"),
+    path("payments/", PaymentListView.as_view(), name="payment_list"),
+    path("payments/edit/<int:pk>/", PaymentUpdateView.as_view(), name="payment_edit"),
+    path("payments/delete/<int:pk>/", PaymentDeleteView.as_view(), name="payment_delete"),
+
 
   
 

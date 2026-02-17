@@ -1,12 +1,9 @@
 from django import forms
 
-from adminapp.models import Enquiry
-from adminapp.models import FollowUp
-from adminapp.models import Admission
-from adminapp.models import Course,Batch
+from .models import Enquiry,FollowUp,Admission,Course,Batch,Payment, FacultyAssignment,Assignstudent
 from django.contrib.auth import get_user_model
 
-from adminapp.models import Course, Batch, FacultyAssignment,Assignstudent
+
 
 User = get_user_model()
 
@@ -45,7 +42,7 @@ class BatchForm(forms.ModelForm):
             "start_date",
             "end_date",
             "capacity",
-            "faculty",
+            
         ]
         widgets = {
             "course": forms.Select(attrs={"class": "form-control"}),
@@ -163,7 +160,7 @@ class AdmissionForm(forms.ModelForm):
             "course",
             "batch",
             "total_fees",
-            "fees_paid",
+            
         ]
 
         widgets = {
@@ -195,10 +192,34 @@ class AdmissionForm(forms.ModelForm):
                 "class": "form-control"
             }),
 
-            "fees_paid": forms.NumberInput(attrs={
+           
+        }
+
+
+
+class PaymentForm(forms.ModelForm):
+    class Meta:
+        model = Payment
+        fields = [
+            "admission",
+            "amount",
+            "status",
+        ]
+
+        widgets = {
+            "admission": forms.Select(attrs={
+                "class": "form-control"
+            }),
+            "amount": forms.NumberInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter Payment Amount"
+            }),
+            "status": forms.Select(attrs={
                 "class": "form-control"
             }),
         }
+
+
 #class FacultyAssignmentForm(forms.ModelForm):
    # class Meta:
       #  model = FacultyAssignment

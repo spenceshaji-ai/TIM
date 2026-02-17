@@ -18,44 +18,64 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views import View
 
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+
 from django.views.generic import UpdateView
 
 
 from django.contrib import messages
-from tims.users.models import User
-from .forms import UserForm
-from django.views.generic import TemplateView
+
+
 
 from .forms import LoginForm, RegisterForm
 
 from .forms import RoleForm
 
 
+
+
+
+
+
+
+
 class LoginView(View):
+    template_name = "users/login.html"
+
     def get(self, request):
         form = LoginForm()
-        return render(request, "users/login.html", {"form": form})
+        return render(request, self.template_name, {"form": form})
 
     def post(self, request):
-        form = LoginForm(request.POST)
+        form = LoginForm(data=request.POST)
 
         if form.is_valid():
-            username = form.cleaned_data["username"]
-            password = form.cleaned_data["password"]
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
 
-            user = authenticate(request, username=username, password=password)
+            user = authenticate(username=username, password=password)
 
-            if user and user.status == "active":
+            if user is not None:
                 login(request, user)
-                return redirect("role_redirect")
 
-            return render(
-                request,
-                "users/login.html",
-                {"form": form, "error": "Invalid credentials or inactive user"},
-            )
+                # 🔥 Role Based Redirection
+                if user.role and user.role.role_name in ["Admin", "HR"]:
+                    return redirect("home")
 
-        return render(request, "users/login.html", {"form": form})
+                elif user.role and user.role.role_name == "Faculty":
+                    return redirect("faculty:home1")
+
+                # elif user.role and user.role.role_name == "Student":
+                #     return redirect("student_dashboard")
+
+                else:
+                    return redirect("login")
+
+        return render(request, self.template_name, {"form": form})
 
 
 
@@ -63,29 +83,58 @@ class LogoutView(View):
     def get(self, request):
         logout(request)
         return redirect("login")
-    
-
-#@login_required
-def role_based_redirect(request):
-    role = request.user.role.role_name
-
-    if role in ["Super Admin", "Admin", "HR", "Manager", "Faculty"]:
-        return redirect("users/staff_dashboard")
-
-    elif role == "Student":
-        return redirect("users/student_dashboard")
-
-    return redirect("users/login")
 
 
-#@login_required
-def staff_dashboard(request):
-    return render(request, "users/staff_dashboard.html")
+# class RoleBasedRedirectView(View):
+#     def get(self, request):
+#         role = request.user.role.role_name
+
+#         if role in ["Super Admin", "Admin", "HR", "Manager", "Faculty"]:
+#             return redirect("users/staff_dashboard")
+
+#         elif role == "Student":
+#             return redirect("users/student_dashboard")
+
+#         return redirect("users/login")
 
 
-#@login_required
-def student_dashboard(request):
-    return render(request, "users/student_dashboard.html")
+class RoleBasedRedirectView(View):
+
+    def get(self, request):
+
+        if not request.user.is_authenticated:
+            return redirect("users:login")
+
+        if not request.user.role:
+            return redirect("users:login")
+
+        role = request.user.role.role_name
+
+        if role == "Super Admin":
+            return redirect("users:superadmin_dashboard")
+
+        elif role in ["Admin", "HR", "Manager"]:
+            return redirect("users:admin_dashboard")
+
+        elif role == "Faculty":
+            return redirect("users:faculty_dashboard")
+
+        elif role == "Student":
+            return redirect("users:student_dashboard")
+
+        return redirect("users:login")
+
+
+
+class StaffDashboardView(View):
+    def get(self, request):
+        return render(request, "users/staff_dashboard.html")
+
+
+class StudentDashboardView(View):
+    def get(self, request):
+        return render(request, "users/student_dashboard.html")
+
 
 
 
@@ -129,3 +178,50 @@ class RoleCreateView(View):
             return redirect("users:role_add")
 
         return render(request, self.template_name, {"form": form})
+
+
+
+
+
+
+# @method_decorator(login_required, name="dispatch")
+# class UserListView(View):
+
+#     def get(self, request):
+
+#         # Role check
+#         if not request.user.role or request.user.role.role_name not in ["Super Admin", "Admin"]:
+#             return redirect("users:login")   # or redirect to dashboard
+
+#         users = User.objects.select_related("role").all()
+#         return render(request, "users/user_list.html", {"users": users})
+class UserListView(View):
+
+    def get(self, request):
+
+        if not request.user.is_authenticated:
+            return redirect("users:login")
+
+        role_filter = request.GET.get("role")  # get role from URL
+
+        users = User.objects.select_related("role").all()
+
+        # 🎯 Apply filtering
+        if role_filter == "student":
+            users = users.filter(role__role_name__iexact="Student")
+
+        elif role_filter == "faculty":
+            users = users.filter(role__role_name__iexact="Faculty")
+
+        elif role_filter == "staff":
+            users = users.filter(role__role_name__in=["Admin", "HR", "Manager"])
+
+        elif role_filter == "superadmin":
+            users = users.filter(role__role_name__iexact="Super Admin")
+
+        return render(request, "users/user_list.html", {"users": users})
+
+
+
+
+
