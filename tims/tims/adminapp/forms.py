@@ -4,6 +4,13 @@ from .models import Enquiry
 from .models import FollowUp
 from .models import Admission
 from adminapp.models import Course,Batch
+from django.contrib.auth import get_user_model
+User = get_user_model()
+from adminapp.models import Course, Batch, FacultyAssignment,Assignstudent
+
+
+
+
 
 class CourseForm(forms.ModelForm):
     class Meta:
@@ -41,7 +48,6 @@ class BatchForm(forms.ModelForm):
             "capacity",
             "faculty",
         ]
-
         widgets = {
             "course": forms.Select(attrs={"class": "form-control"}),
             "faculty": forms.Select(attrs={"class": "form-control"}),
@@ -194,15 +200,24 @@ class AdmissionForm(forms.ModelForm):
            # "course",
            # "batch",
        # ]
+class FacultyAssignmentForm(forms.ModelForm):
+    class Meta:
+        model = FacultyAssignment
+        fields = [
+            "faculty",
+            "course",
+            "batch",
+        ]
+        widgets = {
+            "faculty": forms.Select(attrs={"class": "form-control"}),
+            "course": forms.Select(attrs={"class": "form-control"}),
+            "batch": forms.Select(attrs={"class": "form-control"}),
+        }
 
-      # widgets = {
-           # "faculty": forms.Select(attrs={"class": "form-control"}),
-           # "course": forms.Select(attrs={"class": "form-control"}),
-           # "batch": forms.Select(attrs={"class": "form-control"}),
-       # }
+    def __init__(self, *args, **kwargs):
+     super().__init__(*args, **kwargs)
 
-    #def __init__(self, *args, **kwargs):
-       # super().__init__(*args, **kwargs)
+     self.fields["faculty"].queryset = User.objects.filter(role__isnull=False)
 
         # Optional: only staff as faculty
        # self.fields["faculty"].queryset = User.objects.filter(is_staff=True)
@@ -233,3 +248,19 @@ class LeaveApplicationForm(forms.ModelForm):
                 )
 
         return cleaned_data
+
+class AssignstudentForm(forms.ModelForm):
+    class Meta:
+        model = Assignstudent
+        fields = ["student", "course", "batch"]
+        widgets = {
+            "student": forms.Select(attrs={"class": "form-control"}),
+            "course": forms.Select(attrs={"class": "form-control"}),
+            "batch": forms.Select(attrs={"class": "form-control"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["student"].queryset = User.objects.filter(
+            role__role_name="Student"
+        )

@@ -8,7 +8,7 @@ class StudentForm(forms.ModelForm):
             'name',
             'email',
             'phone',
-            # 'course',
+            'course',
             'passout_year',
             'qualification',
         ]
@@ -27,10 +27,10 @@ class StudentForm(forms.ModelForm):
                 'class': 'form-control'
             }),
 
-            # # ✅ ForeignKey → Dropdown
-            # 'course': forms.Select(attrs={
-            #     'class': 'form-control'
-            # }),
+             # ✅ ForeignKey → Dropdown
+             'course': forms.Select(attrs={
+                'class': 'form-control'
+            }),
 
             'passout_year': forms.NumberInput(attrs={
                 'placeholder': 'Enter passout year',

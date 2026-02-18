@@ -10,6 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('Admin', '0001_initial'),
+        ('adminapp', '0002_facultyassignment'),
     ]
 
     operations = [
@@ -22,6 +23,8 @@ class Migration(migrations.Migration):
                 ('phone', models.CharField(max_length=15)),
                 ('passout_year', models.IntegerField()),
                 ('qualification', models.CharField(max_length=100)),
+                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='adminapp.course')),
+
             ],
         ),
         migrations.CreateModel(
@@ -32,6 +35,7 @@ class Migration(migrations.Migration):
                 ('status', models.CharField(choices=[('Applied', 'Applied'), ('Selected', 'Selected'), ('Rejected', 'Rejected')], default='Applied', max_length=20)),
                 ('applied_date', models.DateField()),
                 ('job', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='Admin.job')),
+                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='adminapp.course')),
             ],
         ),
     ]

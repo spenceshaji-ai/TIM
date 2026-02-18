@@ -5,11 +5,13 @@ from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
 import adminapp.adminapp_urls
-
+import tims.faculty.faculty_urls
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
-    path("about/",TemplateView.as_view(template_name="pages/about.html"),name="about",),
-    # Django Admin, use {% url 'admin:index' %}
+
+    path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
+
+    # Admin
     path(settings.ADMIN_URL, admin.site.urls),
 
     # Auth
@@ -17,13 +19,16 @@ urlpatterns = [
     
     #path('adminapp/', include(adminapp.adminapp_urls)),
     path('', include('adminapp.adminapp_urls')),
+    # Your stuff: custom urls includes go here
+    # ...
+    # Media files
+
+    path("faculty/", include("tims.faculty.faculty_urls")),
     path("users/", include("tims.users.urls", namespace="users")),
 
-    # Admin App
     path("adminapp/", include("tims.adminapp.adminapp_urls")),
     path('Admin/', include("tims.Admin.admin_urls")),
     path('Student/',include("tims.Student.student_urls")),
-    path("faculty/", include("tims.faculty.faculty_urls")),
 
     # Your stuff: custom urls includes go here
     # ...

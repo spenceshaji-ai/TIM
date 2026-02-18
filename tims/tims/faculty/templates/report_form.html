@@ -1,0 +1,35 @@
+{% extends "form.html" %}
+
+{% block form_title %}
+    {% if form.instance.pk %}
+        Update Daily Report
+    {% else %}
+        Create Daily Report
+    {% endif %}
+{% endblock %}
+
+{% block form_action %}
+    {% if form.instance.pk %}
+        {% url 'faculty:faculty_report_update' form.instance.pk %}
+    {% else %}
+        {% url 'faculty:faculty_report_create' %}
+    {% endif %}
+{% endblock %}
+
+{% block form_body %}
+    {{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+    <button type="submit" class="btn btn-success">
+        {% if form.instance.pk %}
+            Update
+        {% else %}
+            Save
+        {% endif %}
+    </button>
+
+    <a href="{% url 'faculty:faculty_report_list' %}" class="btn btn-secondary ms-2">
+        Cancel
+    </a>
+{% endblock %}
