@@ -1,0 +1,104 @@
+{% include 'header.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h3 class="fw-bold mb-4">My Students</h3>
+
+    <!-- Filter Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+
+                <!-- Batch Dropdown -->
+                <div class="col-md-4">
+                    <label class="form-label">Batch</label>
+                    <select name="batch" class="form-select">
+                        <option value="">Select Batch</option>
+                        {% for assign in assignments %}
+                            <option value="{{ assign.batch.id }}"
+                                {% if selected_batch == assign.batch.id|stringformat:"s" %}selected{% endif %}>
+                                {{ assign.batch.batch_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Course Dropdown -->
+                <div class="col-md-4">
+                    <label class="form-label">Course</label>
+                    <select name="course" class="form-select">
+                        <option value="">Select Course</option>
+                        {% for assign in assignments %}
+                            <option value="{{ assign.course.id }}"
+                                {% if selected_course == assign.course.id|stringformat:"s" %}selected{% endif %}>
+                                {{ assign.course.course_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4 align-self-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Filter Students
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Table -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Attendance %</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.email }}</td>
+                            <td>{{ student.phone }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if student.attendance >= 75 %}
+                                        bg-success
+                                    {% elif student.attendance >= 50 %}
+                                        bg-warning
+                                    {% else %}
+                                        bg-danger
+                                    {% endif %}">
+                                    {{ student.attendance }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">
+                                No students found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+{% include 'footer.html' %}

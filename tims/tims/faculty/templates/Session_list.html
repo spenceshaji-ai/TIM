@@ -1,75 +1,91 @@
-{% include 'pages/header.html' %}
+{% include 'header.html' %}
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>Training Sessions</h4>
-    <a href="{% url 'faculty:training_create' %}" class="btn btn-success">
-        + Add Training Session
-    </a>
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>My Training Sessions</h3>
+        <a href="{% url 'faculty:training_create' %}" class="btn btn-primary">
+            + Create Session
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            {% if sessions %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Date</th>
+                            <th>Batch</th>
+                            <th>Topic Covered</th>
+                            <th>Hours</th>
+                            <th>Status</th>
+                            <th>Approval</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for session in sessions %}
+                        <tr>
+                            <td>{{ session.session_date }}</td>
+                            <td>{{ session.batch }}</td>
+                            <td>{{ session.topic_covered }}</td>
+                            <td>{{ session.hours_taken }}</td>
+                            <td>{{ session.status }}</td>
+
+                            <td>
+                                {% if session.approval_status == "Approved" %}
+                                    <span class="badge bg-success">Approved</span>
+                                {% elif session.approval_status == "Rejected" %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if session.approval_status == "Pending" %}
+                                    <a href="{% url 'faculty:training_update' session.id %}" 
+                                       class="btn btn-sm btn-warning">
+                                        Edit
+                                    </a>
+
+                                    <form action="{% url 'faculty:training_delete' session.id %}" 
+                                          method="post" 
+                                          style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" 
+                                                class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Are you sure you want to delete this session?');">
+                                            Delete
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">Locked</span>
+                                {% endif %}
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% else %}
+                <div class="text-center py-4">
+                    <p class="text-muted">No training sessions created yet.</p>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
 </div>
-
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>#</th>
-            <th>Batch</th>
-            <th>Faculty</th>
-            <th>Date</th>
-            <th>Hours</th>
-            <th>Status</th>
-            <th>Approval Status</th>
-            <th width="160">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for session in sessions %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ session.batch }}</td>
-            <td>{{ session.faculty }}</td>
-            <td>{{ session.session_date }}</td>
-            <td>{{ session.hours_taken }}</td>
-            <td>{{ session.status }}</td>
-
-            <!-- Approval Status -->
-            <td>
-                <span class="
-                    {% if session.approval_status == 'Approved' %}badge bg-success
-                    {% elif session.approval_status == 'Rejected' %}badge bg-danger
-                    {% else %}badge bg-warning text-dark
-                    {% endif %}
-                ">
-                    {{ session.approval_status }}
-                </span>
-            </td>
-
-            <td>
-                <a href="{% url 'faculty:training_update' session.id %}"
-                   class="btn btn-sm btn-primary">
-                    Edit
-                </a>
-
-                <form method="post"
-                      action="{% url 'faculty:training_delete' session.id %}"
-                      class="d-inline">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-danger"
-                            onclick="return confirm('Are you sure?');">
-                        Delete
-                    </button>
-                </form>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="8" class="text-center text-muted">
-                No training sessions found
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
 
 {% endblock %}
 
-{% include 'pages/footer.html' %}
+{% include 'footer.html' %}

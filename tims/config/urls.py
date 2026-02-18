@@ -7,6 +7,7 @@ from django.views.generic import TemplateView
 import tims.faculty.faculty_urls
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
+
     path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
 
     # Admin
@@ -20,7 +21,6 @@ urlpatterns = [
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 
     path("faculty/", include("tims.faculty.faculty_urls")),
-    path("", include("tims.faculty.faculty_urls")),
     path("users/", include("tims.users.urls", namespace="users")),
 
     path("adminapp/", include("tims.adminapp.adminapp_urls")),

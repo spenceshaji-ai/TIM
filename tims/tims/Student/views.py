@@ -2,7 +2,11 @@ from django.shortcuts import render, redirect
 from django.views import View
 from Student.models import Student
 from .forms import StudentForm
-
+from django.contrib.auth import get_user_model
+User = get_user_model()
+from adminapp.models import Batch,FacultyAssignment,Assignstudent,Batch
+from tims.faculty.models import TrainingSession,FacultyDailyReport,StudentAttendance
+from django.contrib.auth.mixins import LoginRequiredMixin
 class StudentRegisterView(View):
     template_name="student_register.html"
 
@@ -27,3 +31,48 @@ class StudentRegisterView(View):
             self.template_name,
             {"form": form}
         )
+
+class StudentProgressView(LoginRequiredMixin, View):
+    template_name = "progress.html"
+
+    def get(self, request):
+
+        student = request.user   # 🔐 only logged student
+
+        # Get assigned batch
+        assignment = Assignstudent.objects.filter(
+            student=student
+        ).select_related('batch', 'batch__course').first()
+
+        batch = assignment.batch if assignment else None
+
+        # Attendance calculation
+        total_classes = StudentAttendance.objects.filter(
+            student=student
+        ).count()
+
+        present_classes = StudentAttendance.objects.filter(
+            student=student,
+            status="Present"
+        ).count()
+
+        attendance_percentage = 0
+        if total_classes > 0:
+            attendance_percentage = round(
+                (present_classes / total_classes) * 100, 2
+            )
+
+        context = {
+            "student": student,
+            "batch": batch,
+            "course": batch.course if batch else None,
+            "attendance_percentage": attendance_percentage,
+            "total_classes": total_classes,
+            "present_classes": present_classes,
+        }
+
+        return render(request, self.template_name, context)
+
+class HomeView1(View):
+    def get(self, request):
+        return render(request, "studenthome.html")         

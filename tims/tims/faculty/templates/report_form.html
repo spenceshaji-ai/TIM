@@ -2,17 +2,17 @@
 
 {% block form_title %}
     {% if form.instance.pk %}
-        Update Student Attendance
+        Update Daily Report
     {% else %}
-        Create Student Attendance
+        Create Daily Report
     {% endif %}
 {% endblock %}
 
 {% block form_action %}
     {% if form.instance.pk %}
-        {% url 'faculty:attendance-update' form.instance.pk %}
+        {% url 'faculty:faculty_report_update' form.instance.pk %}
     {% else %}
-        {% url 'faculty:attendance-create' %}
+        {% url 'faculty:faculty_report_create' %}
     {% endif %}
 {% endblock %}
 
@@ -22,10 +22,14 @@
 
 {% block form_button %}
     <button type="submit" class="btn btn-success">
-        {% if form.instance.pk %}Update{% else %}Save{% endif %}
+        {% if form.instance.pk %}
+            Update
+        {% else %}
+            Save
+        {% endif %}
     </button>
 
-    <a href="{% url 'faculty:attendance-list' %}" class="btn btn-secondary ms-2">
+    <a href="{% url 'faculty:faculty_report_list' %}" class="btn btn-secondary ms-2">
         Cancel
     </a>
 {% endblock %}

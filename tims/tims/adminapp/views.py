@@ -2,11 +2,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from adminapp.models import Course,Batch,FacultyAssignment,Assignstudent
-from tims.faculty.models import TrainingSession
+from tims.faculty.models import TrainingSession,FacultyDailyReport,StudentAttendance
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from .forms import CourseForm,BatchForm,FacultyAssignmentForm,AssignstudentForm
 from django.contrib import messages
+from django.utils.dateparse import parse_date, parse_time, parse_datetime
 
 # List
 class CourseListView(View):
@@ -155,23 +156,6 @@ class FacultyCoursesView(View):
             "assignments": assignments,
         })
 
-class BatchProgressFilterView(View):
-    def get(self, request):
-        batches = Batch.objects.all()
-        selected_batch = None
-        courses = None
-
-        batch_id = request.GET.get("batch")
-
-        if batch_id:
-            selected_batch = Batch.objects.get(id=batch_id)
-            courses = selected_batch.courses.prefetch_related("students")
-
-        return render(request, "admin/batch_progress_filter.html", {
-            "batches": batches,
-            "selected_batch": selected_batch,
-            "courses": courses
-        })
 
 class TrainingSessionApprovalListView(View):
     template_name = "training_approval_list.html"
@@ -182,7 +166,6 @@ class TrainingSessionApprovalListView(View):
             'sessions': sessions
         })
 
-
 class TrainingSessionApproveView(View):
     def post(self, request, pk):
         session = get_object_or_404(TrainingSession, pk=pk)
@@ -190,13 +173,13 @@ class TrainingSessionApproveView(View):
         session.save()
         return redirect('adminapp:admin_training_approval_list')
 
-
 class TrainingSessionRejectView(View):
     def post(self, request, pk):
         session = get_object_or_404(TrainingSession, pk=pk)
         session.approval_status = 'Rejected'
         session.save()
         return redirect('adminapp:admin_training_approval_list')
+
 
 class AssignStudentView(View):
     template_name = "student_assignment.html"
@@ -262,3 +245,153 @@ class AssignStudentDeleteView(View):
         assignment = get_object_or_404(Assignstudent, pk=pk)
         assignment.delete()
         return redirect("adminapp:assign-student-list")
+
+
+class AdminFacultyReportListView(View):
+    template_name = "faculty_report_list.html"
+
+    def get(self, request):
+
+        reports = FacultyDailyReport.objects.select_related('faculty')
+
+        # Date filter
+        date_filter = request.GET.get('date')
+
+        if date_filter:
+            parsed_date = parse_date(date_filter)
+            if parsed_date:
+                reports = reports.filter(report_date=parsed_date)
+
+        context = {
+            "reports": reports,
+            "selected_date": date_filter,
+        }
+
+        return render(request, self.template_name, context)
+
+class AdminTrainingSessionListView(View):
+    template_name = "training_session_list.html"
+
+    def get(self, request):
+
+        sessions = TrainingSession.objects.select_related(
+            "faculty", "batch"
+        ).all()
+
+        # Filters
+        batch_id = request.GET.get("batch")
+        faculty_id = request.GET.get("faculty")
+        status = request.GET.get("status")
+
+        if batch_id:
+            sessions = sessions.filter(batch_id=batch_id)
+
+        if faculty_id:
+            sessions = sessions.filter(faculty_id=faculty_id)
+
+        if status:
+            sessions = sessions.filter(status=status)
+
+        # Get all batches
+        batches = Batch.objects.all()
+
+        # Get only faculty users (role = Faculty)
+        faculties = User.objects.filter(role__role_name="Faculty")
+
+        context = {
+            "sessions": sessions,
+            "batches": batches,
+            "faculties": faculties,
+            "selected_batch": batch_id,
+            "selected_faculty": faculty_id,
+            "selected_status": status,
+        }
+
+        return render(request, self.template_name, context)
+
+class AssignmentReportView(View):
+    template_name = "assignment_report.html"
+
+    def get(self, request):
+
+        course_id = request.GET.get("course")
+        batch_id = request.GET.get("batch")
+        role_filter = request.GET.get("role")
+
+        users = []
+
+        # ================= STUDENT FILTER =================
+        if role_filter == "student":
+            assigned_students = Assignstudent.objects.select_related(
+                "student", "batch", "batch__course"
+            )
+
+            if course_id:
+                assigned_students = assigned_students.filter(
+                    batch__course_id=course_id
+                )
+
+            if batch_id:
+                assigned_students = assigned_students.filter(
+                    batch_id=batch_id
+                )
+
+            for assign in assigned_students:
+                user = assign.student
+
+                total = StudentAttendance.objects.filter(
+                    student=user
+                ).count()
+
+                present = StudentAttendance.objects.filter(
+                    student=user,
+                    status="Present"
+                ).count()
+
+                attendance_percentage = 0
+                if total > 0:
+                    attendance_percentage = round((present / total) * 100, 2)
+
+                users.append({
+                    "name": user.name,
+                    "email": user.email,
+                    "phone": user.phone_number,
+                    "attendance": attendance_percentage,
+                })
+
+        # ================= FACULTY FILTER =================
+        elif role_filter == "faculty":
+            assigned_faculty = FacultyAssignment.objects.select_related(
+                "faculty", "batch", "batch__course"
+            )
+
+            if course_id:
+                assigned_faculty = assigned_faculty.filter(
+                    batch__course_id=course_id
+                )
+
+            if batch_id:
+                assigned_faculty = assigned_faculty.filter(
+                    batch_id=batch_id
+                )
+
+            for assign in assigned_faculty:
+                user = assign.faculty
+
+                users.append({
+                    "name": user.name,
+                    "email": user.email,
+                    "phone": user.phone_number,
+                    "attendance": None,
+                })
+
+        context = {
+            "courses": Course.objects.all(),
+            "batches": Batch.objects.all(),
+            "report_data": users,
+            "selected_course": course_id,
+            "selected_batch": batch_id,
+            "selected_role": role_filter,
+        }
+
+        return render(request, self.template_name, context)

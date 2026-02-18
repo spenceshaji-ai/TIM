@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import(
     UserRegisterView,
-    RoleCreateView
+    RoleCreateView,
+    LoginView
     ) 
 from .views import user_detail_view
 from .views import user_redirect_view
@@ -14,7 +15,7 @@ urlpatterns = [
     #path("<str:username>/", view=user_detail_view, name="detail"),
     path("register/", UserRegisterView.as_view(), name="user_register"),
     path("role/add/", RoleCreateView.as_view(), name="role_add"),
-    #path("my-progress/", views.my_progress, name="my_progress"),
-]
+    path('login/', LoginView.as_view(), name='login')
+    ]
 
 

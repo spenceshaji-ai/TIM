@@ -90,5 +90,5 @@ class AssignstudentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["student"].queryset = User.objects.filter(
-            role__role_name="student"
+            role__role_name="Student"
         )
