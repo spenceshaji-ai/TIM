@@ -48,6 +48,10 @@ urlpatterns = [
 
     path('applications/<int:application_id>/schedule-interview/', ScheduleInterviewView.as_view(), name='schedule_interview'),
     path( 'applications/<int:id>/select/', AdminApplicationSelectView.as_view(),name='admin_application_select'),
+
+
+    
+
 ]
 
   

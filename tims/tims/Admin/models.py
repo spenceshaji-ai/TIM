@@ -14,9 +14,11 @@ class Job(models.Model):
     job_type = models.ForeignKey(Jobtype, on_delete=models.CASCADE)
     salary = models.CharField(max_length=100)
 
+    application_deadline = models.DateField()
+    posted_date = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
         return self.title
-    
 
 
 class Interview(models.Model):

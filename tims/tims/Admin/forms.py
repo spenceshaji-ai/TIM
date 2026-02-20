@@ -15,10 +15,18 @@ class JobtypeForm(forms.ModelForm):
 class JobForm(forms.ModelForm):
     class Meta:
         model = Job
-        fields = ['title', 'company', 'location', 'job_type', 'salary']
+        fields = [
+            'title',
+            'company',
+            'location',
+            'job_type',
+            'salary',
+            'application_deadline'   
+        ]
 
         labels = {
             'job_type': 'Job Type',
+            'application_deadline': 'Application Deadline'
         }
 
         widgets = {
@@ -36,13 +44,16 @@ class JobForm(forms.ModelForm):
             }),
             'job_type': forms.Select(attrs={
                 'class': 'form-control',
-            }),  # <-- FIXED: use Select for ForeignKey
+            }),
             'salary': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter salary',
             }),
+            'application_deadline': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control',
+            }),
         }
-
 
 
 

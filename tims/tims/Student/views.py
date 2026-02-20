@@ -139,6 +139,7 @@ from django.http import JsonResponse
 from Student.models import JobApplication, Student
 from Admin.models import Job, Jobtype
 from .forms import StudentForm, ApplicationForm
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -178,12 +179,24 @@ class StudentApplyJobView(View):
         # 2. Get the selected job
         job = get_object_or_404(Job, id=job_id)
 
+        # 🚨 Deadline check
+        if job.application_deadline < timezone.now().date():
+            return redirect("job_list")
+
         # 3. Find Student profile using logged-in user's email
         try:
             student = Student.objects.get(email=request.user.email)
         except Student.DoesNotExist:
-            # If student profile not created
             return redirect("student_register")
+
+        # 🚨 Duplicate application check
+        already_applied = JobApplication.objects.filter(
+            job=job,
+            student=student
+        ).exists()
+
+        if already_applied:
+            return redirect("job_list")
 
         # 4. Create empty form
         form = ApplicationForm()
@@ -204,11 +217,19 @@ class StudentApplyJobView(View):
         # 2. Get job
         job = get_object_or_404(Job, id=job_id)
 
+        # 🚨 Deadline check
+        if job.application_deadline < timezone.now().date():
+            return redirect("job_list")
+
         # 3. Get student profile
         try:
             student = Student.objects.get(email=request.user.email)
         except Student.DoesNotExist:
             return redirect("student_register")
+
+        # 🚨 Duplicate check
+        if JobApplication.objects.filter(job=job, student=student).exists():
+            return redirect("job_list")
 
         # 4. Get form data + resume file
         form = ApplicationForm(request.POST, request.FILES)
@@ -216,30 +237,19 @@ class StudentApplyJobView(View):
         # 5. Validate form
         if form.is_valid():
 
-            # 6. Create object without saving
             application = form.save(commit=False)
-
-            # 7. Assign student
             application.student = student
-
-            # 8. Assign job
             application.job = job
-
-            # 9. Set status
             application.status = "Applied"
-
-            # 10. Save application
             application.save()
 
-            # 11. Redirect to job list
             return redirect("job_list")
 
-        # 12. If form invalid, reload page
+        # 6. If form invalid, reload page
         return render(request, self.template_name, {
             "form": form,
             "job": job
         })
-
 
 
 
@@ -252,7 +262,7 @@ class StudentJobListView(ListView):
     context_object_name = "jobs"
 
     def get_queryset(self):
-        queryset = Job.objects.select_related("job_type")
+        queryset = Job.objects.select_related("job_type").order_by("-posted_date")
         job_type_id = self.request.GET.get("job_type")
         if job_type_id:
             queryset = queryset.filter(job_type_id=job_type_id)
@@ -262,6 +272,7 @@ class StudentJobListView(ListView):
         context = super().get_context_data(**kwargs)
         context["job_types"] = Jobtype.objects.all()
         context["selected_job_type"] = self.request.GET.get("job_type")
+        context["today"] = timezone.now().date()   # <-- ADD THIS
         return context
 
 
@@ -270,6 +281,9 @@ class StudentJobListView(ListView):
 class StudentJobDetailView(View):
     def get(self, request, pk):
         job = get_object_or_404(Job, pk=pk)
+
+        is_expired = job.application_deadline < timezone.now().date()
+
         data = {
             "id": job.id,
             "title": job.title,
@@ -277,6 +291,8 @@ class StudentJobDetailView(View):
             "location": job.location,
             "salary": job.salary,
             "job_type": job.job_type.job_type,
+            "application_deadline": job.application_deadline.strftime("%Y-%m-%d"),
+            "is_expired": is_expired,
         }
         return JsonResponse(data)
 
@@ -285,31 +301,57 @@ class StudentJobDetailView(View):
 # Student Application Tracking
 
 
+# class StudentApplicationTrackingView(View):
+#     template_name = "student/studentapplicationtracking.html"
+
+#     def get(self, request):
+
+#         # 1. Check login
+#         if not request.user.is_authenticated:
+#             return redirect("login")
+
+#         # 2. Get student using logged-in email
+#         try:
+#             student = Student.objects.get(email=request.user.email)
+#         except Student.DoesNotExist:
+#             # If student profile not created
+#             return redirect("student_register")
+
+#         # 3. Get only this student's applications
+#         applications = JobApplication.objects.filter(
+#             student=student
+#         ).select_related("job").order_by("-applied_date")
+
+#         # 4. Send to template
+#         return render(request, self.template_name, {
+#             "applications": applications
+#         })
+
+
 class StudentApplicationTrackingView(View):
     template_name = "student/studentapplicationtracking.html"
 
     def get(self, request):
 
-        # 1. Check login
         if not request.user.is_authenticated:
             return redirect("login")
 
-        # 2. Get student using logged-in email
         try:
             student = Student.objects.get(email=request.user.email)
         except Student.DoesNotExist:
-            # If student profile not created
             return redirect("student_register")
 
-        # 3. Get only this student's applications
         applications = JobApplication.objects.filter(
             student=student
-        ).select_related("job").order_by("-applied_date")
+        ).select_related(
+            "job",          # already needed
+            "interview"     # 🔥 ADD THIS
+        ).order_by("-applied_date")
 
-        # 4. Send to template
         return render(request, self.template_name, {
             "applications": applications
         })
+    
 
 class HomeView1(View):
     def get(self, request):

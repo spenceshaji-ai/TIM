@@ -86,8 +86,13 @@ class JobCreateView(View):
 # LIST JOBS
 class JobListView(View):
     def get(self, request):
-        jobs = Job.objects.all()
-        return render(request, 'admin/job_list.html', {'jobs': jobs})
+        jobs = Job.objects.all().order_by('-posted_date')
+        today = timezone.now().date()
+
+        return render(request, 'admin/job_list.html', {
+            'jobs': jobs,
+            'today': today
+        })
 
 
 # EDIT JOB
@@ -204,7 +209,6 @@ class ScheduleInterviewView(View):
             'form': form,
             'application': application
         })
-
 
 
     

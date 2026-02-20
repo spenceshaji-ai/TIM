@@ -11,7 +11,7 @@ Job List
 </a>
 
 <table class="table table-bordered table-striped">
-    <thead>
+    <thead class="table-dark">
         <tr>
             <th>ID</th>
             <th>Title</th>
@@ -19,8 +19,11 @@ Job List
             <th>Location</th>
             <th>Type</th>
             <th>Salary</th>
-            <th>Edit</th>   
-            <th>Delete</th> 
+            <th>Deadline</th>
+            <th>Posted</th>
+            <th>Status</th>
+            <th>Edit</th>
+            <th>Delete</th>
         </tr>
     </thead>
     <tbody>
@@ -32,16 +35,34 @@ Job List
             <td>{{ job.location }}</td>
             <td>{{ job.job_type }}</td>
             <td>{{ job.salary }}</td>
+
+            <td>{{ job.application_deadline }}</td>
+
+            <td>{{ job.posted_date|date:"Y-m-d H:i" }}</td>
+
             <td>
-                <a href="{% url 'admin_app:job_edit' job.id %}" class="btn btn-sm btn-success w-100">Edit</a>
+                {% if job.application_deadline < today %}
+                    <span class="badge bg-danger">Expired</span>
+                {% else %}
+                    <span class="badge bg-success">Active</span>
+                {% endif %}
             </td>
+
             <td>
-                <a href="{% url 'admin_app:job_delete' job.id %}" class="btn btn-sm btn-danger w-100">Delete</a>
+                <a href="{% url 'admin_app:job_edit' job.id %}" class="btn btn-sm btn-success w-100">
+                    Edit
+                </a>
+            </td>
+
+            <td>
+                <a href="{% url 'admin_app:job_delete' job.id %}" class="btn btn-sm btn-danger w-100">
+                    Delete
+                </a>
             </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="8" class="text-center">No jobs available</td>
+            <td colspan="11" class="text-center">No jobs available</td>
         </tr>
         {% endfor %}
     </tbody>

@@ -7,25 +7,37 @@ My Job Applications
 
 {% block form_body %}
 
+<div class="container-fluid px-0">
+
 {% if applications %}
 
-<table class="table table-hover align-middle">
+<div class="w-100">
+<table class="table table-hover table-bordered align-middle w-100">
+    
+    <!-- Table Header -->
     <thead class="table-light">
         <tr>
-            <th>Job</th>
-            <th>Company</th>
-            <th>Status</th>
-            <th>Applied Date</th>
+            <th style="width:15%">Job</th>
+            <th style="width:15%">Company</th>
+            <th style="width:12%">Application Status</th>
+            <th style="width:12%">Applied Date</th>
+            <th style="width:14%">Interview Date</th>
+            <th style="width:10%">Interview Status</th>
+            <th style="width:22%">Feedback</th>
         </tr>
     </thead>
 
-
-<tbody>
+    <!-- Table Body -->
+    <tbody>
     {% for app in applications %}
     <tr>
+        <!-- Job -->
         <td><strong>{{ app.job.title }}</strong></td>
+
+        <!-- Company -->
         <td>{{ app.job.company }}</td>
 
+        <!-- Application Status -->
         <td>
             {% if app.status == "Applied" %}
                 <span class="badge bg-warning text-dark">Applied</span>
@@ -37,21 +49,68 @@ My Job Applications
                 <span class="badge bg-success">Selected</span>
             {% elif app.status == "Rejected" %}
                 <span class="badge bg-danger">Rejected</span>
+            {% else %}
+                <span class="badge bg-secondary">{{ app.status }}</span>
             {% endif %}
         </td>
 
-        <td>{{ app.applied_date }}</td>
+        <!-- Applied Date -->
+        <td>
+            {{ app.applied_date|date:"d M Y" }}
+        </td>
+
+        <!-- Interview Date -->
+        <td>
+            {% if app.interview %}
+                {{ app.interview.interview_date|date:"d M Y, h:i A" }}
+            {% else %}
+                <span class="text-muted">Not Scheduled</span>
+            {% endif %}
+        </td>
+
+        <!-- Interview Status -->
+        <td>
+            {% if app.interview %}
+                {% if app.interview.status == "Scheduled" %}
+                    <span class="badge bg-warning text-dark">Scheduled</span>
+                {% elif app.interview.status == "Completed" %}
+                    <span class="badge bg-success">Completed</span>
+                {% elif app.interview.status == "Cancelled" %}
+                    <span class="badge bg-danger">Cancelled</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ app.interview.status }}</span>
+                {% endif %}
+            {% else %}
+                <span class="text-muted">-</span>
+            {% endif %}
+        </td>
+
+        <!-- Feedback -->
+        <td>
+            {% if app.interview and app.interview.feedback %}
+                {{ app.interview.feedback }}
+            {% else %}
+                <span class="text-muted">No feedback</span>
+            {% endif %}
+        </td>
+
     </tr>
     {% endfor %}
-</tbody>
-
+    </tbody>
 
 </table>
+</div>
+
 {% else %}
+
 <div class="alert alert-info">
     You have not applied for any jobs yet.
 </div>
+
 {% endif %}
 
+</div>
+
 {% endblock %}
+
 {% include "student/footer.html" %}

@@ -1,95 +1,222 @@
-
+{% extends "student/form.html" %}
 {% include "student/header.html" %}
 
+{% block form_title %}
+Job Opportunities
+{% endblock %}
+
+{% block form_body %}
+
+<style>
+    body {
+        background-color: #f3f6f9;
+    }
+
+    /* Container width control (centered like Indeed) */
+    .main-wrapper {
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    /* Filter buttons */
+    .filter-bar .btn {
+        margin-bottom: 8px;
+    }
+
+    /* Job card */
+    .job-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        transition: 0.2s;
+        background: #fff;
+    }
+
+    .job-card:hover {
+        border-color: #0d6efd;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .job-card.active {
+        border: 2px solid #0d6efd;
+        background: #f8fbff;
+    }
+
+    .job-title {
+        font-weight: 600;
+        font-size: 17px;
+    }
+
+    .job-company {
+        color: #555;
+        font-size: 14px;
+    }
+
+    .job-meta {
+        font-size: 13px;
+        color: #777;
+    }
+
+    /* Right panel */
+    .detail-panel {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        min-height: 550px;
+    }
+
+    /* Equal height feeling */
+    .column-area {
+        display: flex;
+        gap: 20px;
+    }
+
+    .left-column {
+        flex: 1;
+    }
+
+    .right-column {
+        flex: 1;
+    }
+</style>
+
+<div class="container-fluid px-4 py-3">
+    <div class="main-wrapper">
 
 
-<h3 class="mb-3">Job Opportunities</h3>
+        <!-- Filter Bar -->
+        <div class="filter-bar mb-3">
+            <a href="{% url 'job_list' %}"
+                class="btn btn-outline-primary {% if not selected_job_type %}active{% endif %}">
+                All Job Types
+            </a>
 
-<!-- Job type buttons -->
-<div class="mb-4">
-    <a href="{% url 'job_list' %}" 
-       class="btn btn-outline-primary {% if not selected_job_type %}active{% endif %}">
-        All Job Types
-    </a>
+            {% for jt in job_types %}
+            <a href="?job_type={{ jt.id }}"
+                class="btn btn-outline-primary {% if selected_job_type|default:'' == jt.id|stringformat:'s' %}active{% endif %}">
+                {{ jt.job_type }}
+            </a>
+            {% endfor %}
+        </div>
 
-    {% for jt in job_types %}
-        <a href="?job_type={{ jt.id }}" 
-           class="btn btn-outline-primary {% if selected_job_type|default:'' == jt.id|stringformat:'s' %}active{% endif %}">
-            {{ jt.job_type }}
-        </a>
-    {% endfor %}
-</div>
+        <!-- Main Layout (Balanced) -->
+        <div class="row g-4">
 
-<div class="row">
+            <!-- LEFT SIDE -->
+            <div class="col-lg-6">
 
-    <!-- Left: Job List -->
-    <div class="col-md-6">
-        {% for job in jobs %}
-        <div class="card mb-3 job-card"
-             data-url="{% url 'student_job_detail' job.id %}"
-             style="cursor:pointer;">
-            <div class="card-body">
-                <h5>{{ job.title }}</h5>
-                <strong>{{ job.company }}</strong><br>
-                {{ job.location }}<br>
-                {{ job.salary }}<br>
-                <span class="badge bg-secondary">
-                    {{ job.job_type.job_type }}
-                </span>
+                {% for job in jobs %}
+                <div class="card mb-3 p-3 job-card" data-url="{% url 'student_job_detail' job.id %}"
+                    style="cursor:pointer;">
+
+                    <div class="job-title">{{ job.title }}</div>
+
+                    <div class="job-company">
+                        {{ job.company }}
+                    </div>
+
+                    <div class="job-meta">
+                        {{ job.location }} • ₹ {{ job.salary }}
+                    </div>
+
+                    <div class="mt-2">
+                        {% if job.application_deadline >= today %}
+                        <span class="badge bg-success">Open</span>
+                        {% else %}
+                        <span class="badge bg-danger">Expired</span>
+                        {% endif %}
+
+                        <span class="badge bg-light text-dark border">
+                            {{ job.job_type.job_type }}
+                        </span>
+                    </div>
+
+                </div>
+                {% empty %}
+                <p>No jobs available.</p>
+                {% endfor %}
+
             </div>
-        </div>
-        {% empty %}
-            <p>No jobs available</p>
-        {% endfor %}
-    </div>
 
-    <!-- Right: Job Details -->
-    <div class="col-md-6">
-        <div id="job-detail" class="border p-4 text-muted">
-            Select a job to view details
-        </div>
-    </div>
+            <!-- RIGHT SIDE -->
+            <div class="col-lg-6">
 
+                <div id="job-detail" class="detail-panel p-4">
+                    <h5 class="text-muted">Select a job to view details</h5>
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
 </div>
 
-<!-- AJAX Script -->
+<!-- AJAX + Active Card -->
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const cards = document.querySelectorAll('.job-card');
-    const detailDiv = document.getElementById('job-detail');
+    document.addEventListener('DOMContentLoaded', function () {
 
-    cards.forEach(card => {
-        card.addEventListener('click', function() {
-            const url = this.dataset.url;
+        const cards = document.querySelectorAll('.job-card');
+        const detailDiv = document.getElementById('job-detail');
 
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) throw new Error("Network response was not OK");
-                    return response.json();
-                })
-                .then(data => {
-                    detailDiv.innerHTML = `
-                        <div class="card">
-                            <div class="card-body">
-                                <h4>${data.title}</h4>
-                                <strong>${data.company}</strong><br>
-                                Location: ${data.location}<br>
-                                Salary: ${data.salary}<br>
-                                Type: ${data.job_type}<br><br>
-                                <a href="/Student/student/apply/${data.id}/" class="btn btn-success">
-                                    Apply
-                                </a>
-                            </div>
+        cards.forEach(card => {
+            card.addEventListener('click', function () {
+
+                cards.forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+
+                const url = this.dataset.url;
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+
+                        let applyButton = "";
+
+                        if (data.is_expired) {
+                            applyButton = `
+                            <button class="btn btn-secondary" disabled>
+                                Application Closed
+                            </button>
+                        `;
+                        } else {
+                            applyButton = `
+                            <a href="/Student/student/apply/${data.id}/"
+                               class="btn btn-primary">
+                                Apply Now
+                            </a>
+                        `;
+                        }
+
+                        detailDiv.innerHTML = `
+                        <h3 class="fw-bold">${data.title}</h3>
+                        <div class="text-muted mb-2">
+                            ${data.company}
                         </div>
+
+                        <p class="mb-3">
+                            ${data.location}<br>
+                            ₹ ${data.salary}<br>
+                            Job Type: ${data.job_type}<br>
+                            Deadline: ${data.application_deadline}
+                        </p>
+
+                        ${applyButton}
+
+                        <hr>
+
+                        <h5>Job Details</h5>
+                        <p>
+                            This position is currently open. Apply before the deadline.
+                        </p>
                     `;
-                })
-                .catch(err => {
-                    detailDiv.innerHTML = `<p class="text-danger">Failed to load job details</p>`;
-                    console.error(err);
-                });
+                    });
+            });
         });
     });
-});
 </script>
+
+{% endblock %}
 
 {% include "student/footer.html" %}

@@ -9,11 +9,43 @@ Create Job
 {% endblock %}
 
 {% block form_body %}
-{{ form.as_p }}
+<div class="row">
+    <div class="col-md-6">
+        {{ form.title.label_tag }}
+        {{ form.title }}
+    </div>
+
+    <div class="col-md-6">
+        {{ form.company.label_tag }}
+        {{ form.company }}
+    </div>
+
+    <div class="col-md-6 mt-3">
+        {{ form.location.label_tag }}
+        {{ form.location }}
+    </div>
+
+    <div class="col-md-6 mt-3">
+        {{ form.job_type.label_tag }}
+        {{ form.job_type }}
+    </div>
+
+    <div class="col-md-6 mt-3">
+        {{ form.salary.label_tag }}
+        {{ form.salary }}
+    </div>
+
+    <div class="col-md-6 mt-3">
+        {{ form.application_deadline.label_tag }}
+        {{ form.application_deadline }}
+    </div>
+</div>
 {% endblock %}
 
-{% block form_button %} <button type="submit" class="btn btn-success">
-Save Job </button>
+{% block form_button %}
+<button type="submit" class="btn btn-success">
+    Save Job
+</button>
 
 <a href="{% url 'admin_app:job_list' %}" class="btn btn-secondary ms-2">
     Cancel

@@ -15,12 +15,17 @@ enctype="multipart/form-data"
 
 {% block form_body %}
 
-{{ form.errors }}
-
 <div class="mb-3">
     <label class="form-label">Job</label>
     <input type="text" class="form-control"
            value="{{ job.title }} - {{ job.company }}"
+           readonly>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Application Deadline</label>
+    <input type="text" class="form-control"
+           value="{{ job.application_deadline }}"
            readonly>
 </div>
 
@@ -31,9 +36,8 @@ enctype="multipart/form-data"
 
 {% endblock %}
 
-{% block form_button %}
-<button type="submit" class="btn btn-primary">
-    Apply
-</button>
+{% block form_button %} <button type="submit" class="btn btn-primary">
+Apply </button>
 {% endblock %}
+
 {% include 'student/footer.html' %}
