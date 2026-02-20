@@ -33,9 +33,10 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('resume', models.FileField(blank=True, null=True, upload_to='resumes/')),
                 ('status', models.CharField(choices=[('Applied', 'Applied'), ('Selected', 'Selected'), ('Rejected', 'Rejected')], default='Applied', max_length=20)),
-                ('applied_date', models.DateField()),
+                ('applied_date', models.DateField(auto_now_add=True)),
                 ('job', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='Admin.job')),
                 ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='adminapp.course')),
+                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='Student.student')),
             ],
         ),
     ]

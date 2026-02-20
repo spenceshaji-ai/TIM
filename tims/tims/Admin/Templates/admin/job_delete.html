@@ -1,0 +1,31 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+Delete Job
+{% endblock %}
+
+{% block form_action %}
+{% url 'admin_app:job_delete' job.id %}
+{% endblock %}
+
+{% block form_body %}
+
+<div class="alert alert-danger">
+    <h5>Are you sure you want to delete this job?</h5>
+    <p>
+        <strong>{{ job.title }}</strong> at {{ job.company }}
+    </p>
+</div>
+
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-danger">
+    Yes, Delete
+</button>
+
+<a href="{% url 'admin_app:job_list' %}" class="btn btn-secondary ms-2">
+    Cancel
+</a>
+{% endblock %}
+

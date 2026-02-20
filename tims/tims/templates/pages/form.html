@@ -53,13 +53,17 @@
                             <div class="tab-pane show active" id="input-types-preview">
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <form {% block form_action %}{% endblock %}>
+
+                                        <form method="POST" action="{% block form_action %}{% endblock %}" 
+                                             enctype="multipart/form-data">
                                             
-                                                {% block form_body %}{% endblock %}
-                                                
-                                                {% block form_button %}{% endblock %}
-                                            
+
+                                            {% csrf_token %}
+                                            {% block form_body %}{% endblock %}
+                                            {% block form_button %}{% endblock %}
+
                                         </form>
+
                                     </div> <!-- end col -->
 
 

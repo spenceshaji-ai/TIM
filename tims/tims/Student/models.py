@@ -9,8 +9,9 @@ class Student(models.Model):
     phone = models.CharField(max_length=15)
 
     course = models.ForeignKey(
-        "adminapp.Course",
+        'adminapp.Course',
         on_delete=models.CASCADE,
+        related_name='students',
     )
 
     passout_year = models.IntegerField()
@@ -18,36 +19,31 @@ class Student(models.Model):
 
     def __str__(self):
         return self.name
-    
 
-from django.db import models
 
 class JobApplication(models.Model):
     STATUS_CHOICES = [
         ('Applied', 'Applied'),
         ('Selected', 'Selected'),
         ('Rejected', 'Rejected'),
+        ('Shortlisted', 'Shortlisted'),
+        ('Interview', 'Interview'),
     ]
 
+    
     job = models.ForeignKey(
-        Job,
+        'Admin.Job',
         on_delete=models.CASCADE,
         related_name='applications'
     )
 
-    # # ✅ ForeignKey to Student
-    # student = models.ForeignKey(
-    #     Student,
-    #     on_delete=models.CASCADE,
-    #     related_name='applications'
-    # )
-
-    # ✅ Resume upload
-    resume = models.FileField(
-        upload_to='resumes/',
-        null=True,
-        blank=True
+    student = models.ForeignKey(
+        'Student.Student',
+        on_delete=models.CASCADE,
+        related_name='applications'
     )
+
+    resume = models.FileField(upload_to='resumes/', null=True, blank=True)
 
     status = models.CharField(
         max_length=20,
@@ -55,7 +51,7 @@ class JobApplication(models.Model):
         default='Applied'
     )
 
-    applied_date = models.DateField()
+    applied_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.job.title} - {self.student.name}"

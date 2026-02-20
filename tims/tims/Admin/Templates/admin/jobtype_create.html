@@ -1,0 +1,23 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+Create Job Type
+{% endblock %}
+
+{% block form_action %}
+{% url 'admin_app:jobtype_create' %}
+{% endblock %}
+
+{% block form_body %}
+{{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-success">
+    Save Job Type
+</button>
+
+<a href="{% url 'admin_app:jobtype_list' %}" class="btn btn-secondary ms-2">
+    Cancel
+</a>
+{% endblock %}
