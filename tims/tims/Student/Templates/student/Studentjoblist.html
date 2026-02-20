@@ -12,15 +12,14 @@ Job Opportunities
         background-color: #f3f6f9;
     }
 
-    /* Container width control (centered like Indeed) */
     .main-wrapper {
-        max-width: 1200px;
+        width: 100%;
         margin: auto;
     }
 
-    /* Filter buttons */
-    .filter-bar .btn {
-        margin-bottom: 8px;
+    /* Filter buttons spacing */
+    .filter-bar a {
+        margin-bottom: 6px;
     }
 
     /* Job card */
@@ -56,57 +55,45 @@ Job Opportunities
         color: #777;
     }
 
-    /* Right panel */
     .detail-panel {
         background: #fff;
         border-radius: 12px;
         border: 1px solid #e0e0e0;
-        min-height: 550px;
-    }
-
-    /* Equal height feeling */
-    .column-area {
-        display: flex;
-        gap: 20px;
-    }
-
-    .left-column {
-        flex: 1;
-    }
-
-    .right-column {
-        flex: 1;
+        min-height: 600px;
     }
 </style>
 
 <div class="container-fluid px-4 py-3">
     <div class="main-wrapper">
 
+        <!-- ================= FILTER BAR ================= -->
+        <div class="filter-bar mb-3 d-flex flex-wrap gap-2">
 
-        <!-- Filter Bar -->
-        <div class="filter-bar mb-3">
             <a href="{% url 'job_list' %}"
-                class="btn btn-outline-primary {% if not selected_job_type %}active{% endif %}">
+               class="btn btn-outline-secondary btn-sm {% if not selected_job_type %}active{% endif %}">
                 All Job Types
             </a>
 
             {% for jt in job_types %}
-            <a href="?job_type={{ jt.id }}"
-                class="btn btn-outline-primary {% if selected_job_type|default:'' == jt.id|stringformat:'s' %}active{% endif %}">
-                {{ jt.job_type }}
-            </a>
+                <a href="{% url 'job_list' %}?job_type={{ jt.id }}"
+                   class="btn btn-outline-primary btn-sm
+                   {% if selected_job_type|default:'' == jt.id|stringformat:'s' %}active{% endif %}">
+                    {{ jt.job_type }}
+                </a>
             {% endfor %}
+
         </div>
 
-        <!-- Main Layout (Balanced) -->
+        <!-- ================= MAIN LAYOUT ================= -->
         <div class="row g-4">
 
             <!-- LEFT SIDE -->
             <div class="col-lg-6">
 
                 {% for job in jobs %}
-                <div class="card mb-3 p-3 job-card" data-url="{% url 'student_job_detail' job.id %}"
-                    style="cursor:pointer;">
+                <div class="card mb-3 p-3 job-card"
+                     data-url="{% url 'student_job_detail' job.id %}"
+                     style="cursor:pointer;">
 
                     <div class="job-title">{{ job.title }}</div>
 
@@ -120,9 +107,9 @@ Job Opportunities
 
                     <div class="mt-2">
                         {% if job.application_deadline >= today %}
-                        <span class="badge bg-success">Open</span>
+                            <span class="badge bg-success">Open</span>
                         {% else %}
-                        <span class="badge bg-danger">Expired</span>
+                            <span class="badge bg-danger">Expired</span>
                         {% endif %}
 
                         <span class="badge bg-light text-dark border">
@@ -132,7 +119,9 @@ Job Opportunities
 
                 </div>
                 {% empty %}
-                <p>No jobs available.</p>
+                    <div class="alert alert-info">
+                        No jobs available.
+                    </div>
                 {% endfor %}
 
             </div>
@@ -148,48 +137,46 @@ Job Opportunities
 
         </div>
 
-
     </div>
 </div>
 
-<!-- AJAX + Active Card -->
-
+<!-- ================= AJAX SCRIPT ================= -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
 
-        const cards = document.querySelectorAll('.job-card');
-        const detailDiv = document.getElementById('job-detail');
+    const cards = document.querySelectorAll('.job-card');
+    const detailDiv = document.getElementById('job-detail');
 
-        cards.forEach(card => {
-            card.addEventListener('click', function () {
+    cards.forEach(card => {
+        card.addEventListener('click', function () {
 
-                cards.forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
+            cards.forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
 
-                const url = this.dataset.url;
+            const url = this.dataset.url;
 
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
 
-                        let applyButton = "";
+                    let applyButton = "";
 
-                        if (data.is_expired) {
-                            applyButton = `
+                    if (data.is_expired) {
+                        applyButton = `
                             <button class="btn btn-secondary" disabled>
                                 Application Closed
                             </button>
                         `;
-                        } else {
-                            applyButton = `
+                    } else {
+                        applyButton = `
                             <a href="/Student/student/apply/${data.id}/"
                                class="btn btn-primary">
                                 Apply Now
                             </a>
                         `;
-                        }
+                    }
 
-                        detailDiv.innerHTML = `
+                    detailDiv.innerHTML = `
                         <h3 class="fw-bold">${data.title}</h3>
                         <div class="text-muted mb-2">
                             ${data.company}
@@ -211,10 +198,11 @@ Job Opportunities
                             This position is currently open. Apply before the deadline.
                         </p>
                     `;
-                    });
-            });
+                });
         });
     });
+
+});
 </script>
 
 {% endblock %}

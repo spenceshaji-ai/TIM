@@ -341,17 +341,26 @@ class StudentApplicationTrackingView(View):
         except Student.DoesNotExist:
             return redirect("student_register")
 
+        # Get filter value from URL
+        status_filter = request.GET.get("status")
+
         applications = JobApplication.objects.filter(
             student=student
         ).select_related(
-            "job",          # already needed
-            "interview"     # 🔥 ADD THIS
-        ).order_by("-applied_date")
+            "job",
+            "interview"
+        )
+
+        # Apply status filter
+        if status_filter:
+            applications = applications.filter(status=status_filter)
+
+        applications = applications.order_by("-applied_date")
 
         return render(request, self.template_name, {
-            "applications": applications
+            "applications": applications,
+            "selected_status": status_filter
         })
-    
 
 class HomeView1(View):
     def get(self, request):
