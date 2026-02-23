@@ -1,27 +1,135 @@
-{% extends "base_auth.html" %}
 {% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
 
-{% block title %}Login{% endblock %}
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #3509d4, #9d7acd);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-{% block content %}
+        .login-container {
+            width: 420px;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(15, 84, 120, 0.2);
+            text-align: center;
+        }
 
-<div class="text-center w-75 m-auto">
-    <h4 class="text-dark-50 text-center pb-0 fw-bold">Sign In</h4>
-    <p class="text-muted mb-4">Enter your username and password.</p>
-</div>
+        .login-container h1 {
+            margin-bottom: 10px;
+            color: #202580;
+        }
 
-<form method="post">
-    {% csrf_token %}
+        .login-container p {
+            margin-bottom: 25px;
+            color: rgb(4, 9, 88);
+        }
 
-    {% if error %}
-    <div class="alert alert-danger">{{ error }}</div>
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #982a8b;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background-color: #57a0ea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            background-color: #618bbf;
+        }
+
+        .register-link {
+            margin-top: 20px;
+            display: block;
+        }
+
+        .register-link a {
+            color: #1e3c72;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-container">
+    <h1>Welcome Back</h1>
+    <p>Login to continue</p>
+
+    {% if form.errors %}
+        <div class="error">
+            Invalid username or password
+        </div>
     {% endif %}
 
-    {{ form.as_p }}
+    <form method="POST">
+        {% csrf_token %}
 
-    <div class="mb-3 text-center">
-        <button class="btn btn-primary w-100" type="submit">Log In</button>
+        <div class="form-group">
+            <label for="id_username">Username</label>
+            {{ form.username }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_password">Password</label>
+            {{ form.password }}
+        </div>
+
+        <button type="submit" class="btn-login">Login</button>
+    </form>
+
+    <div class="register-link">
+        Don't have an account? 
+        <a href="{% url 'users:user_register' %}">Register here</a>
     </div>
-</form>
+</div>
 
-{% endblock %}
+</body>
+</html>

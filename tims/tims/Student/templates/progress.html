@@ -1,47 +1,94 @@
-{% include 'studentheader.html' %}        
+{% include 'studentheader.html' %}
 {% block content %}
 
 <div class="container mt-5">
 
+    <!-- Page Title -->
     <div class="text-center mb-5">
         <h2 class="fw-bold">My Learning Progress</h2>
         <p class="text-muted">Track your course journey</p>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 align-items-stretch">
 
-        <!-- Student Card -->
-        <div class="col-md-6">
-            <div class="card shadow-lg border-0 rounded-4 p-4">
-                <h5 class="text-primary mb-3">👤 Student Info</h5>
-                <p><strong>Name:</strong> {{ student.name }}</p>
-                <p><strong>Batch:</strong> {{ batch }}</p>
-                <p><strong>Course:</strong> {{ course }}</p>
-                <p><strong>Start Date:</strong> {{ batch.start_date }}</p>
-                <p><strong>End Date:</strong> {{ batch.end_date }}</p>
+        <!-- Student Info Card -->
+        <div class="col-md-6 d-flex">
+            <div class="card shadow-sm border-0 rounded-4 w-100">
+                <div class="card-body">
+
+                    <h5 class="text-primary mb-4">
+                        <i class="mdi mdi-account-circle me-1"></i>
+                        Student Information
+                    </h5>
+
+                    <div class="mb-2 text-muted">
+                        Name :
+                        <span class="text-dark fw-semibold">{{ student.name }}</span>
+                    </div>
+
+                    <div class="mb-2 text-muted">
+                        Batch :
+                        <span class="text-dark fw-semibold">{{ batch }}</span>
+                    </div>
+
+                    <div class="mb-2 text-muted">
+                        Course :
+                        <span class="text-dark fw-semibold">{{ course }}</span>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-2 text-muted">
+                        Start Date :
+                        <span class="text-dark fw-semibold">{{ batch.start_date }}</span>
+                    </div>
+
+                    <div class="mb-2 text-muted">
+                        End Date :
+                        <span class="text-dark fw-semibold">{{ batch.end_date }}</span>
+                    </div>
+
+                </div>
             </div>
         </div>
 
         <!-- Attendance Card -->
-        <div class="col-md-6">
-            <div class="card shadow-lg border-0 rounded-4 p-4 text-center">
+        <div class="col-md-6 d-flex">
+            <div class="card shadow-sm border-0 rounded-4 w-100">
+                <div class="card-body text-center">
 
-                <h5 class="text-success mb-4">📊 Attendance Overview</h5>
-
-                <div class="position-relative d-inline-block">
+                    <h5 class="text-success mb-4">
+                        <i class="mdi mdi-chart-donut me-1"></i>
+                        Attendance Overview
+                    </h5>
 
                     <!-- Circular Progress -->
-                    <div class="progress-circle">
-                        <span class="percentage">{{ attendance_percentage }}%</span>
+                    <div class="mx-auto mb-3 progress-circle">
+                        <span class="percentage">
+                            {{ attendance_percentage }}%
+                        </span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="progress mt-3" style="height:8px;">
+                        <div class="progress-bar bg-success"
+                             style="width: {{ attendance_percentage }}%">
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <p class="mb-1">
+                            Total Classes :
+                            <strong>{{ total_classes }}</strong>
+                        </p>
+
+                        <p class="mb-0">
+                            Present :
+                            <strong>{{ present_classes }}</strong>
+                        </p>
                     </div>
 
                 </div>
-
-                <div class="mt-4">
-                    <p>Total Classes: <strong>{{ total_classes }}</strong></p>
-                    <p>Present: <strong>{{ present_classes }}</strong></p>
-                </div>
-
             </div>
         </div>
 
@@ -51,33 +98,30 @@
 
 <style>
 .progress-circle {
-    width: 150px;
-    height: 150px;
+    width: 160px;
+    height: 160px;
     border-radius: 50%;
     background: conic-gradient(
-        #198754 {{ attendance_percentage }}%,
+        #28c76f {{ attendance_percentage }}%,
         #e9ecef {{ attendance_percentage }}%
     );
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
-    font-weight: bold;
-    color: #000;
 }
 
 .percentage {
     background: #fff;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
-    width: 110px;
-    height: 110px;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 22px;
+    font-weight: 600;
 }
 </style>
 
 {% endblock %}
-
-{% include 'studentfooter.html' %}   
-      
+{% include 'studentfooter.html' %}

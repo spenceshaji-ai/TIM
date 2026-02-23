@@ -322,13 +322,14 @@ class AssignmentReportView(View):
 
         # ================= STUDENT FILTER =================
         if role_filter == "student":
+
             assigned_students = Assignstudent.objects.select_related(
-                "student", "batch", "batch__course"
+                "student", "batch", "course"
             )
 
             if course_id:
                 assigned_students = assigned_students.filter(
-                    batch__course_id=course_id
+                    course_id=course_id
                 )
 
             if batch_id:
@@ -361,6 +362,7 @@ class AssignmentReportView(View):
 
         # ================= FACULTY FILTER =================
         elif role_filter == "faculty":
+
             assigned_faculty = FacultyAssignment.objects.select_related(
                 "faculty", "batch", "batch__course"
             )
@@ -378,11 +380,31 @@ class AssignmentReportView(View):
             for assign in assigned_faculty:
                 user = assign.faculty
 
+                # ---- Training session count (APPROVED ONLY) ----
+                session_qs = TrainingSession.objects.filter(
+                    faculty=user,
+                    approval_status="Approved"
+                )
+
+                # filter by selected batch
+                if batch_id:
+                    session_qs = session_qs.filter(
+                        batch_id=batch_id
+                    )
+
+                # filter by selected course
+                if course_id:
+                    session_qs = session_qs.filter(
+                        batch__course_id=course_id
+                    )
+
+                session_count = session_qs.count()
+
                 users.append({
                     "name": user.name,
                     "email": user.email,
                     "phone": user.phone_number,
-                    "attendance": None,
+                    "sessions": session_count,
                 })
 
         context = {

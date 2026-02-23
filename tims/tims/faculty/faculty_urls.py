@@ -1,22 +1,6 @@
 from django.urls import path
-from .views import (
-    TrainingSessionCreateView,
-    TrainingSessionListView,
-    TrainingSessionUpdateView,
-    TrainingSessionDeleteView,
-    StudentAttendanceListView,
-    StudentAttendanceCreate,
-    StudentAttendanceUpdateView,
-    StudentAttendanceDeleteView,
-    FacultyTrainingProgressView,
-    Home1View,
-    FacultyReportCreateView,
-    FacultyReportListView,
-    FacultyReportUpdateView,
-    FacultyReportDeleteView,
-    FacultyStudentListView,
-    FacultyTrainingProgressView
-)
+from .views import *
+    
 
 
 app_name = "faculty"

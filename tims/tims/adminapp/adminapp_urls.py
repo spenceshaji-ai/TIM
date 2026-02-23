@@ -1,12 +1,5 @@
 from django.urls import path
 from .views import *
-from adminapp.views import (
-    TrainingSessionApprovalListView,
-    TrainingSessionApproveView,
-    TrainingSessionRejectView,
-    AdminFacultyReportListView,
-    AdminTrainingSessionListView
-)
 
 app_name = "adminapp"
 
