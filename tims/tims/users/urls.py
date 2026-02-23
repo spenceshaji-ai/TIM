@@ -4,15 +4,7 @@ from .views import(
     RoleCreateView,
     LoginView
     ) 
-from .views import user_detail_view
-from .views import user_redirect_view,role_redirect_view,StaffDashboardView,StudentDashboardView
-from .views import user_update_view
-from .views import (
-    UserListView,
-    UserCreateView,
-    UserEditView,
-    UserDeleteView
-)
+
 
 app_name = "users"
 urlpatterns = [

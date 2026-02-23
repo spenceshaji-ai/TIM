@@ -4,8 +4,6 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
-import adminapp.adminapp_urls
-import tims.faculty.faculty_urls
 from tims.users.views import LoginView
 
 
@@ -22,7 +20,7 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     
     #path('adminapp/', include(adminapp.adminapp_urls)),
-    path('', include('adminapp.adminapp_urls')),
+    # path('', include('tims.adminapp.adminapp_urls')),
     # Your stuff: custom urls includes go here
     # ...
     # Media files

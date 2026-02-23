@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
 
-from adminapp.models import LeaveApplication, LeaveType
+from tims.adminapp.models import LeaveApplication, LeaveType
 from .forms import LeaveApplicationForm
 
 
@@ -57,10 +57,10 @@ from django.contrib import messages
 # Create your views here.
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from django.views import View
-from .models import TrainingSession,StudentAttendance,FacultyDailyReport
+from tims.faculty.models import TrainingSession,StudentAttendance,FacultyDailyReport
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from adminapp.models import Batch,FacultyAssignment,Assignstudent,Batch
+from tims.adminapp.models import Batch,FacultyAssignment,Assignstudent,Batch
 from .forms import TrainingSessionForm,StudentAttendanceForm,FacultyDailyReportForm
 
 

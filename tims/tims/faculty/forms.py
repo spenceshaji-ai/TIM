@@ -1,5 +1,5 @@
 from django import forms
-from adminapp.models import LeaveApplication
+from tims.adminapp.models import LeaveApplication
 
 class LeaveApplicationForm(forms.ModelForm):
     class Meta:
@@ -25,8 +25,8 @@ class LeaveApplicationForm(forms.ModelForm):
 
         return cleaned_data
 
-from .models import TrainingSession, StudentAttendance,FacultyDailyReport
-from adminapp.models import Batch,FacultyAssignment,Assignstudent
+from tims.faculty.models import TrainingSession, StudentAttendance,FacultyDailyReport
+from tims.adminapp.models import Batch,FacultyAssignment,Assignstudent
 from django.contrib.auth import get_user_model
 User = get_user_model()
 

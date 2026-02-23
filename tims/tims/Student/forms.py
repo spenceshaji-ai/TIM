@@ -1,7 +1,7 @@
 from django import forms
-from Student.models import Student,JobApplication
+from tims.Student.models import Student,JobApplication
 
-from adminapp.models import Course  
+from tims.adminapp.models import Course  
 from django.contrib.auth import get_user_model
 User = get_user_model()
 

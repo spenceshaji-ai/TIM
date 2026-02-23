@@ -1,6 +1,6 @@
 from django import forms
-from Admin.models import Job,Jobtype,Interview
-from Student.models import JobApplication
+from tims.Admin.models import Job,Jobtype,Interview
+from tims.Student.models import JobApplication
 
 
 class JobtypeForm(forms.ModelForm):

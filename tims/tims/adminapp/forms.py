@@ -1,12 +1,12 @@
 from django import forms
 
-from .models import Enquiry
-from .models import FollowUp
-from .models import Admission
-from adminapp.models import Course,Batch
+from tims.adminapp.models import Enquiry
+from tims.adminapp.models import FollowUp
+from tims.adminapp.models import Admission
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from adminapp.models import Course, Batch, FacultyAssignment,Assignstudent
+from tims.adminapp.models import Course, Batch, FacultyAssignment,Assignstudent
+from tims.adminapp.models import LeaveApplication
 
 
 
@@ -221,7 +221,6 @@ class FacultyAssignmentForm(forms.ModelForm):
 
         # Optional: only staff as faculty
        # self.fields["faculty"].queryset = User.objects.filter(is_staff=True)
-from adminapp.models import LeaveApplication
 
 
 class LeaveApplicationForm(forms.ModelForm):

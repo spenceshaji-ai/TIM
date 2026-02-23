@@ -1,5 +1,4 @@
 from django.db import models
-from Admin.models import Job   
 from django.conf import settings
 
 

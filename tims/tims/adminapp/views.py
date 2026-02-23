@@ -1,13 +1,12 @@
 # Create your views here.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from .models import Course,Batch
-from .forms import CourseForm,BatchForm
+from tims.adminapp.forms import CourseForm,BatchForm
 from .models import Enquiry, FollowUp
 from .forms import EnquiryForm,FollowUpForm
 from .models import Admission
 from .forms import AdmissionForm
-from adminapp.models import Course,Batch,FacultyAssignment,Assignstudent
+from tims.adminapp.models import Course,Batch,FacultyAssignment,Assignstudent
 from tims.faculty.models import TrainingSession,FacultyDailyReport,StudentAttendance
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -320,7 +319,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
-from adminapp.models import LeaveApplication
+from tims.adminapp.models import LeaveApplication
 
 
 class LeaveRequestsView(LoginRequiredMixin, UserPassesTestMixin, ListView):

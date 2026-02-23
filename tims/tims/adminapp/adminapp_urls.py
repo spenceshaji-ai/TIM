@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import LeaveHistoryDetailView, LeaveRequestsView, LeaveUserListView, UpdateLeaveStatusView
+from tims.adminapp.views import LeaveHistoryDetailView, LeaveRequestsView, LeaveUserListView, UpdateLeaveStatusView, LeaveRequestsView,UpdateLeaveStatusView,FollowUpCreateView, FollowUpListView
 from .views import *
 from .views import (
     EnquiryListView,
@@ -8,24 +8,19 @@ from .views import (
     EnquiryUpdateView,
     EnquiryDeleteView,
 )
-from .views import FollowUpCreateView, FollowUpListView
+
 from .views import ConvertToAdmissionView, AdmissionListView
-from adminapp.views import (
+from .views import (
     TrainingSessionApprovalListView,
     TrainingSessionApproveView,
     TrainingSessionRejectView,
     AdminFacultyReportListView,
     AdminTrainingSessionListView
 )
+from tims.faculty.views import ApplyLeaveView, MyLeavesView,DeleteLeaveView
 
 app_name = "adminapp"
-from .views import (
-    ApplyLeaveView,
-    MyLeavesView,
-    DeleteLeaveView,
-    LeaveRequestsView,
-    UpdateLeaveStatusView,
-)
+
 
 urlpatterns = [
     path("courses/", CourseListView.as_view(), name="course_list"),
@@ -46,13 +41,9 @@ urlpatterns = [
     path("enquiry/<int:enquiry_id>/followup/add/",FollowUpCreateView.as_view(),name="followup_add"),
     path("admissions/", AdmissionListView.as_view(), name="admission_list"),
     path("enquiry/<int:enquiry_id>/convert/",ConvertToAdmissionView.as_view(),name="convert_admission"),
-
     path("leave/apply/", ApplyLeaveView.as_view(), name="apply_leave"),
     path("leave/my/", MyLeavesView.as_view(), name="my_leaves"),
     path("leave/delete/<int:leave_id>/", DeleteLeaveView.as_view(), name="delete_leave"),
-
-
-
     path("leave/requests/", LeaveRequestsView.as_view(), name="leave_requests"),
     path(
         "leave/<int:leave_id>/<str:status>/",
@@ -65,29 +56,21 @@ urlpatterns = [
         LeaveHistoryDetailView.as_view(),
         name="leave-history-detail"
     ),
-]
-   
-
     path("faculty-assignments/add/", FacultyAssignmentCreateView.as_view(), name="faculty_assignment"),
     path("faculty-assignments/view/",FacultyCoursesView.as_view(),name="faculty_courses"),
 
     path('admin/training-approvals/', TrainingSessionApprovalListView.as_view(), name='admin_training_approval_list'),
     path('admin/training-approve/<int:pk>/', TrainingSessionApproveView.as_view(), name='training_approve'),
     path('admin/training-reject/<int:pk>/', TrainingSessionRejectView.as_view(), name='training_reject'),
-    
-    
-
    #path(
        # "faculty-assignments/<int:pk>/delete/",
         #views.faculty_assignment_delete,
         #name="faculty_assignment_delete",
     #)
- 
     path("assign-students/add/", AssignStudentView.as_view(), name="assign-student"),
     path("assignments/", AssignStudentListView.as_view(),name="assign-student-list"),
     path("assignments/edit/<int:pk>/", AssignStudentEditView.as_view(),name="assign-student-edit"),
     path("assignments/delete/<int:pk>/", AssignStudentDeleteView.as_view(),name="assign-student-delete"),
-
     path("faculty-reports/",AdminFacultyReportListView.as_view(),name="faculty_report_list",),
     path("training-sessions/",AdminTrainingSessionListView.as_view(),name="training_session_list",),
     path("assignment-report/", AssignmentReportView.as_view(), name="assignment-report")

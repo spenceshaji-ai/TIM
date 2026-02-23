@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import ApplyLeaveView, MyLeavesView, DeleteLeaveView
+from tims.faculty.views import ApplyLeaveView, MyLeavesView, DeleteLeaveView
 
 
-from .views import (
+from tims.faculty.views import (
     TrainingSessionCreateView,
     TrainingSessionListView,
     TrainingSessionUpdateView,

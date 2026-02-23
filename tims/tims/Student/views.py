@@ -136,8 +136,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.views.generic import ListView
 from django.http import JsonResponse
-from Student.models import JobApplication, Student
-from Admin.models import Job, Jobtype
+from tims.Student.models import JobApplication, Student
+from tims.Admin.models import Job, Jobtype
 from .forms import StudentForm, ApplicationForm
 from django.utils import timezone
 
@@ -149,11 +149,11 @@ User = get_user_model()
 
 from django.shortcuts import render, redirect
 from django.views import View
-from Student.models import Student
+from tims.Student.models import Student
 from .forms import StudentForm
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from adminapp.models import Batch,FacultyAssignment,Assignstudent,Batch
+from tims.adminapp.models import Batch,FacultyAssignment,Assignstudent,Batch
 from tims.faculty.models import TrainingSession,FacultyDailyReport,StudentAttendance
 from django.contrib.auth.mixins import LoginRequiredMixin
 class StudentRegisterView(View):
