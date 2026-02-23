@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        h1 { font-size: 40px; }
+        h2 { font-size: 30px; }
+        h3 { font-size: 25px; }
+        p { font-size: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Certificate of Completion</h1>
+    <p>This is to certify that</p>
+    <h2>{{ certificate.student.student.name}}</h2>
+    <p>has successfully completed the course</p>
+    <h3>{{ certificate.student.course.course_name }}</h3>
+    <p>Batch: {{ certificate.student.batch.batch_name }}</p>
+    <p>Certificate Number: {{ certificate.certificate_number }}</p>
+    <p>Issued On: {{ certificate.issued_on }}</p>
+</body>
+</html>

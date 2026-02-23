@@ -528,6 +528,12 @@
                             <i class="uil-calender"></i>
                             <span> Training Approval </span>
                         </a>
+                    </li>   
+                    <li class="side-nav-item">    
+                        <a href="{% url 'adminapp:add' %}" class="side-nav-link">
+                            <i class="uil-calender"></i>
+                            <span> Provide Certificate </span>
+                        </a>
                     </li>
 
                     <li class="side-nav-item">
@@ -541,6 +547,12 @@
                         <a href="{% url 'admin_app:job_create' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
                             <span> Create Jobs </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item"></li>        
+                        <a href="{% url 'adminapp:admin_feedback_list' %}" class="side-nav-link">
+                            <i class="uil-comments-alt"></i>
+                            <span> Feedback list </span>
                         </a>
                     </li>
 
@@ -561,8 +573,17 @@
                                 <li>
                                     <a href="{% url 'leave_requests' %}">Clients</a>
                                 </li>
+                                <li>  
+                                    <a href="{% url 'adminapp:course_add' %}">create course</a>
+                                </li>
                                 <li>
-                                    <a href="crm-management.html">Management</a>
+                                    <a href="{% url 'adminapp:batch_add' %}">create batch</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'adminapp:faculty_assignment' %}">Assign faculty</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'adminapp:assign-student' %}">Assign Student</a>
                                 </li>
                             </ul>
                         </div>
@@ -577,7 +598,7 @@
                         <div class="collapse" id="sidebarEcommerce">
                             <ul class="side-nav-second-level">
                                 <li>
-                                    <a href="apps-ecommerce-products.html">Products</a>
+                                    <a href="{% url 'adminapp:mark-completed' %}">Course completed students list</a>
                                 </li>
                                 <li>
                                     <a href="apps-ecommerce-products-details.html">Products Details</a>

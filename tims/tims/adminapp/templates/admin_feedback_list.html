@@ -1,0 +1,73 @@
+{% include "pages/header.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow-lg border-0 rounded-4">
+        
+        <!-- Header -->
+        <div class="card-header text-white rounded-top-4"
+             style="background-color:#0d3b66;">
+            <h4 class="mb-0">⭐ All Student Feedbacks</h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    
+                    <thead style="background-color:#e7f1ff;">
+                        <tr>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Rating</th>
+                            <th>Comment</th>
+                            <th>Submitted On</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for feedback in feedbacks %}
+                        <tr>
+                            <td class="fw-semibold text-dark">
+                                {{ feedback.certificate.student.student.name }}
+                            </td>
+
+                            <td>
+                                {{ feedback.certificate.student.course.course_name }}
+                            </td>
+
+                            <td>
+                                <span class="badge px-3 py-2 text-white"
+                                      style="background-color:#003566;">
+                                    {{ feedback.rating }} ⭐
+                                </span>
+                            </td>
+
+                            <td style="max-width: 300px;">
+                                {{ feedback.comment|default:"No comment" }}
+                            </td>
+
+                            <td class="text-muted">
+                                {{ feedback.submitted_on|date:"M d, Y - h:i A" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                🚫 No feedback available yet.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+{% include "pages/footer.html" %}

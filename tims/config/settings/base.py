@@ -6,6 +6,7 @@ from pathlib import Path
 
 import environ
 
+
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # tims/
 APPS_DIR = BASE_DIR / "tims"
@@ -112,7 +113,8 @@ AUTHENTICATION_BACKENDS = [
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
 AUTH_USER_MODEL = "users.User"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
-LOGIN_REDIRECT_URL = "faculty:faculty_batch_course_students"
+LOGIN_REDIRECT_URL = "users:redirect"
+
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
 LOGIN_URL = "account_login"
 

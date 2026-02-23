@@ -25,13 +25,13 @@ from tims.users.models import User,Role
 from django.contrib.auth import authenticate, login, logout
 
 
-class UserDetailView(LoginRequiredMixin, DetailView):
-    model = User
-    slug_field = "username"
-    slug_url_kwarg = "username"
+# class UserDetailView(LoginRequiredMixin, DetailView):
+#     model = User
+#     slug_field = "username"
+#     slug_url_kwarg = "username"
 
 
-user_detail_view = UserDetailView.as_view()
+# user_detail_view = UserDetailView.as_view()
 
 
 class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
@@ -126,15 +126,31 @@ class LoginView(View):
 
                 # 🔥 Role Based Redirection
                 if user.role and user.role.role_name in ["Admin", "HR"]:
-                    return redirect("home")
+                    return redirect("adminapp:home2")
 
                 elif user.role and user.role.role_name == "Faculty":
                     return redirect("faculty:home1")
 
-                elif user.role and user.role.role_name == "Student":
-                    return redirect("Student:studenthome")
+                elif user.role and user.role.role_name == "student":
+                     return redirect("Student:stdhome")
 
                 else:
                     return redirect("login")
 
         return render(request, self.template_name, {"form": form})
+    
+# #@login_required
+# def role_based_redirect(request):
+#     role = request.user.role.role_name
+
+#     if role in ["Super Admin", "Admin", "HR", "Manager", "Faculty"]:
+#         return redirect("staff_dashboard")
+
+#     elif role == "Student":
+#         return redirect("student_dashboard")
+
+#     return redirect("login")    
+
+# #@login_required
+# def staff_dashboard(request):
+#     return render(request, "users/staff_dashboard.html")
