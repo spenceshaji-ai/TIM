@@ -27,6 +27,12 @@ urlpatterns = [
 
     path("assignments/delete/<int:pk>/", AssignStudentDeleteView.as_view(),
          name="assign-student-delete"),
+        path("cert_add/", CertificateCreateView.as_view(), name="add"),
+       # path("list/", CertificateListView.as_view(), name="list"),    
+       path('mark-completed/', MarkCompletedStudentsView.as_view(), name='mark-completed'),
+       path("certificate/add/<int:student_id>/", CertificateCreateView.as_view(), name="add_certificate_for_student"), 
+       path('feedbacks/', AdminFeedbackListView.as_view(), name='admin_feedback_list'),
+       path('', Home2View.as_view(), name='home2'),
 
 ] 
   

@@ -1,0 +1,71 @@
+{% include 'stdheader.html' %}
+
+<div class="container mt-4">
+    <div class="row">
+
+    {% for material in materials %}
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+
+                    <!-- Title -->
+                    <h5 class="fw-bold mb-1">
+                        {{ material.title }}
+                    </h5>
+
+                    <small class="text-muted">
+                        {{ material.course }} - Batch: {{ material.batch }}
+                    </small>
+
+                    <!-- Description -->
+                    <p class="mt-3 flex-grow-1">
+                        {{ material.description }}
+                    </p>
+
+                    <!-- IMAGE -->
+                    {% if material.material_type == "image" and material.image_file %}
+                    <div class="text-center mb-3">
+                        <img src="{{ material.image_file.url }}"
+                             class="img-fluid rounded"
+                             style="max-height:200px;">
+                    </div>
+                    {% endif %}
+
+                    <!-- BUTTON -->
+                    <div class="mt-auto text-end">
+
+                        {% if material.material_type == "pdf" and material.pdf_file %}
+                        <a href="{{ material.pdf_file.url }}"
+                           class="btn btn-primary btn-sm w-100"
+                           target="_blank">
+                           📄 View / Download PDF
+                        </a>
+                        {% endif %}
+
+                        {% if material.material_type == "video" and material.video_url %}
+                        <a href="{{ material.video_url }}"
+                           class="btn btn-success btn-sm w-100"
+                           target="_blank">
+                           🎥 Watch Video
+                        </a>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning text-center">
+                No materials available.
+            </div>
+        </div>
+    {% endfor %}
+
+    </div>
+</div>
+
+{% include 'stdfooter.html' %}

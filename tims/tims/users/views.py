@@ -11,18 +11,20 @@ from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from tims.users.models import User
-from .forms import UserForm
+from tims.faculty.models import FacultyCourseMaterial
+from .forms import UserForm, LoginForm
 from django.views.generic import TemplateView
 from tims.users.models import User,Role
+from django.contrib.auth import authenticate, login,logout
 
 
-class UserDetailView(LoginRequiredMixin, DetailView):
-    model = User
-    slug_field = "username"
-    slug_url_kwarg = "username"
+# class UserDetailView(LoginRequiredMixin, DetailView):
+#     model = User
+#     slug_field = "username"
+#     slug_url_kwarg = "username"
 
 
-user_detail_view = UserDetailView.as_view()
+# user_detail_view = UserDetailView.as_view()
 
 
 class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
@@ -91,3 +93,53 @@ class RoleCreateView(View):
             return redirect("users:role_add")
 
         return render(request, self.template_name, {"form": form})
+
+class LoginView(View):
+    template_name = "login.html"
+
+    def get(self, request):
+        form = LoginForm()
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request):
+        form = LoginForm(request, data=request.POST)
+
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
+
+            user = authenticate(username=username, password=password)
+
+            if user is not None:
+                login(request, user)
+
+                # 🔥 Role Based Redirection
+                if user.role and user.role.role_name in ["Admin", "HR"]:
+                    return redirect("adminapp:home2")
+
+                elif user.role and user.role.role_name == "Faculty":
+                    return redirect("faculty:home1")
+
+                elif user.role and user.role.role_name == "student":
+                     return redirect("Student:stdhome")
+
+                else:
+                    return redirect("login")
+
+        return render(request, self.template_name, {"form": form})
+    
+# #@login_required
+# def role_based_redirect(request):
+#     role = request.user.role.role_name
+
+#     if role in ["Super Admin", "Admin", "HR", "Manager", "Faculty"]:
+#         return redirect("staff_dashboard")
+
+#     elif role == "Student":
+#         return redirect("student_dashboard")
+
+#     return redirect("login")    
+
+# #@login_required
+# def staff_dashboard(request):
+#     return render(request, "users/staff_dashboard.html")

@@ -1,0 +1,13 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+Submit Feedback for {{ certificate.student.course.course_name }}
+{% endblock %}
+
+{% block form_body %}
+{{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-success">Submit Feedback</button>
+{% endblock %}

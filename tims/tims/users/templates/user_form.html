@@ -1,20 +1,134 @@
-{% extends "forms.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Registration</title>
 
-{% block form_title %}
-User Registration
-{% endblock %}
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-{% block form_action %}
-{% url 'users:user_register' %}
-{% endblock %}
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-{% block form_body %}
-{% csrf_token %}
-{{ form.as_p }}
-{% endblock %}
+        .register-card {
+            width: 100%;
+            max-width: 550px;
+            border-radius: 18px;
+        }
 
-{% block form_button %}
-<button type="submit" class="btn btn-success">
-    Register
-</button>
-{% endblock %}
+        .form-label {
+            font-weight: 600;
+        }
+
+        .btn-success {
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .card-title {
+            font-weight: 700;
+        }
+
+        .errorlist {
+            list-style: none;
+            padding-left: 0;
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card shadow-lg border-0 p-4 register-card mx-auto">
+
+        <!-- Title -->
+        <div class="text-center mb-4">
+            <h3 class="card-title text-success">Create Account</h3>
+            <p class="text-muted">Join TIMS today</p>
+        </div>
+                {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success text-center">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Global Errors -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Full Name</label>
+                {{ form.name }}
+                {{ form.name.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                {{ form.email }}
+                {{ form.email.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phone Number</label>
+                {{ form.phone_number }}
+                {{ form.phone_number.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Status</label>
+                {{ form.status }}
+                {{ form.status.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Role</label>
+                {{ form.role }}
+                {{ form.role.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                {{ form.password1 }}
+                {{ form.password1.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Confirm Password</label>
+                {{ form.password2 }}
+                {{ form.password2.errors }}
+            </div>
+
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-success btn-lg">
+                    Register
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>

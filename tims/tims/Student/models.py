@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-
+from django.utils import timezone
 
 class Student(models.Model):
     name = models.CharField(max_length=200)
@@ -18,4 +18,18 @@ class Student(models.Model):
     def __str__(self):   
         return self.name
     
+
+class Feedback(models.Model):
+    certificate = models.OneToOneField(
+        "adminapp.Certificate",
+        on_delete=models.CASCADE,
+        related_name="feedback"
+    )
+    rating_choices = [(i, str(i)) for i in range(1, 6)]  # 1 to 5 stars
+    rating = models.PositiveSmallIntegerField(choices=rating_choices)
+    comment = models.TextField(blank=True)
+    submitted_on = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Feedback by {self.certificate.student.student.name} for {self.certificate.student.course.course_name}"
 

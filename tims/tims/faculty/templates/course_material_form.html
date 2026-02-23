@@ -1,0 +1,18 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+Add Course Material
+{% endblock %}
+
+{% block form_action %}
+{% url 'faculty:material_add' %}  
+{% endblock %}
+
+{% block form_body %}
+{% csrf_token %}
+{{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-primary">Add Material</button>
+{% endblock %}

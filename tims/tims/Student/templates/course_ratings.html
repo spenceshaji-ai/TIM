@@ -1,0 +1,161 @@
+{% include 'stdheader.html' %}
+{% block content %}
+
+<div class="container-fluid px-4 mt-4">
+
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="fw-bold text-dark">
+                📊 Overall Course Ratings
+            </h2>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        {% for course in course_ratings %}
+        <div class="col-12 col-md-6 col-xl-4">
+
+            <div class="fk-rating-wrapper p-4 h-100">
+
+                <!-- Course Name -->
+                <h5 class="fw-bold mb-4 text-capitalize">
+                    {{ course.course_name }}
+                </h5>
+
+                <div class="row">
+
+                    <!-- LEFT SIDE -->
+                    <div class="col-5 border-end">
+
+                        <div class="fk-overall-rating">
+                            <span class="fk-big-rating">
+                                {{ course.avg_rating|floatformat:1 }}
+                            </span>
+                            <span class="fk-star">★</span>
+                        </div>
+
+                        <div class="text-muted mt-2 small">
+                            {{ course.total_reviews }} Ratings
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT SIDE -->
+                    <div class="col-7">
+
+                        <h6 class="fw-semibold mb-3 small">
+                            Student Reviews
+                        </h6>
+
+                        <div class="fk-review-list">
+
+                            {% for review in course.reviews %}
+                            <div class="fk-review-item">
+
+                                <div class="d-flex align-items-center mb-1">
+                                    <span class="fk-mini-badge">
+                                        {{ review.rating }} ★
+                                    </span>
+
+                                    <span class="ms-2 fw-semibold small">
+                                        {{ review.certificate.student.student.name }}
+                                    </span>
+                                </div>
+
+                                <p class="small text-muted mb-0">
+                                    {{ review.comment }}
+                                </p>
+
+                            </div>
+                            {% empty %}
+                            <p class="text-muted small">
+                                No reviews yet.
+                            </p>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+<style>
+
+/* Card */
+.fk-rating-wrapper {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+}
+
+.fk-rating-wrapper:hover {
+    transform: translateY(-4px);
+}
+
+/* Overall Rating */
+.fk-overall-rating {
+    display: flex;
+    align-items: center;
+}
+
+.fk-big-rating {
+    font-size: 38px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.fk-star {
+    font-size: 28px;
+    color: #16c784;
+    margin-left: 5px;
+}
+
+/* Mini Badge */
+.fk-mini-badge {
+    background: #16c784;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+/* Review List */
+.fk-review-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.fk-review-item:last-child {
+    border-bottom: none;
+}
+
+.fk-review-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Soft Scrollbar */
+.fk-review-list::-webkit-scrollbar {
+    width: 4px;
+}
+.fk-review-list::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 10px;
+}
+
+</style>
+
+{% endblock %}
+{% include 'stdfooter.html' %}
