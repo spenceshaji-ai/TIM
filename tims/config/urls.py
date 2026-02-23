@@ -7,11 +7,9 @@ from django.views.generic import TemplateView
 import adminapp.adminapp_urls
 import tims.faculty.faculty_urls
 from tims.users.views import LoginView
-
-
 urlpatterns = [
-    
-    path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
+    path("", LoginView.as_view(), name="login"),
+    path("home/", TemplateView.as_view(template_name="pages/home.html"), name="home"),
 
     path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
 

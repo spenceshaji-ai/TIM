@@ -64,47 +64,66 @@ from adminapp.models import Batch,FacultyAssignment,Assignstudent,Batch
 from .forms import TrainingSessionForm,StudentAttendanceForm,FacultyDailyReportForm
 
 
-class TrainingSessionCreateView(LoginRequiredMixin, View):
+class TrainingSessionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'create_session.html'
+
+    # 🔐 Faculty Role Check
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    # 🚫 If Not Authorized
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
+
+    def get_assigned_batches(self, user):
+        return Batch.objects.filter(
+            id__in=FacultyAssignment.objects.filter(
+                faculty=user
+            ).values_list('batch', flat=True)
+        )
 
     def get(self, request):
         form = TrainingSessionForm()
-
-        # 👇 Filter batches assigned to this faculty
-        assigned_batches = FacultyAssignment.objects.filter(
-            faculty=request.user
-        ).values_list('batch', flat=True)
-
-        form.fields['batch'].queryset = Batch.objects.filter(
-            id__in=assigned_batches
-        )
-
+        form.fields['batch'].queryset = self.get_assigned_batches(request.user)
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
         form = TrainingSessionForm(request.POST)
-
-        assigned_batches = FacultyAssignment.objects.filter(
-            faculty=request.user
-        ).values_list('batch', flat=True)
-
-        form.fields['batch'].queryset = Batch.objects.filter(
-            id__in=assigned_batches
-        )
+        form.fields['batch'].queryset = self.get_assigned_batches(request.user)
 
         if form.is_valid():
-            session = form.save(commit=False)
-
-            # 👇 Automatically assign logged-in faculty
-            session.faculty = request.user
-
-            session.save()
-            return redirect('faculty:training_list')
+            try:
+                session = form.save(commit=False)
+                session.faculty = request.user
+                session.save()
+                return redirect('faculty:training_list')
+            except IntegrityError:
+                form.add_error(None, "Duplicate session for this batch on this date.")
 
         return render(request, self.template_name, {'form': form})
 
-class TrainingSessionListView(LoginRequiredMixin, View):
+class TrainingSessionListView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'Session_list.html'
+
+    # 🔐 Faculty Role Check
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    # 🚫 If Not Authorized
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
 
     def get(self, request):
         sessions = TrainingSession.objects.filter(
@@ -168,8 +187,20 @@ class TrainingSessionDeleteView(LoginRequiredMixin, View):
         return redirect('faculty:training_list')
 
 
-class StudentAttendanceCreate(LoginRequiredMixin, View):
+class StudentAttendanceCreate(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'create_attendance.html'
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
 
     def get(self, request):
         form = StudentAttendanceForm(user=request.user)
@@ -262,61 +293,62 @@ class FacultyStudentListView(LoginRequiredMixin, View):
 
         faculty = request.user
 
-        # Get only assigned batches & courses
+        # Assigned batches & courses
         assignments = FacultyAssignment.objects.filter(
             faculty=faculty
         ).select_related("course", "batch")
 
-        # Extract assigned batch & course ids
         assigned_batch_ids = assignments.values_list("batch_id", flat=True)
         assigned_course_ids = assignments.values_list("course_id", flat=True)
 
         selected_batch = request.GET.get("batch")
         selected_course = request.GET.get("course")
 
+        # Base queryset → all students assigned to this faculty
+        student_assignments = Assignstudent.objects.filter(
+            batch_id__in=assigned_batch_ids,
+            course_id__in=assigned_course_ids
+        ).select_related("student")
+
+        # Apply filters only if selected
+        if selected_batch:
+            student_assignments = student_assignments.filter(
+                batch_id=selected_batch
+            )
+
+        if selected_course:
+            student_assignments = student_assignments.filter(
+                course_id=selected_course
+            )
+
         students = []
 
-        if selected_batch and selected_course:
+        for assign in student_assignments:
+            student = assign.student
 
-            # Ensure faculty is assigned to this batch & course
-            if assignments.filter(
-                batch_id=selected_batch,
-                course_id=selected_course
-            ).exists():
+            total_classes = StudentAttendance.objects.filter(
+                student=student,
+                batch_id=assign.batch_id
+            ).count()
 
-                student_assignments = Assignstudent.objects.filter(
-                    batch_id=selected_batch,
-                    course_id=selected_course
-                ).select_related("student")
+            present_classes = StudentAttendance.objects.filter(
+                student=student,
+                batch_id=assign.batch_id,
+                status="Present"
+            ).count()
 
-                students = []
+            attendance_percentage = 0
+            if total_classes > 0:
+                attendance_percentage = round(
+                    (present_classes / total_classes) * 100, 2
+                )
 
-                for assign in student_assignments:
-                    student = assign.student
-
-                    total_classes = StudentAttendance.objects.filter(
-                        student=student,
-                        batch_id=selected_batch
-                    ).count()
-
-                    present_classes = StudentAttendance.objects.filter(
-                        student=student,
-                        batch_id=selected_batch,
-                        status="Present"
-                    ).count()
-
-                    attendance_percentage = 0
-                    if total_classes > 0:
-                        attendance_percentage = round(
-                            (present_classes / total_classes) * 100, 2
-                        )
-
-                    students.append({
-                        "name": student.name,
-                        "email": student.email,
-                        "phone": student.phone_number,
-                        "attendance": attendance_percentage,
-                    })
+            students.append({
+                "name": student.name,
+                "email": student.email,
+                "phone": student.phone_number,
+                "attendance": attendance_percentage,
+            })
 
         context = {
             "assignments": assignments,
@@ -326,6 +358,7 @@ class FacultyStudentListView(LoginRequiredMixin, View):
         }
 
         return render(request, self.template_name, context)
+
         
 class FacultyTrainingProgressView(LoginRequiredMixin, View):
     template_name = "training_progress.html"

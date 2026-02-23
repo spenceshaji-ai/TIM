@@ -1,31 +1,9 @@
 from django.urls import path
 from .views import LeaveHistoryDetailView, LeaveRequestsView, LeaveUserListView, UpdateLeaveStatusView
 from .views import *
-from .views import (
-    EnquiryListView,
-    EnquiryCreateView,
-    EnquiryDetailView,
-    EnquiryUpdateView,
-    EnquiryDeleteView,
-)
-from .views import FollowUpCreateView, FollowUpListView
-from .views import ConvertToAdmissionView, AdmissionListView
-from adminapp.views import (
-    TrainingSessionApprovalListView,
-    TrainingSessionApproveView,
-    TrainingSessionRejectView,
-    AdminFacultyReportListView,
-    AdminTrainingSessionListView
-)
 
 app_name = "adminapp"
-from .views import (
-    ApplyLeaveView,
-    MyLeavesView,
-    DeleteLeaveView,
-    LeaveRequestsView,
-    UpdateLeaveStatusView,
-)
+
 
 urlpatterns = [
     path("courses/", CourseListView.as_view(), name="course_list"),
