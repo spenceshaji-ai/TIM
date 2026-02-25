@@ -1,27 +1,37 @@
 from django import forms
-from adminapp.models import LeaveApplication
+from django.core.exceptions import ValidationError
+from datetime import date
+from adminapp.models import LeaveApplication, LeaveBalance, Salary
+from django import forms
+
+
+
 
 class LeaveApplicationForm(forms.ModelForm):
     class Meta:
         model = LeaveApplication
-        fields = ["leave_type", "start_date", "end_date", "reason"]
+        fields = [
+            "leave_type",
+            "start_date",
+            "end_date",
+            "day_type",
+            "reason",
+        ]
+
         widgets = {
-            "start_date": forms.DateInput(attrs={"type": "date"}),
-            "end_date": forms.DateInput(attrs={"type": "date"}),
-            "reason": forms.Textarea(attrs={"rows": 3}),
+            "leave_type": forms.Select(attrs={"class": "form-control"}),
+            "start_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "end_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "day_type": forms.Select(attrs={"class": "form-control"}),
+            "reason": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
 
     def clean(self):
         cleaned_data = super().clean()
-        leave_type = cleaned_data.get("leave_type")
-        start_date = cleaned_data.get("start_date")
-        end_date = cleaned_data.get("end_date")
+        start = cleaned_data.get("start_date")
+        end = cleaned_data.get("end_date")
 
-        if leave_type and start_date and end_date:
-            days = (end_date - start_date).days + 1
-            if days > leave_type.max_days:
-                raise forms.ValidationError(
-                    f"Maximum {leave_type.max_days} days allowed for {leave_type.leave_name}"
-                )
+        if start and end and end < start:
+            raise forms.ValidationError("End date cannot be before start date.")
 
         return cleaned_data

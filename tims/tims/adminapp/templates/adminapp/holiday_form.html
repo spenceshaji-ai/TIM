@@ -1,0 +1,33 @@
+{% extends "adminapp/forms.html" %}
+
+{% block form_title %}
+Add Holiday
+{% endblock %}
+
+{% block form_action %}
+{% url 'adminapp:holiday_add' %}
+{% endblock %}
+
+{% block form_body %}
+
+<div class="mb-3">
+    <label class="form-label">Holiday Date</label>
+    {{ form.date }}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Reason</label>
+    {{ form.reason }}
+</div>
+
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-success">
+Add Holiday
+</button>
+
+<a href="{% url 'adminapp:holiday_list' %}" class="btn btn-secondary">
+Back
+</a>
+{% endblock %}

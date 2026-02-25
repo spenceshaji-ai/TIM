@@ -211,7 +211,7 @@
         <div class="text-center py-3">
             <p class="mb-2">New leave request received</p>
 
-            <a href="{% url 'leave_requests' %}" class="btn btn-sm btn-primary">
+            <a href="{% url 'adminapp:leave_requests' %}" class="btn btn-sm btn-primary">
                 View Requests
             </a>
         </div>
@@ -421,46 +421,33 @@
                     <li class="side-nav-title">Leave Management</li>
 
                     <li class="side-nav-item">
-                        <a href="{% url 'leave_requests' %}" class="side-nav-link">
+                        <a href="{% url 'adminapp:leave_requests' %}" class="side-nav-link">
                             <i class="uil-calender"></i>
                             <span> Approve </span>
                         </a>
                     </li>
 
                     <li class="side-nav-item">
-                        <a href="{% url 'leave_calendar' %}" class="side-nav-link">
+                        <a href="{% url 'adminapp:leave_calendar' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
                             <span> Leave Calendar </span>
                         </a>
                     </li>
                      <li class="side-nav-item">
-                        <a href="{% url 'leave-users' %}" class="side-nav-link">
+                        <a href="{% url 'adminapp:leave_users' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
-                            <span> Leave History </span>
+                            <span> Leave Users </span>
                         </a>
                     </li>
-                    <li class="side-nav-item">
-                        <a data-bs-toggle="collapse" href="#sidebarCrm" aria-expanded="false" aria-controls="sidebarCrm" class="side-nav-link">
-                            <i class="uil uil-tachometer-fast"></i>
-                            <span class="badge bg-danger text-white float-end">New</span>
-                            <span> CRM </span>
+                                        <li class="side-nav-title">Salary Management</li>
+
+                        
+                    
+                         <li class="side-nav-item">
+                        <a href="{% url 'adminapp:salary_users' %}" class="side-nav-link">
+                            <i class="uil-comments-alt"></i>
+                            <span> Salary View </span>
                         </a>
-                        <div class="collapse" id="sidebarCrm">
-                            <ul class="side-nav-second-level">
-                                <li>
-                                    <a href="crm-projects.html">Projects</a>
-                                </li>
-                                <li>
-                                    <a href="crm-orders-list.html">Orders List</a>
-                                </li>
-                                <li>
-                                    <a href="crm-clients.html">Clients</a>
-                                </li>
-                                <li>
-                                    <a href="crm-management.html">Management</a>
-                                </li>
-                            </ul>
-                        </div>
                     </li>
 
                     <li class="side-nav-item">

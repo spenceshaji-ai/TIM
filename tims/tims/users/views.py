@@ -45,10 +45,20 @@ user_update_view = UserUpdateView.as_view()
 class UserRedirectView(LoginRequiredMixin, RedirectView):
     permanent = False
 
-    def get_redirect_url(self) -> str:
-        return reverse("users:detail", kwargs={"username": self.request.user.username})
+    def get_redirect_url(self):
+        user = self.request.user
 
-user_redirect_view = UserRedirectView.as_view()
+        if user.role and user.role.role_name == "Faculty":
+            return reverse("faculty:dashboard")
+
+        elif user.role and user.role.role_name == "Admin":
+            return reverse("adminapp:home")
+
+        elif user.role and user.role.role_name == "Student":
+            return reverse("student:home")
+
+        return reverse("users:login")
+
 
 class UserRegisterView(View):
     template_name = "user_form.html"
@@ -91,3 +101,24 @@ class RoleCreateView(View):
             return redirect("users:role_add")
 
         return render(request, self.template_name, {"form": form})
+    
+from django.contrib.auth.views import LoginView
+from django.shortcuts import redirect
+
+class RoleBasedLoginView(LoginView):
+    template_name = "users/login.html"  # your login template
+
+    def get_success_url(self):
+        user = self.request.user
+
+        if user.role and user.role.role_name == "Faculty":
+            return reverse_lazy("faculty:dashboard")
+
+        elif user.role and user.role.role_name == "Admin":
+            return reverse_lazy("adminapp:home")
+
+        elif user.role and user.role.role_name == "Student":
+            return reverse_lazy("student:home")
+
+        return reverse_lazy("users:redirect")  # fallback
+    

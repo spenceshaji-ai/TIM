@@ -1,37 +1,51 @@
-{% include "pages/header.html" %}
+{% extends "adminapp/forms.html" %}
 
-<div class="container-fluid">
-    <h4 class="page-title">Leave Requests</h4>
+{% block form_title %}
+Leave Requests
+{% endblock %}
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Faculty</th>
-                <th>Leave Type</th>
-                <th>Dates</th>
-                <th>Reason</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for leave in leaves %}
-            <tr>
-                <td>{{ leave.user }}</td>
-                <td>{{ leave.leave_type }}</td>
-                <td>{{ leave.start_date }} → {{ leave.end_date }}</td>
-                <td>{{ leave.reason }}</td>
-                <td>{{ leave.status }}</td>
-                <td>
-                    {% if leave.status == "Pending" %}
-                    <a href="{% url 'update_leave_status' leave.id 'Approved' %}" class="btn btn-sm btn-success">Approve</a>
-                    <a href="{% url 'update_leave_status' leave.id 'Rejected' %}" class="btn btn-sm btn-danger">Reject</a>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+{% block form_action %}
+#
+{% endblock %}
 
-{% include "pages/footer.html" %}
+{% block form_body %}
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>User</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for leave in leave_requests %}
+        <tr>
+            <td>{{ leave.user.get_full_name }}</td>
+            <td>{{ leave.start_date }}</td>
+            <td>{{ leave.end_date }}</td>
+            <td>{{ leave.reason }}</td>
+            <td>{{ leave.status }}</td>
+            <td>
+                <a href="{% url 'adminapp:update_leave_status' leave.id 'Approved' %}"
+                   class="btn btn-success btn-sm">Approve</a>
+
+                <a href="{% url 'adminapp:update_leave_status' leave.id 'Rejected' %}"
+                   class="btn btn-danger btn-sm">Reject</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center">No requests found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+
+{% block form_button %}
+{% endblock %}

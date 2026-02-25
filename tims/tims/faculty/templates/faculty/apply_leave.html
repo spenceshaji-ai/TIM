@@ -5,39 +5,68 @@ Apply Leave
 {% endblock %}
 
 {% block form_action %}
-{% url 'faculty_apply_leave' %}
+{% url 'faculty:faculty_apply_leave' %}
 {% endblock %}
 
 {% block form_body %}
 
+<!-- Leave Balance Table -->
+<h5 class="mb-3">Your Leave Balance ({{ today.year }})</h5>
+
+<table class="table table-bordered mb-4">
+    <thead>
+        <tr>
+            <th>Leave Type</th>
+            <th>Earned</th>
+            <th>Used</th>
+            <th>Remaining</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for balance in leave_balances %}
+        <tr>
+            <td>{{ balance.leave_type.name }}</td>
+            <td>{{ balance.earned_days }}</td>
+            <td>{{ balance.used_days }}</td>
+            <td>{{ balance.remaining_days }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No leave allocated yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 <div class="mb-3">
     <label class="form-label">Leave Type</label>
-    {{ form.leave_type }}
+    <select name="leave_type" class="form-control" required>
+        {% for lt in leave_types %}
+        <option value="{{ lt.id }}">{{ lt.name }}</option>
+        {% endfor %}
+    </select>
 </div>
 
 <div class="mb-3">
     <label class="form-label">Start Date</label>
-    {{ form.start_date }}
+    <input type="date" name="start_date" min="{{ today }}" class="form-control" required>
 </div>
 
 <div class="mb-3">
     <label class="form-label">End Date</label>
-    {{ form.end_date }}
+    <input type="date" name="end_date" min="{{ today }}" class="form-control" required>
 </div>
 
 <div class="mb-3">
-    <label class="form-label">Reason</label>
-    {{ form.reason }}
+    <label class="form-label">Day Type</label>
+    <select name="day_type" class="form-control">
+        <option value="Full">Full Day</option>
+        <option value="Half">Half Day</option>
+    </select>
 </div>
 
 {% endblock %}
 
 {% block form_button %}
-<button type="submit" class="btn btn-primary">
-    Apply Leave
-</button>
-
-<a href="{% url 'faculty_my_leaves' %}" class="btn btn-light ms-2">
-    My Leaves
-</a>
+<button type="submit" class="btn btn-primary">Submit Leave</button>
 {% endblock %}
