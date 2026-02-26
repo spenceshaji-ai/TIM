@@ -4,6 +4,11 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
+<<<<<<< Updated upstream
+=======
+import tims.adminapp.adminapp_urls
+import tims.faculty.faculty_urls
+>>>>>>> Stashed changes
 from tims.users.views import LoginView
 
 

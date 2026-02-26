@@ -1,5 +1,9 @@
 from django.db import models
+<<<<<<< Updated upstream
 from django.conf import settings
+=======
+
+>>>>>>> Stashed changes
 
 
 class Student(models.Model):

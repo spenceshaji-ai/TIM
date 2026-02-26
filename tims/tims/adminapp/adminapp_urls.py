@@ -56,6 +56,12 @@ urlpatterns = [
         LeaveHistoryDetailView.as_view(),
         name="leave-history-detail"
     ),
+<<<<<<< Updated upstream
+=======
+
+   
+
+>>>>>>> Stashed changes
     path("faculty-assignments/add/", FacultyAssignmentCreateView.as_view(), name="faculty_assignment"),
     path("faculty-assignments/view/",FacultyCoursesView.as_view(),name="faculty_courses"),
 
