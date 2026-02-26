@@ -2,6 +2,10 @@ from django.urls import path
 from django.views.generic import TemplateView
 from .views import *
 
+from .views import *
+from .views import AdmissionListView
+
+
 app_name = "adminapp"
 
 urlpatterns = [
@@ -80,6 +84,7 @@ path("salary-paid/<int:pk>/",
     path("management/leave/list/", ManagementLeaveListView.as_view(), name="management_leave_list"),
 
     # ================= COURSES =================
+    path("",Home2View.as_view(),name='home2'),
     path("courses/", CourseListView.as_view(), name="course_list"),
     path("courses/add/", CourseCreateView.as_view(), name="course_add"),
     path("courses/edit/<int:id>/", CourseEditView.as_view(), name="course_edit"),
@@ -92,6 +97,27 @@ path("salary-paid/<int:pk>/",
     path("batches/delete/<int:id>/", BatchDeleteView.as_view(), name="batch_delete"),
 
     # ================= FACULTY =================
+    path("enquiries/", EnquiryListView.as_view(), name="enquiry_list"),
+    path("enquiries/add/", EnquiryCreateView.as_view(), name="enquiry_add"),
+    path("enquiries/<int:pk>/", EnquiryDetailView.as_view(), name="enquiry_detail"),
+    path("enquiries/<int:pk>/edit/", EnquiryUpdateView.as_view(), name="enquiry_edit"),
+    path("enquiries/<int:pk>/delete/", EnquiryDeleteView.as_view(), name="enquiry_delete"),
+    path("followups/<int:enquiry_id>/", FollowUpListView.as_view(), name="followup_list"),
+    path("enquiry/<int:enquiry_id>/followup/add/",FollowUpCreateView.as_view(),name="followup_add"),
+    path("followup/edit/<int:pk>/",FollowUpUpdateView.as_view(),name="followup_edit"),
+    path("enquiry/<int:enquiry_id>/not-interested/",MarkNotInterestedView.as_view(),name="not_interested"),
+
+    path("admissions/", AdmissionListView.as_view(), name="admission_list"),
+    path("enquiry/<int:enquiry_id>/convert/",ConvertToAdmissionView.as_view(),name="convert_admission"),
+    path("enquiry/<int:admission_id>/create-student/",CreateStudentAccountView.as_view(),name="create_student_account"),
+    path("payments/add/", PaymentCreateView.as_view(), name="payment_create"),
+    path("payments/", PaymentListView.as_view(), name="payment_list"),
+    path("payments/edit/<int:pk>/", PaymentUpdateView.as_view(), name="payment_edit"),
+    path("payments/delete/<int:pk>/", PaymentDeleteView.as_view(), name="payment_delete"),
+
+
+  
+
     path("faculty-assignments/add/", FacultyAssignmentCreateView.as_view(), name="faculty_assignment"),
     path("faculty-assignments/view/", FacultyCoursesView.as_view(), name="faculty_courses"),
 
@@ -100,4 +126,9 @@ path("salary-paid/<int:pk>/",
     path("assignments/", AssignStudentListView.as_view(), name="assign_student_list"),
     path("assignments/edit/<int:pk>/", AssignStudentEditView.as_view(), name="assign_student_edit"),
     path("assignments/delete/<int:pk>/", AssignStudentDeleteView.as_view(), name="assign_student_delete"),
-]
+
+    path("assignments/delete/<int:pk>/", AssignStudentDeleteView.as_view(),
+         name="assign-student-delete"),
+
+] 
+  

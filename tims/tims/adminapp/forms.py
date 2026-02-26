@@ -13,9 +13,11 @@ from datetime import date
 from adminapp.models import LeaveApplication, LeaveBalance, Salary
 
 
+from django.utils import timezone
+from .models import Enquiry,FollowUp,Admission,Course,Batch,Payment, FacultyAssignment,Assignstudent
 from django.contrib.auth import get_user_model
 
-from adminapp.models import Course, Batch, FacultyAssignment,Assignstudent
+
 
 User = get_user_model()
 
@@ -58,6 +60,7 @@ class BatchForm(forms.ModelForm):
         ]
         widgets = {
             "course": forms.Select(attrs={"class": "form-control"}),
+            "faculty": forms.Select(attrs={"class": "form-control"}),
             "batch_name": forms.TextInput(attrs={"class": "form-control"}),
             "start_date": forms.DateInput(attrs={
                 "class": "form-control",
@@ -69,6 +72,192 @@ class BatchForm(forms.ModelForm):
             }),
             "capacity": forms.NumberInput(attrs={"class": "form-control"}),
         }
+
+class EnquiryForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # ✅ Populate dropdown with courses
+        self.fields["course"].queryset = Course.objects.all()
+
+        # ✅ Optional: Add placeholder
+        self.fields["course"].empty_label = "Select Course"
+         # ⭐ FORCE DATE INPUT TYPE
+        self.fields["next_followup_date"].widget.input_type = "date"
+    class Meta:
+        model = Enquiry
+
+        fields = [
+            "name",
+            "phone",
+            "email",
+            "course",
+            "source",
+            "status",
+            "next_followup_date", 
+        ]
+
+        widgets = {
+
+            # Name
+            "name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter Enquiry Person Name"
+            }),
+
+            # Phone
+            "phone": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter Phone Number"
+            }),
+
+            # Email
+            "email": forms.EmailInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter Email Address"
+            }),
+
+            # Course Dropdown
+            "course": forms.Select(attrs={
+                "class": "form-control"
+            }),
+
+            # Source Dropdown
+            "source": forms.Select(attrs={
+                "class": "form-control"
+            }),
+
+            # Status Dropdown
+            "status": forms.Select(attrs={
+                "class": "form-control"
+            }),
+            # ✅ Next Follow-up Date
+            "next_followup_date": forms.DateInput(attrs={
+                "class": "form-control",
+                "type": "date"   # 👈 IMPORTANT for calendar picker
+            }),
+        }
+
+
+
+
+
+class FollowUpForm(forms.ModelForm):
+    class Meta:
+        model = FollowUp
+
+        fields = [
+            "followup_date",
+            "today_remark",
+            "next_followup_date",
+            "status",
+        ]
+
+        widgets = {
+
+            "followup_date": forms.DateInput(attrs={
+                "class": "form-control",
+                "type": "date"
+            }),
+
+            "today_remark": forms.Textarea(attrs={
+                "class": "form-control",
+                "placeholder": "Enter Today's Discussion",
+                "rows": 3
+            }),
+
+            "next_followup_date": forms.DateInput(attrs={
+                "class": "form-control",
+                "type": "date"
+            }),
+
+            "status": forms.Select(attrs={
+                "class": "form-control"
+            }),
+        }
+
+class AdmissionForm(forms.ModelForm):
+    class Meta:
+        model = Admission
+
+        fields = [
+            "student_name",
+            "phone",
+            "email",
+            "course",
+            "batch",
+            "total_fees",
+            
+        ]
+
+        widgets = {
+
+            "student_name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Student Full Name"
+            }),
+
+            "phone": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Phone Number"
+            }),
+
+            "email": forms.EmailInput(attrs={
+                "class": "form-control",
+                "placeholder": "Email Address"
+            }),
+
+            "course": forms.Select(attrs={
+                "class": "form-control"
+            }),
+
+            "batch": forms.Select(attrs={
+                "class": "form-control"
+            }),
+
+            "total_fees": forms.NumberInput(attrs={
+                "class": "form-control"
+            }),
+
+           
+        }
+
+
+
+class PaymentForm(forms.ModelForm):
+
+      # ➜ Extra field (not in model)
+    pending_fee = forms.DecimalField(
+        required=False,
+        label="Pending Fee",
+        widget=forms.NumberInput(attrs={
+            "class": "form-control",
+            "readonly": "readonly",
+            "placeholder": "Pending Fee"
+        })
+    )
+    class Meta:
+        model = Payment
+        fields = [
+            "admission",
+            "pending_fee",   # ➜ Add here to display in form
+            "amount",
+            "status",
+        ]
+
+        widgets = {
+            "admission": forms.Select(attrs={
+                "class": "form-control"
+            }),
+            "amount": forms.NumberInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter Payment Amount"
+            }),
+            "status": forms.Select(attrs={
+                "class": "form-control"
+            }),
+        }
+
 
 class FacultyAssignmentForm(forms.ModelForm):
     class Meta:
@@ -89,6 +278,8 @@ class FacultyAssignmentForm(forms.ModelForm):
 
      self.fields["faculty"].queryset = User.objects.filter(role__isnull=False)
 
+        # Optional: only staff as faculty
+       # self.fields["faculty"].queryset = User.objects.filter(is_staff=True)
 
 class AssignstudentForm(forms.ModelForm):
     class Meta:

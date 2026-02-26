@@ -20,6 +20,8 @@ class User(AbstractUser):
      null=True,
      blank=True
      )
+     created_at=models.DateTimeField(auto_now_add=True,null=True,blank=True)
+
      role = models.ForeignKey(
      Role,
      on_delete=models.SET_NULL,  

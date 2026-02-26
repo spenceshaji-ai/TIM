@@ -1,0 +1,127 @@
+
+{% include "pages/header.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Enquiry Details</h2>
+
+    <!-- 🔹 Enquiry Information -->
+    <div class="card p-3 shadow">
+        <p><strong>Name:</strong> {{ enquiry.name }}</p>
+        <p><strong>Phone:</strong> {{ enquiry.phone }}</p>
+        <p><strong>Email:</strong> {{ enquiry.email }}</p>
+        <p><strong>Course:</strong> {{ enquiry.course.course_name }}</p>
+        <p><strong>Status:</strong> {{ enquiry.status }}</p>
+        <p><strong>Source:</strong> {{ enquiry.source }}</p>
+        <p><strong>Created At:</strong> {{ enquiry.created_at }}</p>
+    </div>
+
+    <!-- 🔹 Navigation Buttons -->
+    <div class="mt-3">
+        <a href="{% url 'adminapp:enquiry_list' %}" class="btn btn-secondary">
+            Back to List
+        </a>
+
+        <a href="{% url 'adminapp:enquiry_edit' enquiry.id %}" class="btn btn-warning">
+            Edit
+        </a>
+    </div>
+
+    <!-- 🔹 Follow Up Section -->
+    <hr class="mt-4">
+
+    <h4 class="mb-3">Follow Ups</h4>
+
+    <!-- Add FollowUp -->
+    <a href="{% url 'adminapp:followup_add' enquiry.id %}" class="btn btn-primary btn-sm mb-3">
+        + Add Follow Up
+    </a>
+
+    <!-- FollowUp List -->
+    <!-- FollowUp Table -->
+    <table class="table table-bordered table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Today Remark</th>
+                
+                <th style="width:120px;">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for f in followups.all %}
+            <tr>
+                <td>{{ f.followup_date|date:"M d, Y" }}</td>
+
+                <td>
+                    {% if f.status == "Completed" %}
+                    <span class="badge bg-success">Completed</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">
+                        {{ f.status }}
+                    </span>
+                    {% endif %}
+                </td>
+
+                <td>{{ f.today_remark }}</td>
+                
+
+                <!-- ✅ Edit Button -->
+                <td>
+                    <a href="{% url 'adminapp:followup_edit' f.id %}" class="btn btn-sm btn-warning">
+                        ✏️ Edit
+                    </a>
+                </td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">
+                    No followups yet
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 🔥 ACTION SECTION -->
+    <div class="mt-4">
+
+        {% if enquiry.status == "Converted" %}
+
+        <span class="badge bg-success p-2">
+            Already Converted ✅
+        </span>
+
+        {% elif enquiry.status == "Not Interested" %}
+
+        <span class="badge bg-danger p-2">
+            Not Interested ❌
+        </span>
+
+        {% else %}
+
+        <!-- Convert Button -->
+        <a href="{% url 'adminapp:convert_admission' enquiry.id %}" class="btn btn-success">
+            ✅ Convert to Admission
+        </a>
+
+        <!-- Not Interested Button -->
+        <a href="{% url 'adminapp:not_interested' enquiry.id %}" class="btn btn-danger"
+            onclick="return confirm('Mark this enquiry as Not Interested?');">
+            ❌ Not Interested
+        </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% include "pages/footer.html" %}

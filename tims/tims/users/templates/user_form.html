@@ -1,20 +1,77 @@
-{% extends "forms.html" %}
+{% extends "base.html" %}
 
-{% block form_title %}
-User Registration
-{% endblock %}
+{% block content %}
 
-{% block form_action %}
-{% url 'users:user_register' %}
-{% endblock %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 95vh;">
 
-{% block form_body %}
-{% csrf_token %}
-{{ form.as_p }}
-{% endblock %}
+    <div class="card shadow-lg border-0 p-4"
+         style="max-width: 520px; width: 100%; border-radius: 20px;">
 
-{% block form_button %}
-<button type="submit" class="btn btn-success">
-    Register
-</button>
+        <!-- Title -->
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-success">User Registration</h2>
+            <p class="text-muted">Create a new account</p>
+        </div>
+
+        <!-- Form -->
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Username</label>
+                {{ form.username }}
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Email</label>
+                {{ form.email }}
+            </div>
+
+            <!-- Phone -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Phone Number</label>
+                {{ form.phone_number }}
+            </div>
+
+            <!-- Role -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Role</label>
+                {{ form.role }}
+            </div>
+
+            <!-- Status -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Status</label>
+                {{ form.status }}
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Password</label>
+                {{ form.password1 }}
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Confirm Password</label>
+                {{ form.password2 }}
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid mt-4">
+                <button type="submit"
+                        class="btn btn-success btn-lg fw-bold"
+                        style="border-radius: 10px;">
+                    Register
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
 {% endblock %}
