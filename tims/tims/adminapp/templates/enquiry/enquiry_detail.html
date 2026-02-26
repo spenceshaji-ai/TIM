@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+
 {% include "pages/header.html" %}
 
 {% block content %}
@@ -40,22 +40,53 @@
     </a>
 
     <!-- FollowUp List -->
-    <ul class="list-group">
-        {% for f in enquiry.followups.all %}
-        <li class="list-group-item">
-            <strong>{{ f.followup_date }}</strong> —
-            <span class="badge bg-info text-dark">
-                {{ f.status }}
-            </span>
-            <br>
-            {{ f.remarks }}
-        </li>
-        {% empty %}
-        <li class="list-group-item text-muted">
-            No followups yet.
-        </li>
-        {% endfor %}
-    </ul>
+    <!-- FollowUp Table -->
+    <table class="table table-bordered table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Today Remark</th>
+                
+                <th style="width:120px;">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for f in followups.all %}
+            <tr>
+                <td>{{ f.followup_date|date:"M d, Y" }}</td>
+
+                <td>
+                    {% if f.status == "Completed" %}
+                    <span class="badge bg-success">Completed</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">
+                        {{ f.status }}
+                    </span>
+                    {% endif %}
+                </td>
+
+                <td>{{ f.today_remark }}</td>
+                
+
+                <!-- ✅ Edit Button -->
+                <td>
+                    <a href="{% url 'adminapp:followup_edit' f.id %}" class="btn btn-sm btn-warning">
+                        ✏️ Edit
+                    </a>
+                </td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">
+                    No followups yet
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <!-- 🔥 ACTION SECTION -->
     <div class="mt-4">

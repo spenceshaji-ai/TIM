@@ -35,6 +35,22 @@ class UserAdminChangeForm(UserChangeForm):
 # =========================
 
 class UserForm(UserCreationForm):
+    
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control'
+        }),
+        help_text=""   # ❌ removes rules
+    )
+
+    password2 = forms.CharField(
+        label="Confirm Password",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control'
+        }),
+        help_text=""   # ❌ removes rules
+    )
     class Meta:
         model = User
         fields = ['username', 'name', 'email', 'phone_number', 'status', 'role']
@@ -60,6 +76,20 @@ class UserForm(UserCreationForm):
             'status': forms.Select(attrs={'class': 'form-control'}),
             'role': forms.Select(attrs={'class': 'form-control'}),
         }
+def clean_password1(self):
+    password = self.cleaned_data.get("password1")
+
+    from django.contrib.auth.password_validation import validate_password
+    from django.core.exceptions import ValidationError
+
+    try:
+       validate_password(password)
+    except ValidationError as e:
+            # Show rules ONLY when invalid
+        self.fields['password1'].help_text = "<br>".join(e.messages)
+        raise forms.ValidationError(e.messages)
+
+    return password
 
 
 # =========================

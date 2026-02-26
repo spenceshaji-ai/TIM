@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #dee0ea, #e3dde9);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .login-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-title {
+        font-weight: 700;
+        color: #333;
+    }
+
+    .login-subtitle {
+        color: #727171;
+        font-size: 14px;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid #ddd;
+        transition: 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 8px rgba(102,126,234,0.4);
+    }
+
+    .btn-login {
+        background: linear-gradient(45deg, #2f4bea, #2f2fec);
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 12px;
+        transition: 0.3s;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102,126,234,0.4);
+    }
+
+    .alert {
+        border-radius: 10px;
+    }
+</style>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh;">
+
+    <div class="login-card" style="max-width: 420px; width: 100%;">
+
+        <!-- Title -->
+        <div class="text-center mb-4">
+            <h2 class="login-title">Welcome 👋</h2>
+            <p class="login-subtitle">Login to continue</p>
+        </div>
+
+        <!-- Error Message -->
+        {% if error %}
+        <div class="alert alert-danger text-center">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Login Form -->
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Username</label>
+                {{ form.username }}
+            </div>
+
+            <!-- Password -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Password</label>
+                {{ form.password }}
+            </div>
+
+            <!-- Button -->
+            <button type="submit" class="btn btn-login w-100 text-white">
+                Login
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

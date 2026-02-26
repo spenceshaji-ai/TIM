@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import QuerySet
 from django.urls import reverse
@@ -17,6 +17,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views import View
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
 
 
 
@@ -44,7 +46,7 @@ from .forms import RoleForm
 
 
 class LoginView(View):
-    template_name = "users/login.html"
+    template_name = "login.html"
 
     def get(self, request):
         form = LoginForm()
@@ -60,11 +62,24 @@ class LoginView(View):
             user = authenticate(username=username, password=password)
 
             if user is not None:
+
+                  # 🔐 1️⃣ INACTIVE CHECK (ADD HERE)
+                if user.status != "active":
+                    messages.error(request, "Your account is inactive")
+                    return redirect("login")
                 login(request, user)
 
+                # 🔑 2️⃣ FORCE PASSWORD CHANGE
+                if user.must_change_password:
+                    return redirect("change_password")
+
                 # 🔥 Role Based Redirection
-                if user.role and user.role.role_name in ["Admin", "HR"]:
-                    return redirect("home")
+                  # 🔥 SUPER ADMIN CHECK
+                if user.is_superuser:
+                    return redirect("adminapp:home3")   # or superadmin dashboard
+
+                if user.role and user.role.role_name in ["Admin", "HR","Manager"]:
+                    return redirect("adminapp:home2")
 
                 elif user.role and user.role.role_name == "Faculty":
                     return redirect("faculty:home1")
@@ -73,69 +88,19 @@ class LoginView(View):
                 #     return redirect("student_dashboard")
 
                 else:
+                    messages.error(request, "Role not assigned properly")
                     return redirect("login")
-
+        messages.error(request, "Invalid username or password")
         return render(request, self.template_name, {"form": form})
 
 
-
 class LogoutView(View):
-    def get(self, request):
+    def post(self, request):
         logout(request)
         return redirect("login")
 
-
-# class RoleBasedRedirectView(View):
-#     def get(self, request):
-#         role = request.user.role.role_name
-
-#         if role in ["Super Admin", "Admin", "HR", "Manager", "Faculty"]:
-#             return redirect("users/staff_dashboard")
-
-#         elif role == "Student":
-#             return redirect("users/student_dashboard")
-
-#         return redirect("users/login")
-
-
-class RoleBasedRedirectView(View):
-
     def get(self, request):
-
-        if not request.user.is_authenticated:
-            return redirect("users:login")
-
-        if not request.user.role:
-            return redirect("users:login")
-
-        role = request.user.role.role_name
-
-        if role == "Super Admin":
-            return redirect("users:superadmin_dashboard")
-
-        elif role in ["Admin", "HR", "Manager"]:
-            return redirect("users:admin_dashboard")
-
-        elif role == "Faculty":
-            return redirect("users:faculty_dashboard")
-
-        elif role == "Student":
-            return redirect("users:student_dashboard")
-
-        return redirect("users:login")
-
-
-
-class StaffDashboardView(View):
-    def get(self, request):
-        return render(request, "users/staff_dashboard.html")
-
-
-class StudentDashboardView(View):
-    def get(self, request):
-        return render(request, "users/student_dashboard.html")
-
-
+        return render(request, "logout.html")
 
 
 class UserRegisterView(View):
@@ -184,17 +149,7 @@ class RoleCreateView(View):
 
 
 
-# @method_decorator(login_required, name="dispatch")
-# class UserListView(View):
 
-#     def get(self, request):
-
-#         # Role check
-#         if not request.user.role or request.user.role.role_name not in ["Super Admin", "Admin"]:
-#             return redirect("users:login")   # or redirect to dashboard
-
-#         users = User.objects.select_related("role").all()
-#         return render(request, "users/user_list.html", {"users": users})
 class UserListView(View):
 
     def get(self, request):

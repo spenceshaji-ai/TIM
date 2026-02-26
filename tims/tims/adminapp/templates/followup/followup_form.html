@@ -1,9 +1,11 @@
-{% extends "base.html" %}
+
 {% include "pages/header.html" %}
 
 {% load crispy_forms_tags %}
 
 {% block content %}
+
+{% now "Y-m-d" as today %}
 
 <div class="container mt-4">
 
@@ -22,9 +24,10 @@
             Save Follow Up
         </button>
 
-        <a href="{% url 'adminapp:enquiry_detail' enquiry.id %}" class="btn btn-secondary mt-3">
-            Cancel
-        </a>
+    <a href="{% url 'adminapp:enquiry_detail' enquiry.id %}" 
+       class="btn btn-secondary mt-3">
+    Cancel
+    </a>
 
     </form>
 

@@ -1,10 +1,12 @@
 # Create your views here.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
+from django.utils.timezone import now
+from django.db.models import OuterRef, Subquery
 
 from tims.adminapp.models import Course, Batch, Enquiry, FollowUp, Admission,Payment
 from .forms import CourseForm, BatchForm, EnquiryForm, FollowUpForm, AdmissionForm,PaymentForm
-
+from datetime import date
 
 from tims.adminapp.models import FacultyAssignment,Assignstudent
 from django.contrib.auth import get_user_model
@@ -13,6 +15,8 @@ from .forms import FacultyAssignmentForm,AssignstudentForm
 from django.contrib import messages
 from django.db import models
 from django.db.models import Sum
+from tims.users.models import Role
+from django.contrib import messages
 
 
 
@@ -128,7 +132,20 @@ class EnquiryListView(View):
 
     def get(self, request):
         enquiries = Enquiry.objects.all().order_by("-created_at")
-        return render(request, self.template_name, {"enquiries": enquiries})
+        # 🔥 Attach next follow-up date from FollowUp table
+        for enquiry in enquiries:
+            last_followup = FollowUp.objects.filter(
+                enquiry=enquiry
+            ).order_by("-id").first()   # latest followup
+
+            
+            if last_followup and last_followup.next_followup_date:
+                enquiry.next_followup_date = last_followup.next_followup_date
+        
+        return render(request, self.template_name, {
+               "enquiries": enquiries,
+               "today": date.today(),   # ⭐ REQUIRED
+        })
 
 class EnquiryCreateView(View):
     template_name = "enquiry/enquiry_form.html"
@@ -141,17 +158,37 @@ class EnquiryCreateView(View):
         form = EnquiryForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            enquiry=form.save()
+             # 🔥 Create FollowUp automatically if date exists
+            if enquiry.next_followup_date:
+                FollowUp.objects.create(
+                    enquiry=enquiry,
+                    followup_date=enquiry.next_followup_date,
+                    status="Pending"   # or any default
+                )
+            
+
             return redirect("adminapp:enquiry_list")
 
         return render(request, self.template_name, {"form": form})
+
+
 
 class EnquiryDetailView(View):
     template_name = "enquiry/enquiry_detail.html"
 
     def get(self, request, pk):
         enquiry = get_object_or_404(Enquiry, pk=pk)
-        return render(request, self.template_name, {"enquiry": enquiry})
+
+        followups = FollowUp.objects.filter(
+            enquiry=enquiry
+        ).order_by("-followup_date")   # 🔥 newest date first
+
+        return render(request, self.template_name, {
+            "enquiry": enquiry,
+            "followups": followups
+        })
+
 
 class EnquiryUpdateView(View):
     template_name = "enquiry/enquiry_form.html"
@@ -167,7 +204,7 @@ class EnquiryUpdateView(View):
 
         if form.is_valid():
             form.save()
-            return redirect("enquiry_list")
+            return redirect("adminapp:enquiry_list")
 
         return render(request, self.template_name, {"form": form})
 
@@ -181,7 +218,7 @@ class EnquiryDeleteView(View):
     def post(self, request, pk):
         enquiry = get_object_or_404(Enquiry, pk=pk)
         enquiry.delete()
-        return redirect("enquiry_list")
+        return redirect("adminapp:enquiry_list")
     
 class MarkNotInterestedView(View):
 
@@ -199,9 +236,12 @@ class FollowUpCreateView(View):
     template_name = "followup/followup_form.html"
 
     def get(self, request, enquiry_id):
-        form = FollowUpForm()
+        
         enquiry = get_object_or_404(Enquiry, id=enquiry_id)
-
+        form = FollowUpForm(initial={
+            "followup_date": enquiry.next_followup_date
+        })
+        
         return render(request, self.template_name, {
             "form": form,
             "enquiry": enquiry
@@ -214,24 +254,68 @@ class FollowUpCreateView(View):
         if form.is_valid():
             followup = form.save(commit=False)
             followup.enquiry = enquiry
-            followup.save()
+            followup.created_by = request.user
 
-            return redirect("adminapp:" \
-            "enquiry_detail", pk=enquiry.id)
+            followup.save()
+            # 👇 Update enquiry's next follow-up date
+            enquiry.next_followup_date = followup.next_followup_date
+            enquiry.save()
+
+            return redirect("adminapp:""enquiry_detail", pk=enquiry.id)
 
         return render(request, self.template_name, {
             "form": form,
             "enquiry": enquiry
         })
-    
 class FollowUpListView(View):
     template_name = "followup/followup_list.html"
 
-    def get(self, request):
-        followups = FollowUp.objects.all().order_by("-followup_date")
-        return render(request, self.template_name, {"followups": followups})
+    def get(self, request, enquiry_id):
+        enquiry = get_object_or_404(Enquiry, id=enquiry_id)
+
+        followups = FollowUp.objects.filter(
+            enquiry=enquiry
+        ).order_by("-followup_date")   # 🔥 Feb 20 first
+
+        return render(request, self.template_name, {
+            
+            "followups": followups,
+            "enquiry": enquiry
+        })
+from django.views import View
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import FollowUp
+from .forms import FollowUpForm
 
 
+class FollowUpUpdateView(View):
+    template_name = "followup/followup_form.html"
+
+    def get(self, request, pk):
+        followup = get_object_or_404(FollowUp, id=pk)
+        form = FollowUpForm(instance=followup)
+
+        return render(request, self.template_name, {
+            "form": form,
+            "followup": followup,
+            "enquiry":followup.enquiry
+        })
+
+    def post(self, request, pk):
+        followup = get_object_or_404(FollowUp, id=pk)
+        form = FollowUpForm(request.POST, instance=followup)
+
+        if form.is_valid():
+            form.save()
+
+            # 🔥 Go back to enquiry detail page
+            return redirect("adminapp:enquiry_detail", followup.enquiry_id)
+
+        return render(request, self.template_name, {
+            "form": form,
+            "followup": followup,
+            "enquiry":followup.enquiry
+        })
 class ConvertToAdmissionView(View):
     template_name = "admission/admission_form.html"
 
@@ -272,25 +356,70 @@ class ConvertToAdmissionView(View):
             "form": form,
             "enquiry": enquiry
         })
-    
+
 class AdmissionListView(View):
     template_name = "admission/admission_list.html"
 
     def get(self, request):
+
         admissions = Admission.objects.all().order_by("-admission_date")
+
         for adm in admissions:
             paid = adm.payments.aggregate(
                 total=models.Sum("amount")
-              )["total"] or 0
+            )["total"] or 0
 
             adm.paid_amount = paid
             adm.pending_amount = adm.course.fee - paid
 
+        # ⭐ ADD THIS HERE
+        users_usernames = list(
+            User.objects.values_list("username", flat=True)
+        )
+
         return render(request, self.template_name, {
-             "admissions": admissions
-         })
+            "admissions": admissions,
+            "users_usernames": users_usernames   # ⭐ PASS TO TEMPLATE
+        })
 
 
+
+class CreateStudentAccountView(View):
+
+    def post(self, request, admission_id):
+
+        # 🔐 Allow only Admin
+        if not (request.user.role and request.user.role.role_name == "Admin"):
+            return redirect("adminapp:admission_list")
+
+        admission = get_object_or_404(Admission, id=admission_id)
+        enquiry = admission.enquiry
+
+        # ⭐ Correct role name
+        student_role = Role.objects.get(role_name="Student")
+
+        # ⭐ Check if already registered
+        existing_user = User.objects.filter(username=enquiry.phone).first()
+
+        if existing_user:
+            messages.info(request, "Student already registered")
+            return redirect("adminapp:admission_list")
+
+        # ⭐ Create new account
+        User.objects.create_user(
+            username=enquiry.phone,
+            email=enquiry.email or "",
+            password="student123",
+            role=student_role,
+            first_name=enquiry.name
+        )
+
+        enquiry.status = "Converted"
+        enquiry.save()
+
+        messages.success(request, "Student registered successfully")
+
+        return redirect("adminapp:admission_list")
     
 
 
@@ -301,6 +430,40 @@ class AdmissionListView(View):
 
 
 class PaymentCreateView(View):
+
+
+     # 👉 Show form + admission fee data
+    def get(self, request):
+
+        form = PaymentForm()
+
+        admissions = Admission.objects.select_related("course").all()
+
+        admission_data = []
+
+        for adm in admissions:
+            total_fee = adm.course.fee
+
+            paid_total = adm.payments.aggregate(
+                total=Sum("amount")
+            )["total"] or 0
+
+            admission_data.append({
+                "id": adm.id,
+                "fee": float(total_fee),
+                "paid": float(paid_total),
+            })
+
+        return render(
+            request,
+            "payment/payment_form.html",
+            {
+                "form": form,
+                "admission_data": admission_data   # ⭐ MUST send this
+            }
+        )
+
+    
 
     def post(self, request):
         form = PaymentForm(request.POST)
@@ -389,7 +552,7 @@ class PaymentDeleteView(View):
         payment.delete()
         return redirect("adminapp:payment_list")
 
-    
+
 
 class FacultyAssignmentCreateView(View):
     template_name = "faculty_assignment.html"
@@ -494,3 +657,8 @@ class AssignStudentDeleteView(View):
         assignment = get_object_or_404(Assignstudent, pk=pk)
         assignment.delete()
         return redirect("adminapp:assign-student-list")
+
+class Home2View(View):
+    def get(self, request):
+        return render(request, "pages/adminhome.html")
+

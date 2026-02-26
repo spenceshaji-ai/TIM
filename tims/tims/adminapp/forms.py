@@ -1,5 +1,5 @@
 from django import forms
-
+from django.utils import timezone
 from .models import Enquiry,FollowUp,Admission,Course,Batch,Payment, FacultyAssignment,Assignstudent
 from django.contrib.auth import get_user_model
 
@@ -68,6 +68,8 @@ class EnquiryForm(forms.ModelForm):
 
         # ✅ Optional: Add placeholder
         self.fields["course"].empty_label = "Select Course"
+         # ⭐ FORCE DATE INPUT TYPE
+        self.fields["next_followup_date"].widget.input_type = "date"
     class Meta:
         model = Enquiry
 
@@ -78,6 +80,7 @@ class EnquiryForm(forms.ModelForm):
             "course",
             "source",
             "status",
+            "next_followup_date", 
         ]
 
         widgets = {
@@ -114,6 +117,11 @@ class EnquiryForm(forms.ModelForm):
             "status": forms.Select(attrs={
                 "class": "form-control"
             }),
+            # ✅ Next Follow-up Date
+            "next_followup_date": forms.DateInput(attrs={
+                "class": "form-control",
+                "type": "date"   # 👈 IMPORTANT for calendar picker
+            }),
         }
 
 
@@ -126,7 +134,8 @@ class FollowUpForm(forms.ModelForm):
 
         fields = [
             "followup_date",
-            "remarks",
+            "today_remark",
+            "next_followup_date",
             "status",
         ]
 
@@ -137,17 +146,21 @@ class FollowUpForm(forms.ModelForm):
                 "type": "date"
             }),
 
-            "remarks": forms.Textarea(attrs={
+            "today_remark": forms.Textarea(attrs={
                 "class": "form-control",
-                "placeholder": "Enter Follow Up Remarks",
+                "placeholder": "Enter Today's Discussion",
                 "rows": 3
+            }),
+
+            "next_followup_date": forms.DateInput(attrs={
+                "class": "form-control",
+                "type": "date"
             }),
 
             "status": forms.Select(attrs={
                 "class": "form-control"
             }),
         }
-
 
 class AdmissionForm(forms.ModelForm):
     class Meta:
@@ -198,10 +211,22 @@ class AdmissionForm(forms.ModelForm):
 
 
 class PaymentForm(forms.ModelForm):
+
+      # ➜ Extra field (not in model)
+    pending_fee = forms.DecimalField(
+        required=False,
+        label="Pending Fee",
+        widget=forms.NumberInput(attrs={
+            "class": "form-control",
+            "readonly": "readonly",
+            "placeholder": "Pending Fee"
+        })
+    )
     class Meta:
         model = Payment
         fields = [
             "admission",
+            "pending_fee",   # ➜ Add here to display in form
             "amount",
             "status",
         ]
@@ -220,14 +245,6 @@ class PaymentForm(forms.ModelForm):
         }
 
 
-#class FacultyAssignmentForm(forms.ModelForm):
-   # class Meta:
-      #  model = FacultyAssignment
-        #fields = [
-         #   "faculty",
-           # "course",
-           # "batch",
-       # ]
 class FacultyAssignmentForm(forms.ModelForm):
     class Meta:
         model = FacultyAssignment

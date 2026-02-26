@@ -29,7 +29,7 @@ class Batch(models.Model):
 class Enquiry(models.Model):
 
     name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=15)
+    phone = models.CharField(max_length=15,unique=True)
     email = models.EmailField(blank=True, null=True)
 
     course = models.ForeignKey(
@@ -66,7 +66,7 @@ class Enquiry(models.Model):
         null=True,
         blank=True
     )
-
+    next_followup_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -79,9 +79,9 @@ class FollowUp(models.Model):
         on_delete=models.CASCADE,
         related_name="followups"
     )
-
+    today_remark = models.TextField(blank=True, null=True)    # today's discussion
     followup_date = models.DateField()
-
+    next_followup_date = models.DateField(null=True, blank=True)
     status = models.CharField(
         max_length=20,
         choices=[
@@ -91,17 +91,12 @@ class FollowUp(models.Model):
         ],
         default="Pending"
     )
-
-    remarks = models.TextField(blank=True)
-
     created_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True
     )
-
     created_at = models.DateTimeField(auto_now_add=True)
-
     def __str__(self):
         return f"{self.enquiry.name} - {self.followup_date}"
 

@@ -1,6 +1,4 @@
-{% extends "base.html" %}
 {% include "pages/header.html" %}
-
 
 {% block content %}
 
@@ -13,7 +11,7 @@
             + Add Enquiry
         </a>
     </div>
-
+    
     <table class="table table-bordered table-hover">
         <thead class="table-dark">
             <tr>
@@ -22,6 +20,7 @@
                 <th>Status</th>
                 <th>Source</th>
                 <th>Actions</th>
+                <th>Next Follow-up</th>
             </tr>
         </thead>
 
@@ -34,25 +33,53 @@
                 <td>{{ enquiry.source }}</td>
 
                 <td>
-                    <a href="{% url 'adminapp:enquiry_detail' enquiry.id %}" class="btn btn-info btn-info">
+                    <a href="{% url 'adminapp:enquiry_detail' enquiry.id %}" class="btn btn-info btn-sm">
                         View
                     </a>
 
-                    <a href="{% url 'adminapp:enquiry_edit' enquiry.id %}" class="btn btn-warning btn-warning">
+                    <a href="{% url 'adminapp:enquiry_edit' enquiry.id %}" class="btn btn-warning btn-sm">
                         Edit
                     </a>
 
-                    <a href="{% url 'adminapp:enquiry_delete' enquiry.id %}" class="btn btn-danger btn-danger">
+                    <a href="{% url 'adminapp:enquiry_delete' enquiry.id %}" class="btn btn-danger btn-sm">
                         Delete
                     </a>
-                   
+
+
+                    <!-- Follow-Up button -->
+                    {% if enquiry.status != "Not Interested" %}
+                    <a href="{% url 'adminapp:followup_add' enquiry.id %}" class="btn btn-primary btn-sm">
+                        Follow-Up
+                    </a>
+                    {% endif %}
                 </td>
+                <td
+                {% if enquiry.next_followup_date %}
+                {% if enquiry.next_followup_date < today %}
+                    style="background:red !important; color:black !important; font-weight:bold;"
+                {% elif enquiry.next_followup_date == today %}
+                    style="background:#ffd93d !important; color:black !important; font-weight:bold;"
+                {% endif %}
+                {% endif %}
+                >
+
+                {% if enquiry.next_followup_date %}
+                    {{ enquiry.next_followup_date|date:"d-m-Y" }}
+                {% else %}
+                    No date
+                {% endif %}
+
+                </td>
+                
+
             </tr>
             {% endfor %}
-        </tbody> 
+        </tbody>
     </table>
 
 </div>
 
+
 {% endblock %}
+
 {% include "pages/footer.html" %}

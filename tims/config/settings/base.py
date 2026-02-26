@@ -92,7 +92,8 @@ LOCAL_APPS = [
     
     "tims.facultyapp",
     "tims.adminapp",
-    "tims.Student"
+    "tims.Student",
+    "tims.Admin"
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
