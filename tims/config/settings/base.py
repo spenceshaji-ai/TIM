@@ -116,7 +116,7 @@ AUTH_USER_MODEL = "users.User"
 LOGIN_REDIRECT_URL = "users:redirect"
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
-LOGIN_URL = "account_login"
+LOGIN_URL = "users:login"
 
 # PASSWORDS
 # ------------------------------------------------------------------------------
@@ -197,7 +197,9 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
                 "tims.users.context_processors.allauth_settings",
-            ],
+                "tims.adminapp.context_processors.admin_leave_notifications",
+                "tims.adminapp.context_processors.faculty_leave_notification",           
+             ],
         },
     },
 ]

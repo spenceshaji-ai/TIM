@@ -3,7 +3,7 @@
 <html lang="en" data-layout-mode="detached">
 
 <head>
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
 
     <meta charset="utf-8" />
     <title>Layout Detached | Hyper - Responsive Bootstrap 5 Admin Dashboard</title>
@@ -12,7 +12,7 @@
     <meta content="Coderthemes" name="author" />
 
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{% static 'admin/assets/images/favicon.ico' %}">
+    <link rel="shortcut icon" href="assets/images/favicon.ico">
 
     <!-- Daterangepicker css -->
     <link href="{% static 'admin/assets/vendor/daterangepicker/daterangepicker.css' %}" rel="stylesheet" type="text/css">
@@ -156,9 +156,7 @@
                             </form>
                         </div>
                     </li>
-                    <li class="dropdown notification-list">
-    <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#">
-        <i class="uil-bell"></i>
+                   
 
 
 
@@ -190,33 +188,37 @@
                             </a>
 
                         </div>
-                   <li class="dropdown notification-list">
+                    </li>
+
+<li class="dropdown notification-list">
     <a class="nav-link dropdown-toggle arrow-none position-relative"
        data-bs-toggle="dropdown" href="#">
 
         <i class="ri-notification-3-line font-22
-           {% if admin_pending_leave_count > 0 %}text-danger{% endif %}">
+           {% if faculty_leave_update %}text-danger{% endif %}">
         </i>
 
-        {% if admin_pending_leave_count > 0 %}
+        {% if faculty_leave_update %}
         <span class="notification-dot"></span>
         {% endif %}
     </a>
 
     <div class="dropdown-menu dropdown-menu-end dropdown-lg py-0">
         <div class="p-2 border-bottom">
-            <h6 class="m-0 font-16 fw-semibold">Leave Notifications</h6>
+            <h6 class="m-0 font-16 fw-semibold">Leave Update</h6>
         </div>
 
         <div class="text-center py-3">
-            <p class="mb-2">New leave request received</p>
+            <p class="mb-2">Your leave status has been updated</p>
 
-            <a href="{% url 'adminapp:leave_requests' %}" class="btn btn-sm btn-primary">
-                View Requests
+            <a href="{% url 'faculty:faculty_my_leaves' %}" class="btn btn-sm btn-primary">
+                View My Leaves
             </a>
         </div>
     </div>
 </li>
+
+
 
 
                     <li class="dropdown d-none d-sm-inline-block">
@@ -419,96 +421,45 @@
                     </li>
 
                     <li class="side-nav-title">Leave Management</li>
-                             <li class="side-nav-item">
-                        
-                        <a href="{% url 'adminapp:leave_requests' %}" class="side-nav-link">
-                            <i class="uil-calender"></i>
-                            <span> Leave Requests </span>
-                        </a>
-                    </li>
+
                     <li class="side-nav-item">
-                        
-                        <a href="{% url 'admin_app:jobtype_create' %}"  class="side-nav-link">
+                        <a href="{% url 'faculty:faculty_my_leaves' %}" class="side-nav-link">
                             <i class="uil-calender"></i>
-                            <span> Create Jobs Types </span>
-                        </a>
-                    </li>
-                    <li class="side-nav-item">
-                        <a href="{% url 'adminapp:admin_training_approval_list' %}" class="side-nav-link">
-                            <i class="uil-calender"></i>
-                            <span> Training Approval </span>
-                        </a>
-                    </li>   
-                    <li class="side-nav-item">    
-                        <a href="{% url 'adminapp:add' %}" class="side-nav-link">
-                            <i class="uil-calender"></i>
-                            <span> Provide Certificate </span>
+                            <span> My Leaves </span>
                         </a>
                     </li>
 
                     <li class="side-nav-item">
-                        <a href="{% url 'adminapp:faculty_report_list' %}" class="side-nav-link">
-                        
-                            <span> Faculty Report </span>
-                        </a>
-                    </li>
-                    <li class="side-nav-item">
-                        
-                        <a href="{% url 'admin_app:job_create' %}" class="side-nav-link">
+                        <a href="{% url 'faculty:faculty_apply_leave' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
-                            <span> Create Jobs </span>
+                            <span> Leave Apply </span>
                         </a>
                     </li>
-                    <li class="side-nav-item"></li>        
-                        <a href="{% url 'adminapp:admin_feedback_list' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> Feedback list </span>
-                        </a>
-                    </li>
-                        <li class="side-nav-item"></li>        
-                       
-                        <a href="{% url 'adminapp:leave_calendar' %}" class="side-nav-link">
+                     <li class="side-nav-item">
+                        <a href="{% url 'faculty:leave_calendar' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
                             <span> Leave Calendar </span>
                         </a>
                     </li>
-                     <li class="side-nav-item">
-                        <a href="{% url 'adminapp:leave_users' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> Leave Users </span>
-                        </a>
-                    </li>
-                                        <li class="side-nav-title">Salary Management</li>
-
-                        
-                    
-                         <li class="side-nav-item">
-                        <a href="{% url 'adminapp:salary_users' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> Salary View </span>
+                    <li class="side-nav-item">
+                        <a data-bs-toggle="collapse" href="#sidebarCrm" aria-expanded="false" aria-controls="sidebarCrm" class="side-nav-link">
+                            <i class="uil uil-tachometer-fast"></i>
+                            <span class="badge bg-danger text-white float-end">New</span>
+                            <span> CRM </span>
                         </a>
                         <div class="collapse" id="sidebarCrm">
                             <ul class="side-nav-second-level">
                                 <li>
-                                    <a href="{% url 'adminapp:training_session_list' %}">Daily Sessions</a>
+                                    <a href="crm-projects.html">Projects</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'adminapp:assignment-report' %}">Users details</a>
+                                    <a href="crm-orders-list.html">Orders List</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'leave_requests' %}">Clients</a>
-                                </li>
-                                <li>  
-                                    <a href="{% url 'adminapp:course_add' %}">create course</a>
+                                    <a href="crm-clients.html">Clients</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'adminapp:batch_add' %}">create batch</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'adminapp:faculty_assignment' %}">Assign faculty</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'adminapp:assign-student' %}">Assign Student</a>
+                                    <a href="crm-management.html">Management</a>
                                 </li>
                             </ul>
                         </div>
@@ -523,7 +474,7 @@
                         <div class="collapse" id="sidebarEcommerce">
                             <ul class="side-nav-second-level">
                                 <li>
-                                    <a href="{% url 'adminapp:mark-completed' %}">Course completed students list</a>
+                                    <a href="apps-ecommerce-products.html">Products</a>
                                 </li>
                                 <li>
                                     <a href="apps-ecommerce-products-details.html">Products Details</a>
@@ -593,9 +544,9 @@
                     </li>
 
                     <li class="side-nav-item">
-                        <a href="{% url 'admin_app:admin_application_list' %}" class="side-nav-link">
+                        <a href="apps-social-feed.html" class="side-nav-link">
                             <i class="uil-rss"></i>
-                            <span> Student Job Application</span>
+                            <span> Social Feed </span>
                         </a>
                     </li>
 
@@ -1173,5 +1124,4 @@
             </div>
         </div>
         <!-- ========== Left Sidebar End ========== -->
-          <div class="content-page">
-        
+        <div class="content-page">

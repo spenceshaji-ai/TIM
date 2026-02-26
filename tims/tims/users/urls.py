@@ -1,8 +1,7 @@
 from django.urls import path
 from .views import *
-from .views import user_detail_view
-from .views import user_redirect_view
-from .views import user_update_view
+
+
 
 app_name = "users"
 urlpatterns = [
@@ -13,5 +12,6 @@ urlpatterns = [
     path("role/add/", RoleCreateView.as_view(), name="role_add"),
     path('login/', LoginView.as_view(), name='login')
 ]
+
 
 

@@ -11,17 +11,16 @@ from django.views.generic import RedirectView
 from django.views.generic import UpdateView
 from django.views.generic import ListView, CreateView, DeleteView
 from tims.users.models import User
-from .forms import UserForm
+from users.forms import UserForm
 from django.views.generic import TemplateView
 
 
 from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from tims.users.models import User
-from .forms import UserForm,LoginForm
-from django.views.generic import TemplateView
 from tims.users.models import User,Role
+from users.forms import UserForm,LoginForm
+from django.views.generic import TemplateView
 from django.contrib.auth import authenticate, login, logout
 
 
@@ -54,10 +53,20 @@ user_update_view = UserUpdateView.as_view()
 class UserRedirectView(LoginRequiredMixin, RedirectView):
     permanent = False
 
-    def get_redirect_url(self) -> str:
-        return reverse("users:detail", kwargs={"username": self.request.user.username})
+    def get_redirect_url(self):
+        user = self.request.user
 
-user_redirect_view = UserRedirectView.as_view()
+        if user.role and user.role.role_name == "Faculty":
+            return reverse("faculty:dashboard")
+
+        elif user.role and user.role.role_name == "Admin":
+            return reverse("adminapp:home")
+
+        elif user.role and user.role.role_name == "Student":
+            return reverse("student:home")
+
+        return reverse("users:login")
+
 
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
@@ -86,7 +95,7 @@ class UserRegisterView(View):
         return render(request, self.template_name, {"form": form})
 
 
-from .forms import RoleForm
+from users.forms import RoleForm
 
 class RoleCreateView(View):
     template_name = "role_form.html"

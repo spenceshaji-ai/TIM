@@ -1,8 +1,12 @@
 from django.urls import path
+from django.views.generic import TemplateView
+
+from adminapp.views import Home2View
+from django.urls import path
 from .views import *
 app_name = "faculty"
 urlpatterns = [
-    path('', Home1View.as_view(), name='home1'),
+    path('', Home2View.as_view(), name='home1'),
     path("sessions/", TrainingSessionListView.as_view(), name="training_list"),
     path("sessions/create/", TrainingSessionCreateView.as_view(), name="training_create"),
     path("sessions/<int:pk>/update/", TrainingSessionUpdateView.as_view(), name="training_update"),
@@ -29,6 +33,42 @@ urlpatterns = [
         FacultyMaterialAddView.as_view(),
         name="material_add"
     ),
-    path('', Home1View.as_view(), name='home1')
+    path('', Home1View.as_view(), name='home1'),
+
+
+
+
+
+  
+    path("", FacultyDashboardView.as_view(), name="dashboard"),
+path(
+        "apply-leave/",
+        ApplyLeaveView.as_view(),
+        name="faculty_apply_leave",
+    ),    
+path(
+        "my-leaves/",
+        MyLeavesView.as_view(),
+        name="faculty_my_leaves",
+    ),
+path(
+        "delete-leave/<int:leave_id>/",
+        DeleteLeaveView.as_view(),
+        name="faculty_delete_leave",
+    ),
+
+    path(
+        "leave-calendar/",
+        TemplateView.as_view(
+            template_name="faculty/leave_calendar.html"
+        ),
+        name="leave_calendar"
+    ),
+    path(
+        "leave-calendar/data/",
+        LeaveCalendarDataView.as_view(),
+        name="leave_calendar_data"
+    ),
+
 ]
 

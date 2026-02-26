@@ -4,11 +4,11 @@
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from Admin.models import Job,Jobtype
-from .forms import JobForm,JobtypeForm
+from Admin.forms import JobForm,JobtypeForm
 
 from Student.models import JobApplication
 from  Admin.models import Interview
-from .forms import ScheduleInterviewForm
+from Admin.forms import ScheduleInterviewForm
 from django.utils import timezone
 
 

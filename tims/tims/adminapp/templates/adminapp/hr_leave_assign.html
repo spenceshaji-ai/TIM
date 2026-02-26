@@ -1,0 +1,77 @@
+{% extends "adminapp/forms.html" %}
+
+{% block form_title %}
+Assign Leave - {{ employee.username }}
+{% endblock %}
+
+{% block form_action %}
+{% url 'adminapp:hr_leave_assign' employee.id %}
+{% endblock %}
+
+{% block form_body %}
+
+<h5 class="mb-3">Current Leave Status ({{ year }})</h5>
+
+<table class="table table-bordered mb-4">
+    <thead class="table-dark">
+        <tr>
+            <th>Leave Type</th>
+            <th>Total Allocated</th>
+            <th>Used</th>
+            <th>Remaining</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for balance in balances %}
+        <tr>
+            <td>{{ balance.leave_type.get_name_display }}</td>
+            <td>{{ balance.earned_days }}</td>
+            <td>{{ balance.used_days }}</td>
+            <td>{{ balance.remaining_days }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-center">
+                No leave allocated yet.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+
+<h5 class="mb-3">Assign / Update Leave Allocation</h5>
+
+<div class="mb-3">
+    <label class="form-label">Leave Type</label>
+    <select name="leave_type" class="form-control" required>
+        <option value="">Select Leave Type</option>
+        {% for leave in leave_types %}
+        <option value="{{ leave.id }}">
+            {{ leave.get_name_display }}
+        </option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Total Days for {{ year }}</label>
+    <input type="number"
+           name="total_days"
+           class="form-control"
+           required>
+</div>
+
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-success">
+    Save Allocation
+</button>
+
+<a href="{% url 'adminapp:leave_users' %}"
+   class="btn btn-secondary">
+    Back
+</a>
+{% endblock %}
