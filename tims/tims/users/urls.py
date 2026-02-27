@@ -1,7 +1,12 @@
 from django.urls import path
-from .views import *
-app_name="users"
+from .views import(
+    UserRegisterView,
+    RoleCreateView,
+    LoginView
+    ) 
 
+
+app_name = "users"
 urlpatterns = [
     path("login/", RoleBasedLoginView.as_view(), name="login"),
     path("register/", UserRegisterView.as_view(), name="user_register"),

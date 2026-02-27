@@ -12,7 +12,7 @@
     <meta content="Coderthemes" name="author" />
 
     <!-- App favicon -->
-    <link rel="shortcut icon" href="assets/images/favicon.ico">
+    <link rel="shortcut icon" href="{% static 'admin/assets/images/favicon.ico' %}">
 
     <!-- Daterangepicker css -->
     <link href="{% static 'admin/assets/vendor/daterangepicker/daterangepicker.css' %}" rel="stylesheet" type="text/css">
@@ -422,15 +422,38 @@
 
                     <li class="side-nav-item">
                         <a href="{% url 'adminapp:leave_requests' %}" class="side-nav-link">
+                             <i class="uil-calender"></i>
+                            <span> Leave Request</span>
+                        </a>
+                    </li>
+                             <li class="side-nav-item">
+                        
+                        <a href="{% url 'admin_app:jobtype_create' %}"  class="side-nav-link">
+                            <i class="uil-calender"></i>
+                            <span> Create Jobs Types </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href="{% url 'adminapp:admin_training_approval_list' %}" class="side-nav-link">
                             <i class="uil-calender"></i>
                             <span> Approve </span>
-                        </a>
+                        
                     </li>
 
                     <li class="side-nav-item">
                         <a href="{% url 'adminapp:leave_calendar' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
-                            <span> Leave Calendar </span>
+                            <span> Leave Calendar </span> </a> </li> <li class="side-nav-item">
+                        <a href="{% url 'adminapp:faculty_report_list' %}" class="side-nav-link">
+                        
+                            <span> Faculty Report </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        
+                        <a href="{% url 'admin_app:job_create' %}" class="side-nav-link">
+                            <i class="uil-comments-alt"></i>
+                            <span> Create Jobs </span>
                         </a>
                     </li>
                      <li class="side-nav-item">
@@ -448,6 +471,22 @@
                             <i class="uil-comments-alt"></i>
                             <span> Salary View </span>
                         </a>
+                        <div class="collapse" id="sidebarCrm">
+                            <ul class="side-nav-second-level">
+                                <li>
+                                    <a href="{% url 'adminapp:training_session_list' %}">Projects</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'adminapp:assignment-report' %}">Orders List</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'leave_requests' %}">Clients</a>
+                                </li>
+                                <li>
+                                    <a href="crm-management.html">Management</a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
 
                     <li class="side-nav-item">
@@ -529,9 +568,9 @@
                     </li>
 
                     <li class="side-nav-item">
-                        <a href="apps-social-feed.html" class="side-nav-link">
+                        <a href="{% url 'admin_app:admin_application_list' %}" class="side-nav-link">
                             <i class="uil-rss"></i>
-                            <span> Social Feed </span>
+                            <span> Student Job Application</span>
                         </a>
                     </li>
 
@@ -1109,4 +1148,5 @@
             </div>
         </div>
         <!-- ========== Left Sidebar End ========== -->
-        <div class="content-page">
+          <div class="content-page">
+        

@@ -1,19 +1,28 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import authenticate, login
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import QuerySet
 from django.urls import reverse
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse_lazy
 from django.views.generic import DetailView
 from django.views.generic import RedirectView
 from django.views.generic import UpdateView
+from django.views.generic import ListView, CreateView, DeleteView
+from tims.users.models import User
+from .forms import UserForm
+from django.views.generic import TemplateView
+
+
 from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from tims.users.models import User
-from .forms import UserForm
+from .forms import UserForm,LoginForm
 from django.views.generic import TemplateView
 from tims.users.models import User,Role
+from django.contrib.auth import authenticate, login, logout
 
 
 class UserDetailView(LoginRequiredMixin, DetailView):
@@ -59,6 +68,10 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
         return reverse("users:login")
 
+
+from django.views import View
+from django.shortcuts import render, redirect, get_object_or_404
+#from faculty.models import TrainingSession,StudentAttendance
 
 class UserRegisterView(View):
     template_name = "user_form.html"
@@ -122,3 +135,37 @@ class RoleBasedLoginView(LoginView):
 
         return reverse_lazy("users:redirect")  # fallback
     
+
+class LoginView(View):
+    template_name = "login.html"
+
+    def get(self, request):
+        form = LoginForm()
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request):
+        form = LoginForm(request, data=request.POST)
+
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
+
+            user = authenticate(username=username, password=password)
+
+            if user is not None:
+                login(request, user)
+
+                # 🔥 Role Based Redirection
+                if user.role and user.role.role_name in ["Admin", "HR"]:
+                    return redirect("home")
+
+                elif user.role and user.role.role_name == "Faculty":
+                    return redirect("faculty:home1")
+
+                elif user.role and user.role.role_name == "Student":
+                    return redirect("Student:studenthome")
+
+                else:
+                    return redirect("login")
+
+        return render(request, self.template_name, {"form": form})

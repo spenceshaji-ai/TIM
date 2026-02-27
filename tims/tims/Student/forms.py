@@ -1,6 +1,12 @@
 from django import forms
-from Student.models import Student
+from tims.Student.models import Student,JobApplication
 
+from tims.adminapp.models import Course  
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
+
+# Student Registration
 class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
@@ -40,4 +46,26 @@ class StudentForm(forms.ModelForm):
                 'placeholder': 'Enter qualification',
                 'class': 'form-control'
             }),
+        }
+
+#Student Job Application
+
+class ApplicationForm(forms.ModelForm):
+    class Meta:
+        model = JobApplication
+        fields = ["resume"]
+
+        widgets = {
+            "resume": forms.FileInput(attrs={
+                "class": "form-control",
+                "accept": ".pdf,.doc,.docx"
+            })
+        }
+
+        labels = {
+            "resume": "Upload Resume"
+        }
+
+        help_texts = {
+            "resume": "Allowed formats: PDF, DOC, DOCX"
         }

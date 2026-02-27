@@ -4,9 +4,13 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
+from tims.users.views import LoginView
+
 
 urlpatterns = [
+    
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
+
     path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
 
     # Admin
@@ -14,26 +18,39 @@ urlpatterns = [
 
     # Auth
     path("accounts/", include("allauth.urls")),
-    # Admin App
-    path("adminapp/", include("tims.adminapp.adminapp_urls")),
+    
+    #path('adminapp/', include(adminapp.adminapp_urls)),
+    # path('', include('tims.adminapp.adminapp_urls')),
+    # Your stuff: custom urls includes go here
+    # ...
+    # Media files
+
     path("faculty/", include("tims.faculty.faculty_urls")),
+    path("users/", include("tims.users.urls", namespace="users")),
+
+    path("adminapp/", include("tims.adminapp.adminapp_urls")),
+    path('Admin/', include("tims.Admin.admin_urls")),
+    path('Student/',include("tims.Student.student_urls")),
 
     # Your stuff: custom urls includes go here
     # ...
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
-    path("users/", include("tims.users.urls", namespace="users")),
-    path("Student/", include("tims.Student.studentapp_urls", namespace="Student")),
 ]
-# Media files
+
+# ✅ Serve Media Files in Development
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    
+
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     # Error pages
     urlpatterns += [
-        path("400/", default_views.bad_request, kwargs={"exception": Exception("Bad Request!")}),
-        path("403/", default_views.permission_denied, kwargs={"exception": Exception("Permission Denied")}),
-        path("404/", default_views.page_not_found, kwargs={"exception": Exception("Page not Found")}),
+        path("400/",default_views.bad_request,kwargs={"exception": Exception("Bad Request!")},),
+        path("403/",default_views.permission_denied,kwargs={"exception": Exception("Permission Denied")},),
+        path("404/",default_views.page_not_found,kwargs={"exception": Exception("Page not Found")},),
         path("500/", default_views.server_error),
     ]
 
@@ -42,5 +59,6 @@ if settings.DEBUG:
         import debug_toolbar
         urlpatterns = [
             path("__debug__/", include(debug_toolbar.urls)),
-            *urlpatterns,
-        ]
+            
+        ] + urlpatterns
+

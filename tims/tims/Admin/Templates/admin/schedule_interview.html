@@ -1,0 +1,19 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+Schedule Interview
+{% endblock %}
+
+{% block form_body %}
+<p><strong>Student:</strong> {{ application.student.name }}</p>
+<p><strong>Job:</strong> {{ application.job.title }}</p>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" class="btn btn-primary mt-2">Schedule</button>
+</form>
+{% endblock %}
+
+{% block form_button %}{% endblock %}
