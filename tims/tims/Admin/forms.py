@@ -1,10 +1,6 @@
 from django import forms
 from tims.Admin.models import Job,Jobtype,Interview
-<<<<<<< Updated upstream
 from tims.Student.models import JobApplication
-=======
-from Student.models import JobApplication
->>>>>>> Stashed changes
 
 
 class JobtypeForm(forms.ModelForm):

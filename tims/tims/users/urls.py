@@ -2,7 +2,9 @@ from django.urls import path
 from .views import(
     UserRegisterView,
     RoleCreateView,
-    LoginView
+    LoginView,
+    RoleBasedLoginView,
+    UserRedirectView,
     ) 
 
 
@@ -14,7 +16,7 @@ urlpatterns = [
     path("redirect/", UserRedirectView.as_view(), name="redirect"),
 
     # KEEP THIS LAST
-    path("<str:username>/", user_detail_view, name="detail"),
+    # path("<str:username>/", user_detail_view, name="detail"),
 ]
 
 

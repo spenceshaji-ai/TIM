@@ -1,16 +1,16 @@
 from django import forms
-from adminapp.models import LeaveApplication, LeaveBalance, Salary
+from tims.adminapp.models import LeaveApplication, LeaveBalance, Salary
 from django.core.exceptions import ValidationError
 
 from django import forms
 from django.core.exceptions import ValidationError
 from datetime import date
-from adminapp.models import LeaveApplication
+from tims.adminapp.models import LeaveApplication
 
 from django import forms
 from django.core.exceptions import ValidationError
 from datetime import date
-from adminapp.models import LeaveApplication, LeaveBalance, Salary
+from tims.adminapp.models import LeaveApplication, LeaveBalance, Salary
 
 
 
@@ -60,7 +60,6 @@ class BatchForm(forms.ModelForm):
             "start_date",
             "end_date",
             "capacity",
-            "faculty",
         ]
         widgets = {
             "course": forms.Select(attrs={"class": "form-control"}),
@@ -301,7 +300,7 @@ class LeaveBalanceForm(forms.ModelForm):
         }
 
 from django import forms
-from adminapp.models import Salary, Holiday
+from tims.adminapp.models import Salary, Holiday
 
 from django import forms
 

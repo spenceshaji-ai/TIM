@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, render
 from django.utils.timezone import now
-from adminapp.models import LeaveApplication, LeaveBalance, LeaveType
+from tims.adminapp.models import LeaveApplication, LeaveBalance, LeaveType
 from .forms import LeaveApplicationForm
 
 
@@ -17,7 +17,7 @@ from datetime import date
 from datetime import date
 from django.utils.timezone import now
 from django.contrib import messages
-from adminapp.models import LeaveApplication, LeaveBalance, LeaveType
+from tims.adminapp.models import LeaveApplication, LeaveBalance, LeaveType
 
 
 class ApplyLeaveView(LoginRequiredMixin, View):
@@ -114,7 +114,7 @@ import calendar
 from datetime import date, timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
-from adminapp.models import LeaveApplication
+from tims.adminapp.models import LeaveApplication
 from django.http import JsonResponse
 
 

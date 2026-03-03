@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from datetime import date
-from adminapp.models import LeaveApplication, LeaveBalance, Salary
+from tims.adminapp.models import LeaveApplication, LeaveBalance, Salary
 from django import forms
 
 
