@@ -281,10 +281,12 @@ class FeedbackCreateView(LoginRequiredMixin, View):
 
         form = FeedbackForm(request.POST)
         if form.is_valid():
-            student = form.save()
-            return redirect('student_register')
+            feedback = form.save(commit=False)
+            feedback.certificate = certificate
+            feedback.save()
+            return render(request, "feedback_success.html", {"certificate": certificate})
 
-        return render(request, self.template_name, {"form": form})
+        return render(request, "feedback_form.html", {"form": form, "certificate": certificate})
 
 
 
@@ -486,11 +488,11 @@ class StudentApplicationTrackingView(View):
             "selected_status": status_filter
         })
 
-        return render(
-            request,
-            'admin/application_edit.html',
-            {'form': form, 'application': application}
-        )
+        # return render(
+        #     request,
+        #     'admin/application_edit.html',
+        #     {'form': form, 'application': application}
+        # )
 
 
 class StudentProgressView(LoginRequiredMixin, View):
