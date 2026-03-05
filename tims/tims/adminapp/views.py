@@ -533,9 +533,10 @@ from tims.adminapp.models import Course,Batch,FacultyAssignment,Assignstudent
 from tims.faculty.models import TrainingSession,FacultyDailyReport,StudentAttendance
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from .forms import CourseForm,BatchForm,FacultyAssignmentForm,AssignstudentForm
+from .forms import CourseForm,BatchForm,FacultyAssignmentForm,AssignstudentForm,CertificateForm
 from django.contrib import messages
 from django.utils.dateparse import parse_date, parse_time, parse_datetime
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # List
 class CourseListView(View):
@@ -946,6 +947,7 @@ class AssignStudentView(View):
             "form": form,
             "assignments": assignments
         })
+  
 
 class AssignStudentListView(View):
     template_name = "assign_studentlist.html"
@@ -1159,3 +1161,87 @@ class AssignmentReportView(View):
         }
 
         return render(request, self.template_name, context)
+    
+
+from django.template.loader import get_template
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+
+class CertificateCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = "add_certificate.html"
+    login_url = "users:login"
+
+    # 🔐 Allow only Admin
+    def test_func(self):
+        return (
+            hasattr(self.request.user, "role") and
+            self.request.user.role.role_name == "Admin"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("home")  # 🔁 change this to your dashboard url name
+
+    def get(self, request):
+        form = CertificateForm()
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request):
+        form = CertificateForm(request.POST)
+        if form.is_valid():
+            certificate = form.save()
+            messages.success(
+                request,
+                f"Certificate {certificate.certificate_number} issued successfully!"
+            )
+            return render(request, "certificate_preview.html", {"certificate": certificate})
+
+        return render(request, self.template_name, {"form": form})
+
+
+    
+# adminapp/views.py
+from django.utils import timezone
+from datetime import timedelta
+
+class MarkCompletedStudentsView(View):
+    def get(self, request):
+        today = timezone.now().date()
+        count = 0
+
+        students = Assignstudent.objects.filter(is_completed=False)
+
+        for student in students:
+            # calculate end date (example: course.duration in days)
+            course_duration_days = getattr(student.course, "duration_in_days", 0)
+            course_end_date = student.joined_on + timedelta(days=course_duration_days)
+
+            if today >= course_end_date:
+                student.is_completed = True
+                student.completed_on = course_end_date
+                student.save()
+                count += 1
+
+        messages.success(request, f"{count} student(s) marked as completed.")
+        return redirect("adminapp:assign-student-list")
+
+# tims/adminapp/views.py or wherever you keep admin views
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import ListView
+from tims.Student.models import Feedback
+
+
+class AdminFeedbackListView(LoginRequiredMixin, ListView):
+    model = Feedback
+    template_name = "admin_feedback_list.html"
+    context_object_name = "feedbacks"
+    ordering = ["-submitted_on"]
+
+    def test_func(self):
+        # Allow only Admin role
+        return self.request.user.role == "Admin"
+
+class Home2View(View):
+    def get(self, request):
+        return render(request, "pages/adminhome.html")    

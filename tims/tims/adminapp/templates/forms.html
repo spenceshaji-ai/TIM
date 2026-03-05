@@ -54,7 +54,7 @@
                             <div class="tab-pane show active" id="input-types-preview">
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <form method="post" action="{% block form_action %}{% endblock %}">
+                                        <form method="post" action="{% block form_action %}{% endblock %}"enctype="multipart/form-data">
                                           {% csrf_token %}
                                            {% if form.errors %}
                                           <div class="alert alert-danger">

@@ -161,7 +161,7 @@ path("salary-paid/<int:pk>/",
     path("training-sessions/",AdminTrainingSessionListView.as_view(),name="training_session_list",),
     path("assignment-report/", AssignmentReportView.as_view(), name="assignment-report")
 
-]
+
 # from tims.adminapp.views import LeaveHistoryDetailView, LeaveRequestsView, LeaveUserListView, UpdateLeaveStatusView, LeaveRequestsView,UpdateLeaveStatusView,FollowUpCreateView, FollowUpListView
 # from .views import *
 # from .views import (
@@ -183,4 +183,13 @@ path("salary-paid/<int:pk>/",
 
 
 
+       path("assignments/delete/<int:pk>/", AssignStudentDeleteView.as_view(),
+         name="assign-student-delete"),
+       path("cert_add/", CertificateCreateView.as_view(), name="add"),
+       # path("list/", CertificateListView.as_view(), name="list"),    
+       path('mark-completed/', MarkCompletedStudentsView.as_view(), name='mark-completed'),
+       path("certificate/add/<int:student_id>/", CertificateCreateView.as_view(), name="add_certificate_for_student"), 
+       path('feedbacks/', AdminFeedbackListView.as_view(), name='admin_feedback_list'),
+       path('', Home2View.as_view(), name='home2'),
 
+]

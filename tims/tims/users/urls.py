@@ -17,6 +17,9 @@ urlpatterns = [
 
     # KEEP THIS LAST
     # path("<str:username>/", user_detail_view, name="detail"),
+    path("login/", LoginView.as_view(), name="login"),
+    # path("redirect/", role_based_redirect.as_view(), name="role_redirect"),
+    # path("staff/dashboard/", staff_dashboard.as_view(), name="staff_dashboard"),
 ]
 
 

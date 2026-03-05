@@ -1,0 +1,13 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+Thank you for your feedback!
+{% endblock %}
+
+{% block form_body %}
+<p>Your feedback for {{ certificate.student.course.course_name }} has been submitted successfully.</p>
+{% endblock %}
+
+{% block form_button %}
+<a href="{% url 'Student:my_certificates' %}" class="btn btn-primary">Back to Certificates</a>
+{% endblock %}

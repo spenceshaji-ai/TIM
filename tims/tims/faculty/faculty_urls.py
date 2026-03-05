@@ -1,6 +1,6 @@
 from django.urls import path
 from django.views.generic import TemplateView
-from .views import ApplyLeaveView, FacultyDashboardView, LeaveCalendarDataView, MyLeavesView, DeleteLeaveView
+from .views import ApplyLeaveView, FacultyDashboardView, FacultyMaterialAddView, LeaveCalendarDataView, MyLeavesView, DeleteLeaveView
 from .views import ApplyLeaveView, MyLeavesView
 
 
@@ -82,5 +82,13 @@ path(
     path("leave/apply/", ApplyLeaveView.as_view(), name="faculty_apply_leave"),
     path("leave/my/", MyLeavesView.as_view(), name="faculty_my_leaves"),
     path("leave/delete/<int:leave_id>/", DeleteLeaveView.as_view(), name="faculty_delete_leave"),
+     path(
+        "materials/add/",
+        FacultyMaterialAddView.as_view(),
+        name="material_add"
+    ),
+    path('', Home1View.as_view(), name='home1')
     
 ]
+
+

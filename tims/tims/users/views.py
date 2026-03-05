@@ -19,19 +19,20 @@ from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from tims.users.models import User
-from .forms import UserForm,LoginForm
+from tims.faculty.models import FacultyCourseMaterial
+from .forms import UserForm, LoginForm
 from django.views.generic import TemplateView
 from tims.users.models import User,Role
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login,logout
 
 
-class UserDetailView(LoginRequiredMixin, DetailView):
-    model = User
-    slug_field = "username"
-    slug_url_kwarg = "username"
+# class UserDetailView(LoginRequiredMixin, DetailView):
+#     model = User
+#     slug_field = "username"
+#     slug_url_kwarg = "username"
 
 
-user_detail_view = UserDetailView.as_view()
+# user_detail_view = UserDetailView.as_view()
 
 
 class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
@@ -157,13 +158,13 @@ class LoginView(View):
 
                 # 🔥 Role Based Redirection
                 if user.role and user.role.role_name in ["Admin", "HR"]:
-                    return redirect("home")
+                    return redirect("adminapp:home2")
 
                 elif user.role and user.role.role_name == "Faculty":
                     return redirect("faculty:home1")
 
-                elif user.role and user.role.role_name == "Student":
-                    return redirect("Student:studenthome")
+                elif user.role and user.role.role_name == "student":
+                     return redirect("Student:stdhome")
 
                 else:
                     return redirect("login")
