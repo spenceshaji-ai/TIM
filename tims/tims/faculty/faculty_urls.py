@@ -1,8 +1,6 @@
 from django.urls import path
 from django.views.generic import TemplateView
 from .views import ApplyLeaveView, FacultyDashboardView, LeaveCalendarDataView, MyLeavesView, DeleteLeaveView
-app_name = "faculty"
-from django.urls import path
 from .views import ApplyLeaveView, MyLeavesView
 
 

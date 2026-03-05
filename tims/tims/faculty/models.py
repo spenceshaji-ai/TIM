@@ -19,6 +19,13 @@ class TrainingSession(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     approval_status = models.CharField(max_length=20,default='Pending')
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['batch', 'session_date'],
+                name='unique_batch_session_date'
+            )
+        ]    
     def __str__(self):
         return f"{self.batch} - {self.session_date}"    
 
@@ -41,19 +48,12 @@ class StudentAttendance(models.Model):
         return f"{self.student} - {self.attendance_date} - {self.status}"
 
 class FacultyDailyReport(models.Model):
-    faculty = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="daily_reports"
-    )
-
+    faculty = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name="daily_reports")
     report_date = models.DateField(default=timezone.now)
-
     start_time = models.TimeField()
     end_time = models.TimeField()
     activities = models.TextField()
     remarks = models.TextField(blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

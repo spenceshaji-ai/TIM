@@ -1,7 +1,13 @@
 from django.urls import path
 from django.views.generic import TemplateView
 from .views import *
-
+# from .views import (
+#     EnquiryListView,
+#     EnquiryCreateView,
+#     EnquiryDetailView,
+#     EnquiryUpdateView,
+#     EnquiryDeleteView,
+# )
 app_name = "adminapp"
 
 urlpatterns = [
@@ -100,32 +106,7 @@ path("salary-paid/<int:pk>/",
     path("assignments/", AssignStudentListView.as_view(), name="assign_student_list"),
     path("assignments/edit/<int:pk>/", AssignStudentEditView.as_view(), name="assign_student_edit"),
     path("assignments/delete/<int:pk>/", AssignStudentDeleteView.as_view(), name="assign_student_delete"),
-]
-from tims.adminapp.views import LeaveHistoryDetailView, LeaveRequestsView, LeaveUserListView, UpdateLeaveStatusView, LeaveRequestsView,UpdateLeaveStatusView,FollowUpCreateView, FollowUpListView
-from .views import *
-from .views import (
-    EnquiryListView,
-    EnquiryCreateView,
-    EnquiryDetailView,
-    EnquiryUpdateView,
-    EnquiryDeleteView,
-)
-
-from .views import ConvertToAdmissionView, AdmissionListView
-from .views import (
-    TrainingSessionApprovalListView,
-    TrainingSessionApproveView,
-    TrainingSessionRejectView,
-    AdminFacultyReportListView,
-    AdminTrainingSessionListView
-)
-from tims.faculty.views import ApplyLeaveView, MyLeavesView,DeleteLeaveView
-
-app_name = "adminapp"
-
-
-urlpatterns = [
-    path("courses/", CourseListView.as_view(), name="course_list"),
+     path("courses/", CourseListView.as_view(), name="course_list"),
     path("courses/add/", CourseCreateView.as_view(), name="course_add"),
     path("courses/edit/<int:id>/", CourseEditView.as_view(), name="course_edit"),
     path("courses/delete/<int:id>/", CourseDeleteView.as_view(), name="course_delete"),
@@ -180,5 +161,26 @@ urlpatterns = [
     path("training-sessions/",AdminTrainingSessionListView.as_view(),name="training_session_list",),
     path("assignment-report/", AssignmentReportView.as_view(), name="assignment-report")
 
-] 
-  
+]
+# from tims.adminapp.views import LeaveHistoryDetailView, LeaveRequestsView, LeaveUserListView, UpdateLeaveStatusView, LeaveRequestsView,UpdateLeaveStatusView,FollowUpCreateView, FollowUpListView
+# from .views import *
+# from .views import (
+#     EnquiryListView,
+#     EnquiryCreateView,
+#     EnquiryDetailView,
+#     EnquiryUpdateView,
+#     EnquiryDeleteView,
+# )
+
+# from .views import ConvertToAdmissionView, AdmissionListView
+# from .views import (
+#     TrainingSessionApprovalListView,
+#     TrainingSessionApproveView,
+#     TrainingSessionRejectView,
+#     AdminFacultyReportListView,
+#     AdminTrainingSessionListView
+# )
+
+
+
+

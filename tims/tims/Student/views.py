@@ -423,6 +423,32 @@ class StudentProgressView(LoginRequiredMixin, View):
 
         return render(request, self.template_name, context)
 
+class StudentTrainingSessionView(LoginRequiredMixin, View):
+    template_name = "training_sessions.html"
+
+    def get(self, request):
+
+        # Assigned batch & course for this student
+        student_assignments = Assignstudent.objects.filter(
+            student=request.user
+        ).select_related("batch", "course")
+
+        batch_ids = student_assignments.values_list("batch_id", flat=True)
+
+        # Only approved sessions
+        sessions = TrainingSession.objects.filter(
+            batch_id__in=batch_ids,
+            approval_status="Approved"
+        ).select_related("batch", "faculty").order_by("-session_date")
+
+        context = {
+            "sessions": sessions,
+            "student_assignments": student_assignments
+        }
+
+        return render(request, self.template_name, context)
+
+
 class HomeView1(View):
     def get(self, request):
         return render(request, "studenthome.html")         
