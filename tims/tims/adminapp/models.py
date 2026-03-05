@@ -34,7 +34,7 @@ class FacultyAssignment(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["faculty", "course", "batch"],
-                name="unique_faculty_course_batch_per_faculty"
+                name="unique_faculty_course_batch_per_faculty" 
             )
         ]
 
