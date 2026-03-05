@@ -33,7 +33,8 @@ urlpatterns = [
     path("facultyapp/",include("tims.facultyapp.faculty_url" )),
 
     path("Admin/",include("tims.Admin.admin_urls" )),
-
+    
+    path("Student/", include("tims.Student.studentapp_urls")),
 
 
 

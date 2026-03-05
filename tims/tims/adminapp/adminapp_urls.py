@@ -4,6 +4,7 @@ from .views import *
 
 from .views import *
 from .views import AdmissionListView
+from .views import StaffListCreateView, FacultyListCreateView,EditStaffView
 
 
 app_name = "adminapp"
@@ -114,9 +115,15 @@ path("salary-paid/<int:pk>/",
     path("payments/", PaymentListView.as_view(), name="payment_list"),
     path("payments/edit/<int:pk>/", PaymentUpdateView.as_view(), name="payment_edit"),
     path("payments/delete/<int:pk>/", PaymentDeleteView.as_view(), name="payment_delete"),
+    
+    path("staff/", StaffListCreateView.as_view(), name="staff_list"),
+    path("faculty/", FacultyListCreateView.as_view(), name="faculty_list"),
+   
+    path("staff/edit/<int:pk>/", EditStaffView.as_view(), name="edit_staff"),
+    path("staff/delete/<int:pk>/", DeleteStaffView.as_view(), name="delete_staff"),
+    path("faculty/edit/<int:pk>/",EditFacultyView.as_view(),name="edit_faculty"),
 
-
-  
+    path("faculty/delete/<int:pk>/",DeleteFacultyView.as_view(),name="delete_faculty"),
 
     path("faculty-assignments/add/", FacultyAssignmentCreateView.as_view(), name="faculty_assignment"),
     path("faculty-assignments/view/", FacultyCoursesView.as_view(), name="faculty_courses"),
@@ -129,6 +136,8 @@ path("salary-paid/<int:pk>/",
 
     path("assignments/delete/<int:pk>/", AssignStudentDeleteView.as_view(),
          name="assign-student-delete"),
+
+     
 
 ] 
   

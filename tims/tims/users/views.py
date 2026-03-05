@@ -36,7 +36,7 @@ from django.contrib import messages
 from .forms import LoginForm, RegisterForm
 
 from .forms import RoleForm
-
+from django.contrib.auth import login
 
 
 
@@ -68,15 +68,14 @@ class LoginView(View):
                     messages.error(request, "Your account is inactive")
                     return redirect("login")
                 login(request, user)
-
-                # 🔑 2️⃣ FORCE PASSWORD CHANGE
+                 # ⭐ FORCE PASSWORD CHANGE (ADD HERE)
                 if user.must_change_password:
-                    return redirect("change_password")
-
+                    return redirect("users:change_password")
+               
                 # 🔥 Role Based Redirection
                   # 🔥 SUPER ADMIN CHECK
                 if user.is_superuser:
-                    return redirect("adminapp:home3")   # or superadmin dashboard
+                    return redirect("adminapp:home2")   # or superadmin dashboard
 
                 if user.role and user.role.role_name in ["Admin", "HR","Manager"]:
                     return redirect("adminapp:home2")
@@ -84,8 +83,8 @@ class LoginView(View):
                 elif user.role and user.role.role_name == "Faculty":
                     return redirect("faculty:home1")
 
-                # elif user.role and user.role.role_name == "Student":
-                #     return redirect("student_dashboard")
+                elif user.role and user.role.role_name == "Student":
+                    return redirect("Student:stdhome")
 
                 else:
                     messages.error(request, "Role not assigned properly")
@@ -93,6 +92,53 @@ class LoginView(View):
         messages.error(request, "Invalid username or password")
         return render(request, self.template_name, {"form": form})
 
+
+class ForcePasswordChangeView(View):
+
+    template_name = "change_password.html"
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
+
+        if password1 != password2:
+            messages.error(request, "Passwords do not match")
+            return redirect("users:change_password")
+
+        user = request.user
+
+        user.set_password(password1)
+
+        user.must_change_password = False
+
+        user.save()
+
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+        # ROLE BASED REDIRECT
+        if user.role:
+            role = user.role.role_name
+
+            if role == "Admin":
+                return redirect("adminapp:home2")
+
+            elif role == "HR":
+                return redirect("adminapp:home2")
+
+            elif role == "Manager":
+                return redirect("adminapp:home2")
+
+            elif role == "Faculty":
+                return redirect("faculty:home1")
+
+            elif role == "Student":
+                return redirect("Student:stdhome")
+
+        return redirect("login")
 
 class LogoutView(View):
     def post(self, request):
@@ -126,23 +172,6 @@ class UserRegisterView(View):
         return render(request, self.template_name, {"form": form})
 
 
-
-class RoleCreateView(View):
-    template_name = "role_form.html"
-
-    def get(self, request):
-        form = RoleForm()
-        return render(request, self.template_name, {"form": form})
-
-    def post(self, request):
-        form = RoleForm(request.POST)
-
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Role created successfully")
-            return redirect("users:role_add")
-
-        return render(request, self.template_name, {"form": form})
 
 
 
@@ -179,4 +208,49 @@ class UserListView(View):
 
 
 
+class RoleCreateView(View):
+    template_name = "role_form.html"
 
+    def get(self, request):
+
+        # Only Superadmin and Admin can access
+        if not request.user.is_authenticated:
+            return redirect("login")
+
+        form = RoleForm()
+        return render(request, self.template_name, {"form": form})
+
+
+
+    def post(self, request):
+
+        if not request.user.is_authenticated:
+            return redirect("login")
+
+        form = RoleForm(request.POST)
+
+        if form.is_valid():
+
+            role_name = form.cleaned_data["role_name"]
+
+            # ⭐ SUPERADMIN can create Admin, HR, Manager
+            if request.user.is_superuser:
+                if role_name not in ["Admin", "HR", "Manager"]:
+                    messages.error(request, "Superadmin can only create Admin, HR, Manager roles")
+                    return redirect("users:role_add")
+
+            # ⭐ ADMIN can create Student, Faculty
+            elif request.user.role.role_name == "Admin":
+                if role_name not in ["Student", "Faculty"]:
+                    messages.error(request, "Admin can only create Student and Faculty roles")
+                    return redirect("users:role_add")
+
+            else:
+                messages.error(request, "You are not allowed to create roles")
+                return redirect("login")
+
+            form.save()
+            messages.success(request, "Role created successfully")
+            return redirect("users:role_add")
+
+        return render(request, self.template_name, {"form": form})

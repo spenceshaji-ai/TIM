@@ -1,0 +1,176 @@
+{% include "pages/header.html" %}
+<style>
+.inactive-row {
+    opacity: 0.5;
+    background-color: #f1f1f1;
+}
+</style>
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="mb-3">Staff Management</h3>
+
+    <!-- 🔔 Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- 📝 Staff Registration Form -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            Create Staff (Admin / HR / Manager)
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST" action="{% url 'adminapp:staff_list' %}">
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <!-- Name -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+
+                    <!-- Username -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control">
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" name="phone" class="form-control" required>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+
+                    <!-- Role -->
+                    <div class="col-md-4 mb-3">
+                        <label>Role</label>
+                        <select name="role" class="form-control">
+                            {% for role in roles %}
+                                <option value="{{ role.id }}"
+                                    {% if staff.role.id == role.id %}selected{% endif %}>
+                                    {{ role.role_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    Create Staff
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- 📋 Staff List -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            Staff List
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for user in staff %}
+                    <tr class="{% if user.status == 'inactive' %}inactive-row{% endif %}"></tr>
+                    <tr>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.role.role_name }}</td>
+                        <td>{{ user.phone_number }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.status == "active" %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <!-- ⭐ ACTION BUTTONS -->
+                        <td>
+
+        <!-- ✏️ Edit Button -->
+                    
+                        <a href="{% url 'adminapp:edit_staff' user.id %}"
+                           class="btn btn-sm btn-warning">
+                            
+                            Edit
+                        </a>
+                    
+
+        <!-- 🗑️ Delete Button -->
+                        <form action="{% url 'adminapp:delete_staff' user.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+
+                            <button type="submit"
+                                    class="btn btn-danger btn-sm"
+                                     
+                                    onclick="return confirm('Are you sure you want to delete this staff?')">
+                                Delete
+                            </button>
+                        </form>
+                       </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            No staff found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% include "pages/footer.html" %}

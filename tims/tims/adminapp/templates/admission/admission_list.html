@@ -7,6 +7,13 @@
 <div class="container mt-4">
 
     <h2>Admissions List</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">
+                 {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <table class="table table-bordered table-hover mt-3">
         <thead class="table-dark">
@@ -61,13 +68,7 @@
                 {% endif %}
 
                 </td>
-                {% if messages %}
-                    {% for message in messages %}
-                       <div class="alert alert-success">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
+                
             </tr>
 
              {% empty %}

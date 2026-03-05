@@ -203,17 +203,40 @@ class RoleForm(forms.ModelForm):
              }),
          }
 
-class LoginForm(AuthenticationForm):
-    username = forms.CharField(
-        widget=forms.TextInput(attrs={
-            "class": "form-control",
-            "placeholder": "Username"
-        })
-    )
+from django import forms
+from .models import User, Role
+
+
+class StaffCreateForm(forms.ModelForm):
 
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            "class": "form-control",
-            "placeholder": "Password"
-        })
+        widget=forms.PasswordInput,
+        label="Password"
     )
+
+    role = forms.ModelChoiceField(
+        queryset=Role.objects.filter(
+            role_name__in=["Admin", "HR", "Manager"]
+        ),
+        empty_label="Select Role"
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            "name",
+            "username",
+            "email",
+            "phone_number",
+            "role",
+            "status",
+        ]
+
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "form-control"}),
+            "username": forms.TextInput(attrs={"class": "form-control"}),
+            "email": forms.EmailInput(attrs={"class": "form-control"}),
+            "phone_number": forms.TextInput(attrs={"class": "form-control"}),
+            "role": forms.Select(attrs={"class": "form-select"}),
+            "status": forms.Select(attrs={"class": "form-select"}),
+        }
