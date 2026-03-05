@@ -1,0 +1,24 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+Student Registration
+{% endblock %}
+
+{% block form_action %}
+{% url 'Student:student_register' %}
+{% endblock %}
+
+{% block form_body %}
+{{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-success">
+    Register Student
+</button>
+
+<a href="{% url 'Student:student_register' %}" class="btn btn-secondary ms-2">
+    Cancel
+</a>
+{% endblock %}
+

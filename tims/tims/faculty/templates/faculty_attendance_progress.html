@@ -1,0 +1,53 @@
+{% include 'header.html' %}
+<div class="container mt-4">
+  <h4>Student Attendance Progress</h4>
+
+  <!-- COURSE FILTER -->
+  <form method="get" class="row mb-4">
+    <div class="col-md-4">
+      <label>Course</label>
+      <select name="course" class="form-select">
+        <option value="">All Courses</option>
+        {% for course in courses %}
+          <option value="{{ course.id }}"
+            {% if selected_course == course.id|stringformat:"s" %}selected{% endif %}>
+            {{ course.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-2 d-flex align-items-end">
+      <button class="btn btn-primary w-100">Filter</button>
+    </div>
+  </form>
+
+  <!-- ATTENDANCE TABLE -->
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Course</th>
+        <th>Total Classes</th>
+        <th>Present</th>
+        <th>Attendance %</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in attendance_data %}
+      <tr>
+        <td>{{ row.student }}</td>
+        <td>{{ row.course.name }}</td>
+        <td>{{ row.total }}</td>
+        <td>{{ row.present }}</td>
+        <td>{{ row.percentage }}%</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">No attendance data available</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include 'footer.html' %}

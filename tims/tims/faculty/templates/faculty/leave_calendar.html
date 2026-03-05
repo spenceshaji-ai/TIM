@@ -1,0 +1,42 @@
+{% include "faculty/header.html" %}
+
+<div class="container-fluid">
+    <h4 class="page-title">My Leave Calendar</h4>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <div id="leaveCalendar"></div>
+        </div>
+    </div>
+</div>
+
+{% include "faculty/footer.html" %}
+
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let calendarEl = document.getElementById("leaveCalendar");
+
+    let calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        height: 650,
+        events: "{% url 'faculty:leave_calendar_data' %}",
+
+        eventDidMount: function(info) {
+            if (info.event.extendedProps.status === "Pending") {
+                info.el.style.backgroundColor = "#ffc107"; // yellow
+            }
+            if (info.event.extendedProps.status === "Approved") {
+                info.el.style.backgroundColor = "#28a745"; // green
+            }
+        }
+    });
+
+    calendar.render();
+});
+</script>

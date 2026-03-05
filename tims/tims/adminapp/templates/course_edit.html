@@ -1,0 +1,41 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+Edit Course
+{% endblock %}
+
+{% block form_action %}
+{% url 'adminapp:course_edit' course.id %}
+{% endblock %}
+
+{% block form_body %}
+<div class="mb-3">
+    {{ form.course_name.label_tag }}
+    {{ form.course_name }}
+    {{ form.course_name.errors }}
+</div>
+
+<div class="mb-3">
+    {{ form.duration.label_tag }}
+    {{ form.duration }}
+    {{ form.duration.errors }}
+</div>
+
+<div class="mb-3">
+    {{ form.syllabus.label_tag }}
+    {{ form.syllabus }}
+    {{ form.syllabus.errors }}
+</div>
+
+<div class="mb-3">
+    {{ form.fee.label_tag }}
+    {{ form.fee }}
+    {{ form.fee.errors }}
+</div>
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-success">
+    Update Course
+</button>
+{% endblock %}

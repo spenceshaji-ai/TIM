@@ -1,0 +1,144 @@
+{% include 'pages/header.html' %}
+
+{% block form_title %}
+Admin Job Applications
+{% endblock %}
+
+{% block form_body %}
+
+<div class="w-100">
+
+    <!-- Status Filter Buttons (optional but useful) -->
+    <div class="mb-3">
+        <a href="{% url 'admin_app:admin_application_list' %}" class="btn btn-outline-secondary btn-sm">All</a>
+        <a href="?status=Applied" class="btn btn-outline-warning btn-sm">Applied</a>
+        <a href="?status=Shortlisted" class="btn btn-outline-info btn-sm">Shortlisted</a>
+        <a href="?status=Interview" class="btn btn-outline-primary btn-sm">Interview</a>
+        <a href="?status=Selected" class="btn btn-outline-success btn-sm">Selected</a>
+        <a href="?status=Rejected" class="btn btn-outline-danger btn-sm">Rejected</a>
+    </div>
+
+    <table class="table table-hover align-middle w-100">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Job</th>
+                <th>Student</th>
+                <th>Resume</th>
+                <th>Status</th>
+                <th>Applied Date</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><strong>{{ app.job }}</strong></td>
+                <td>{{ app.student }}</td>
+
+                <!-- Resume -->
+                <td>
+                    {% if app.resume %}
+                        <a href="{{ app.resume.url }}" target="_blank"
+                           class="btn btn-sm btn-outline-primary">
+                            View Resume
+                        </a>
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+
+                <!-- Status -->
+                <td>
+                    {% if app.status == "Applied" %}
+                        <span class="badge bg-warning text-dark">Applied</span>
+                    {% elif app.status == "Shortlisted" %}
+                        <span class="badge bg-info text-dark">Shortlisted</span>
+                    {% elif app.status == "Interview" %}
+                        <span class="badge bg-primary">Interview</span>
+                    {% elif app.status == "Selected" %}
+                        <span class="badge bg-success">Selected</span>
+                    {% elif app.status == "Rejected" %}
+                        <span class="badge bg-danger">Rejected</span>
+                    {% endif %}
+                </td>
+
+                <td>{{ app.applied_date }}</td>
+
+                <!-- Actions -->
+                <td class="text-center">
+
+                    {% if app.status == "Applied" %}
+                        <div class="d-flex justify-content-center gap-2">
+                            <form method="POST" action="{% url 'admin_app:admin_application_approve' app.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    Approve
+                                </button>
+                            </form>
+
+                            <form method="POST" action="{% url 'admin_app:admin_application_reject' app.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    Reject
+                                </button>
+                            </form>
+                        </div>
+
+                    {% elif app.status == "Shortlisted" %}
+                        {% if app.interview %}
+                            <span class="text-muted">Interview Scheduled</span>
+                        {% else %}
+                            <a href="{% url 'admin_app:schedule_interview' app.id %}"
+                               class="btn btn-sm btn-primary">
+                                Schedule Interview
+                            </a>
+                        {% endif %}
+
+                    {% elif app.status == "Interview" %}
+                        {% if app.interview and app.interview.interview_date <= current_time %}
+                            <div class="d-flex justify-content-center gap-2">
+                                <form method="POST" action="{% url 'admin_app:admin_application_select' app.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        Final Select
+                                    </button>
+                                </form>
+
+                                <form method="POST" action="{% url 'admin_app:admin_application_reject' app.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        Final Reject
+                                    </button>
+                                </form>
+                            </div>
+                        {% else %}
+                            <span class="text-muted">Interview Pending</span>
+                        {% endif %}
+
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+
+                </td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted py-3">
+                    No applications found
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+{% block form_button %}
+{% endblock %}
+
+{% include 'pages/footer.html' %}

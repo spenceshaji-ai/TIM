@@ -1,0 +1,61 @@
+{% include 'pages/header.html' %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div class="d-flex justify-content-between mb-3">
+            <h4>Upcoming Holidays</h4>
+
+            <a href="{% url 'adminapp:holiday_add' %}"
+               class="btn btn-primary">
+                Add Holiday
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+
+                <table class="table table-bordered table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Date</th>
+                            <th>Reason</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for holiday in holidays %}
+                        <tr>
+                            <td>{{ holiday.date }}</td>
+                            <td>{{ holiday.reason }}</td>
+                            <td>
+                                <a href="{% url 'adminapp:holiday_edit' holiday.id %}"
+                                   class="btn btn-sm btn-info">
+                                    Edit
+                                </a>
+
+                                <a href="{% url 'adminapp:holiday_delete' holiday.id %}"
+                                   class="btn btn-sm btn-danger">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center">
+                                No Upcoming Holidays
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% include 'pages/footer.html' %}

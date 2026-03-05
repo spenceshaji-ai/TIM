@@ -1,0 +1,58 @@
+{% extends "adminapp/forms.html" %}
+
+{% block form_title %}
+Leave Users
+{% endblock %}
+
+{% block form_action %}
+{% url 'adminapp:leave_users' %}
+{% endblock %}
+
+{% block form_body %}
+
+<div class="mb-3">
+    <input type="text" name="search" class="form-control"
+           placeholder="Search by username"
+           value="{{ request.GET.search }}">
+</div>
+
+<button type="submit" class="btn btn-primary mb-4">Search</button>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Username</th>
+            <th>View Leave</th>
+            <th>Assign Leave</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.username }}</td>
+
+            <td>
+                <a href="{% url 'adminapp:leave_history_detail' user.id %}"
+                   class="btn btn-info btn-sm">
+                    View Leaves
+                </a>
+            </td>
+
+            <td>
+                <a href="{% url 'adminapp:hr_leave_assign' user.id %}"
+                   class="btn btn-success btn-sm">
+                    Assign Leave
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" class="text-center">No users found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+
+{% block form_button %}{% endblock %}

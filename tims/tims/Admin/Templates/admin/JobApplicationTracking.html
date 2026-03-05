@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Job Applications</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background: #f4f4f4;
+        }
+        .btn {
+            padding: 6px 10px;
+            text-decoration: none;
+            color: white;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .shortlist { background: #17a2b8; }
+        .interview { background: #ffc107; color: black; }
+        .select { background: #28a745; }
+        .reject { background: #dc3545; }
+
+        .actions a {
+            margin: 2px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Job Applications</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Student</th>
+            <th>Job</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for app in applications %}
+        <tr>
+            <td>{{ app.id }}</td>
+            <td>{{ app.student.name }}</td>
+            <td>{{ app.job.title }}</td>
+            <td>{{ app.status }}</td>
+
+            <td class="actions">
+                {% if app.status == 'Applied' %}
+                    <a href="{% url 'applicationtracking_update' app.id 'Shortlisted' %}" class="btn shortlist">Shortlist</a>
+                    <a href="{% url 'applicationtracking_update' app.id 'Rejected' %}" class="btn reject">Reject</a>
+
+                {% elif app.status == 'Shortlisted' %}
+                    <a href="{% url 'applicationtracking_update' app.id 'Interview' %}" class="btn interview">Interview</a>
+                    <a href="{% url 'applicationtracking_update' app.id 'Rejected' %}" class="btn reject">Reject</a>
+
+                {% elif app.status == 'Interview' %}
+                    <a href="{% url 'applicationtracking_update' app.id 'Selected' %}" class="btn select">Select</a>
+                    <a href="{% url 'applicationtracking_update' app.id 'Rejected' %}" class="btn reject">Reject</a>
+
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No applications found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
+
+ 

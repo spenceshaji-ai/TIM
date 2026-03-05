@@ -1,0 +1,31 @@
+{% extends "form.html" %}
+
+{% block form_title %}
+    {% if form.instance.pk %}
+        Update Training Session
+    {% else %}
+        Create Training Session
+    {% endif %}
+{% endblock %}
+
+{% block form_action %}
+    {% if form.instance.pk %}
+        {% url 'faculty:training_update' form.instance.pk %}
+    {% else %}
+        {% url 'faculty:training_create' %}
+    {% endif %}
+{% endblock %}
+
+{% block form_body %}
+    {{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+    <button type="submit" class="btn btn-success">
+        {% if form.instance.pk %}Update{% else %}Save{% endif %}
+    </button>
+
+    <a href="{% url 'faculty:training_list' %}" class="btn btn-secondary ms-2">
+        Cancel
+    </a>
+{% endblock %}

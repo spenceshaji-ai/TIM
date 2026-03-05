@@ -1,0 +1,39 @@
+{% extends "forms.html" %}
+
+{% block form_title %}
+Job Type List
+{% endblock %}
+
+{% block form_body %}
+
+<a href="{% url 'admin_app:jobtype_create' %}" class="btn btn-success mb-3">
+    Add Job Type
+</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Job Type</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for jt in jobtypes %}
+        <tr>
+            <td>{{ jt.id }}</td>
+            <td>{{ jt.job_type }}</td>
+            <td>
+                <a href="{% url 'admin_app:jobtype_edit' jt.id %}" class="btn btn-sm btn-primary">Edit</a>
+                <a href="{% url 'admin_app:jobtype_delete' jt.id %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">No job types found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
