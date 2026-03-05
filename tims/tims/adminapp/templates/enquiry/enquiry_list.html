@@ -26,13 +26,15 @@
 
         <tbody>
             {% for enquiry in enquiries %}
-            <tr>
+            <tr{% if enquiry.status == "Converted" %} style="background:#e9ecef; opacity:0.6;" {% endif %}>
                 <td>{{ enquiry.name }}</td>
                 <td>{{ enquiry.course.course_name }}</td>
                 <td>{{ enquiry.status }}</td>
                 <td>{{ enquiry.source }}</td>
 
                 <td>
+                    {% if enquiry.status != "Converted" %}
+
                     <a href="{% url 'adminapp:enquiry_detail' enquiry.id %}" class="btn btn-info btn-sm">
                         View
                     </a>
@@ -51,6 +53,11 @@
                     <a href="{% url 'adminapp:followup_add' enquiry.id %}" class="btn btn-primary btn-sm">
                         Follow-Up
                     </a>
+                    {% endif %}
+                {% else %}
+
+               <span class="badge bg-success">Admission Done</span>
+
                     {% endif %}
                 </td>
                 <td

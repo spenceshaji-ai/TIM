@@ -27,3 +27,28 @@ class StudentRegisterView(View):
             self.template_name,
             {"form": form}
         )
+
+from django.views import View
+from django.shortcuts import render, redirect
+
+
+class StudentDashboardView(View):
+
+    template_name = "student/stdhome.html"
+
+    def get(self, request):
+
+        # 🔐 Force password change check
+        if request.user.must_change_password:
+            return redirect("users:change_password")
+
+        return render(request, self.template_name)
+
+class stdHome(View):
+    def get(self, request):
+
+        # 🔐 force password change
+        if request.user.must_change_password:
+            return redirect("users:change_password")
+
+        return render(request, "student/stdhome.html")

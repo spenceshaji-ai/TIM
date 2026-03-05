@@ -645,14 +645,16 @@
                         <a data-bs-toggle="collapse" href="#sidebarProjects" aria-expanded="false"
                             aria-controls="sidebarProjects" class="side-nav-link">
                             <i class="uil-briefcase"></i>
-                            <span> Projects </span>
+                            <span> Registration </span>
                             <span class="menu-arrow"></span>
                         </a>
                         <div class="collapse" id="sidebarProjects">
                             <ul class="side-nav-second-level">
 
                                 <li>
-                                    <a href="apps-projects-details.html">Details</a>
+                                    <a href="{% url 'adminapp:staff_list' %}">Staff</a>
+                                    <a href="{% url 'adminapp:faculty_list' %}">Faculty</a>
+                                    
                                 </li>
                                 <li>
                                     <a href="apps-projects-gantt.html">Gantt <span
@@ -707,13 +709,13 @@
                         <a data-bs-toggle="collapse" href="#sidebarPages" aria-expanded="false"
                             aria-controls="sidebarPages" class="side-nav-link">
                             <i class="uil-copy-alt"></i>
-                            <span> Pages </span>
+                            <span> role creation </span>
                             <span class="menu-arrow"></span>
                         </a>
                         <div class="collapse" id="sidebarPages">
                             <ul class="side-nav-second-level">
                                 <li>
-                                    <a href="pages-profile.html">Profile</a>
+                                    <a href="{% url 'users:role_add' %}">Staff</a>
                                 </li>
                                 <li>
                                     <a href="pages-profile-2.html">Profile 2</a>

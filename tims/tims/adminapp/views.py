@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.utils.timezone import now
 from django.db.models import OuterRef, Subquery
+import secrets
 
 from tims.adminapp.models import Course, Batch, Enquiry, FollowUp, Admission,Payment
 from .forms import CourseForm, BatchForm, EnquiryForm, FollowUpForm, AdmissionForm,PaymentForm
@@ -15,7 +16,7 @@ from .forms import FacultyAssignmentForm,AssignstudentForm
 from django.contrib import messages
 from django.db import models
 from django.db.models import Sum
-from tims.users.models import Role
+from tims.users.models import Role,User
 from django.contrib import messages
 
 
@@ -404,20 +405,30 @@ class CreateStudentAccountView(View):
         if existing_user:
             messages.info(request, "Student already registered")
             return redirect("adminapp:admission_list")
-
+        
+        # ⭐ Generate random password
+        temp_password = secrets.token_urlsafe(8)
+        
         # ⭐ Create new account
         User.objects.create_user(
             username=enquiry.phone,
             email=enquiry.email or "",
-            password="student123",
+            password=temp_password,
             role=student_role,
-            first_name=enquiry.name
+            name=enquiry.name,
+            phone_number=enquiry.phone,
+            must_change_password=True
+            
         )
 
         enquiry.status = "Converted"
         enquiry.save()
 
-        messages.success(request, "Student registered successfully")
+         # ⭐ Show password to admin
+        messages.success(
+            request,
+            f"Student registered successfully. Temporary password: {temp_password}"
+        )
 
         return redirect("adminapp:admission_list")
     
@@ -662,3 +673,249 @@ class Home2View(View):
     def get(self, request):
         return render(request, "pages/adminhome.html")
 
+
+from django.views import View
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
+
+
+
+
+
+class StaffListCreateView(View):
+    template_name = "staff_list.html"
+
+    # ✅ Show page
+    def get(self, request):
+
+        if not request.user.is_superuser:
+            return redirect("login")
+
+        staff = User.objects.filter(
+            role__role_name__in=["Admin", "HR", "Manager"]
+        )
+
+        roles = Role.objects.filter(
+            role_name__in=["Admin", "HR", "Manager"]
+        )
+
+        return render(request, self.template_name, {
+            "staff": staff,
+            "roles": roles
+        })
+
+    # ✅ Handle form submit
+    def post(self, request):
+
+        if not request.user.is_superuser:
+            return redirect("login")
+
+        role_id = request.POST.get("role")   # 🔥 get role ID
+        name = request.POST.get("name")
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        password = request.POST.get("password")
+        status = request.POST.get("status")
+
+        if not all([role_id, name, username, phone, password]):
+            messages.error(request, "All required fields must be filled")
+            return redirect("adminapp:staff_list")
+
+    # ✅ Get role using ID
+        try:
+            role = Role.objects.get(id=role_id)
+        except Role.DoesNotExist:
+            messages.error(request, "Invalid role selected")
+            return redirect("adminapp:staff_list")
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username already exists")
+            return redirect("adminapp:staff_list")
+
+        if User.objects.filter(phone_number=phone).exists():
+            messages.error(request, "Phone number already exists")
+            return redirect("adminapp:staff_list")
+
+        user = User.objects.create(
+            username=username,
+            name=name,
+            email=email,
+            phone_number=phone,
+            role=role,
+            status=status,
+            is_staff=True,
+            must_change_password=True 
+    )
+
+        user.set_password(password)
+        user.save()
+
+        messages.success(request, f"{role.role_name} created successfully")
+        return redirect("adminapp:staff_list") 
+
+class EditStaffView(View):
+    template_name = "edit_staff.html"
+    def get(self, request, pk):
+        staff = get_object_or_404(User, pk=pk)
+        roles = Role.objects.all()
+
+        return render(request, self.template_name, {
+            "staff": staff,
+            "roles": roles
+        })
+
+    def post(self, request, pk=None):
+        if pk:
+            user = User.objects.get(pk=pk)
+        else:
+            user = User()
+        user = User.objects.get(pk=pk)
+        user.name = request.POST.get("name")
+        user.email = request.POST.get("email")
+        user.status = request.POST.get("status")
+        user.save()
+        return redirect("adminapp:staff_list")
+
+
+class DeleteStaffView(View):
+
+    def post(self, request, pk):
+
+        if not request.user.is_superuser:
+            return redirect("login")
+
+        staff = get_object_or_404(User, pk=pk)
+        staff.delete()
+
+        return redirect("adminapp:staff_list")
+
+class FacultyListCreateView(View):
+    template_name = "faculty_list.html"
+
+    # ✅ Show page
+    def get(self, request):
+        print("Authenticated:", request.user.is_authenticated)
+        print("User:", request.user)
+        if not (request.user.role and request.user.role.role_name == "Admin"):
+            return redirect("login")
+
+        faculty = User.objects.filter(role__role_name="Faculty")
+
+        return render(request, self.template_name, {
+            "faculty": faculty
+        })
+
+    # ✅ Handle form submit
+    def post(self, request):
+
+
+        
+
+
+        if not (request.user.role and request.user.role.role_name == "Admin"):
+            return redirect("login")
+        username = request.POST.get("username")
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        password = request.POST.get("password")
+
+        if not all([name, phone, password]):
+            messages.error(request, "All required fields must be filled")
+            return redirect("adminapp:faculty_list")
+
+        faculty_role = Role.objects.filter(role_name="Faculty").first()
+         # ✅ phone duplicate validation
+        if User.objects.filter(phone_number=phone).exists():
+            messages.error(request, "Phone number already registered")
+            return redirect("adminapp:faculty_list")
+
+        if not faculty_role:
+            messages.error(request, "Faculty role not found")
+            return redirect("adminapp:faculty_list")
+
+        if User.objects.filter(username=phone).exists():
+            messages.error(request, "Faculty already exists")
+            return redirect("adminapp:faculty_list")
+
+        User.objects.create_user(
+            username=username,
+            password=password,
+            name=name,
+            email=email,
+            phone_number=phone,
+            role=faculty_role,
+            status="active"
+        )
+
+        messages.success(request, "Faculty created successfully")
+        return redirect("adminapp:faculty_list")
+
+class EditFacultyView(View):
+    template_name = "edit_faculty.html"
+
+    def get(self, request, pk):
+
+        if not (request.user.role and request.user.role.role_name == "Admin"):
+            return redirect("login")
+
+        faculty = User.objects.get(id=pk)
+
+        return render(request, self.template_name, {
+            "faculty": faculty
+        })
+
+    def post(self, request, pk):
+
+        if not (request.user.role and request.user.role.role_name == "Admin"):
+            return redirect("login")
+
+        faculty = User.objects.get(id=pk)
+
+        name = request.POST.get("name")
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        status = request.POST.get("status")
+
+        # username validation
+        if User.objects.exclude(id=faculty.id).filter(username=username).exists():
+            messages.error(request, "Username already exists")
+            return redirect("adminapp:edit_faculty", pk=pk)
+
+        # phone validation
+        if User.objects.exclude(id=faculty.id).filter(phone_number=phone).exists():
+            messages.error(request, "Phone number already registered")
+            return redirect("adminapp:edit_faculty", pk=pk)
+
+        faculty.name = name
+        faculty.username = username
+        faculty.email = email
+        faculty.phone_number = phone
+        faculty.status = status
+
+        faculty.save()
+
+        messages.success(request, "Faculty updated successfully")
+
+        return redirect("adminapp:faculty_list")
+    
+class DeleteFacultyView(View):
+
+    def post(self, request, pk):
+
+        if not (request.user.role and request.user.role.role_name == "Admin"):
+            return redirect("login")
+
+        faculty = User.objects.get(id=pk)
+
+        faculty.delete()
+
+        messages.success(request, "Faculty deleted successfully")
+
+        return redirect("adminapp:faculty_list")
