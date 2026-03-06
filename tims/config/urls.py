@@ -26,6 +26,8 @@ urlpatterns = [
     
     path("Student/", include("tims.Student.studentapp_urls")),
 
+    path("superadmin/",include("tims.superadmin.superadmin_urls")),
+
 
 
     
