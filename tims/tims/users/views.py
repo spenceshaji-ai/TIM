@@ -69,13 +69,13 @@ class LoginView(View):
                     return redirect("login")
                 login(request, user)
                  # ⭐ FORCE PASSWORD CHANGE (ADD HERE)
-                if user.must_change_password:
+                if user.must_change_password and not user.is_superuser:
                     return redirect("users:change_password")
                
                 # 🔥 Role Based Redirection
                   # 🔥 SUPER ADMIN CHECK
                 if user.is_superuser:
-                    return redirect("adminapp:home2")   # or superadmin dashboard
+                    return redirect("superadmin:home5")   # or superadmin dashboard
 
                 if user.role and user.role.role_name in ["Admin", "HR","Manager"]:
                     return redirect("adminapp:home2")
