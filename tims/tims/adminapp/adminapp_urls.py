@@ -16,27 +16,52 @@ urlpatterns = [
     path("", AdminDashboardView.as_view(), name="home"),
 
     # ================= SALARY =================
-path("salary-users/", SalaryUsersView.as_view(), name="salary_users"),
+# ===============================
+    # 1️⃣ SALARY STRUCTURE
+    # ===============================
+    path("salary/structure/",
+         SalaryStructureListView.as_view(),
+         name="salary_structure_list"),
 
-path("salary-history/<int:pk>/",
-     UserSalaryHistoryView.as_view(),
-     name="user_salary_history"),
+    path("salary/set/<int:user_id>/",
+         SalaryStructureCreateUpdateView.as_view(),
+         name="salary_set"),
 
-path("salary-add/<int:pk>/",
-     UserSalaryCreateView.as_view(),
-     name="user_salary_add"),
+    path("salary/preview/<int:pk>/",
+         SalaryPreviewView.as_view(),
+         name="salary_preview"),   
 
-path("salary-update/<int:pk>/",
-     SalaryUpdateView.as_view(),
-     name="salary_update"),
+    # ===============================
+    # 2️⃣ MONTHLY SALARY GENERATION
+    # ===============================
+    path(
+        "salary/monthly/",
+        MonthlySalaryUserListView.as_view(),
+        name="monthly_salary_users"
+    ),
 
-path("salary-delete/<int:pk>/",
-     SalaryDeleteView.as_view(),
-     name="salary_delete"),
+        path(
+    "salary/generate/<int:user_id>/",
+    MonthlySalaryGenerateView.as_view(),
+    name="generate_salary"
+),
 
-path("salary-paid/<int:pk>/",
-     SalaryMarkPaidView.as_view(),
-     name="salary_mark_paid"),
+    path(
+        "salary/history/<int:user_id>/",
+        SalaryHistoryView.as_view(),
+        name="salary_history"
+    ),
+
+    # ===============================
+    # 4️⃣ ALL GENERATED SALARIES
+    # ===============================
+    path(
+        "salary/list/",
+        SalaryListView.as_view(),
+        name="salary_list"
+    ),
+
+
 
     # ================= HOLIDAY =================
     path("holiday/add/", HolidayCreateView.as_view(), name="holiday_add"),

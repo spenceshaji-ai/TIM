@@ -34,19 +34,20 @@ urlpatterns = [
 path(
         "apply-leave/",
         ApplyLeaveView.as_view(),
-        name="faculty_apply_leave",
-    ),    
-path(
-        "my-leaves/",
-        MyLeavesView.as_view(),
-        name="faculty_my_leaves",
-    ),
-path(
-        "delete-leave/<int:leave_id>/",
-        DeleteLeaveView.as_view(),
-        name="faculty_delete_leave",
+        name="faculty_apply_leave"
     ),
 
+    path(
+        "my-leaves/",
+        MyLeavesView.as_view(),
+        name="faculty_my_leaves"
+    ),
+
+    path(
+        "delete-leave/<int:leave_id>/",
+        DeleteLeaveView.as_view(),
+        name="delete_leave"
+    ),
     path(
         "leave-calendar/",
         TemplateView.as_view(

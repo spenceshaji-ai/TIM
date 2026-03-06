@@ -1,0 +1,167 @@
+{% include "pages/header.html" %}
+
+<div class="container-fluid">
+
+<h4 class="page-title">Generate Salary</h4>
+
+<div class="card mt-3">
+<div class="card-body">
+
+<form method="POST">
+{% csrf_token %}
+
+<div class="row">
+
+<div class="col-md-6">
+<label>Faculty</label>
+<input type="text" class="form-control" value="{{ faculty.username }}" readonly>
+</div>
+
+<div class="col-md-3">
+<label>Month</label>
+<select name="month" class="form-control" required>
+<option value="">Select Month</option>
+{% for value,name in months %}
+<option value="{{value}}">{{name}}</option>
+{% endfor %}
+</select>
+</div>
+
+<div class="col-md-3">
+<label>Year</label>
+<input type="number" name="year" class="form-control" value="2026" required>
+</div>
+
+</div>
+
+
+<hr>
+
+<h5 class="mt-3">Earnings</h5>
+
+<div class="row mt-3">
+
+<div class="col-md-4">
+<label>Basic Salary</label>
+<input type="number" id="basic_salary" class="form-control" value="{{ structure.basic_salary }}" readonly>
+</div>
+
+<div class="col-md-4">
+<label>HRA (40%)</label>
+<input type="number" id="hra" class="form-control" readonly>
+</div>
+
+<div class="col-md-4">
+<label>Travel Allowance</label>
+<input type="number" id="travel_allowance" class="form-control" value="{{ structure.travel_allowance }}" readonly>
+</div>
+
+</div>
+
+
+<div class="row mt-3">
+
+<div class="col-md-4">
+<label>Special Allowance</label>
+<input type="number" id="special_allowance" class="form-control" value="{{ structure.special_allowance }}" readonly>
+</div>
+
+<div class="col-md-4">
+<label>Bonus</label>
+<input type="number" name="bonus" id="bonus" class="form-control" value="0">
+</div>
+
+<div class="col-md-4">
+<label>Incentive</label>
+<input type="number" name="incentive" id="incentive" class="form-control" value="0">
+</div>
+
+</div>
+
+
+<div class="row mt-3">
+
+<div class="col-md-4">
+<label>Gross Salary</label>
+<input type="number" id="gross_salary" class="form-control" readonly>
+</div>
+
+<div class="col-md-4">
+<label>PF (12%)</label>
+<input type="number" id="pf" class="form-control" readonly>
+</div>
+
+<div class="col-md-4">
+<label>ESI</label>
+<input type="number" id="esi" class="form-control" readonly>
+</div>
+
+</div>
+
+
+<div class="row mt-3">
+
+<div class="col-md-4">
+<label>Net Salary</label>
+<input type="number" id="net_salary" class="form-control" readonly>
+</div>
+
+</div>
+
+
+<div class="mt-4">
+<button type="submit" class="btn btn-success">
+Generate Salary
+</button>
+</div>
+
+</form>
+
+</div>
+</div>
+
+</div>
+
+
+<script>
+
+function calculateSalary(){
+
+let basic = parseFloat(document.getElementById("basic_salary").value) || 0
+let travel = parseFloat(document.getElementById("travel_allowance").value) || 0
+let special = parseFloat(document.getElementById("special_allowance").value) || 0
+let bonus = parseFloat(document.getElementById("bonus").value) || 0
+let incentive = parseFloat(document.getElementById("incentive").value) || 0
+
+let hra = basic * 0.40
+
+document.getElementById("hra").value = hra
+
+let gross = basic + hra + travel + special + bonus + incentive
+
+document.getElementById("gross_salary").value = gross
+
+let pf = basic * 0.12
+document.getElementById("pf").value = pf
+
+let esi = 0
+if(gross <= 21000){
+esi = gross * 0.0075
+}
+
+document.getElementById("esi").value = esi
+
+let net = gross - pf - esi
+
+document.getElementById("net_salary").value = net
+
+}
+
+document.getElementById("bonus").addEventListener("input", calculateSalary)
+document.getElementById("incentive").addEventListener("input", calculateSalary)
+
+window.onload = calculateSalary
+
+</script>
+
+{% include "pages/footer.html" %}

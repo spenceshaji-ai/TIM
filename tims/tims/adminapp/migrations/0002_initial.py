@@ -120,6 +120,11 @@ class Migration(migrations.Migration):
             name='faculty',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
+        migrations.AddField(
+            model_name='salarystructure',
+            name='faculty',
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+        ),
         migrations.AddConstraint(
             model_name='facultyassignment',
             constraint=models.UniqueConstraint(fields=('faculty', 'course', 'batch'), name='unique_faculty_course_batch_per_faculty'),

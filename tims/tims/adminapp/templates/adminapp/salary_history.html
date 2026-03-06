@@ -1,0 +1,57 @@
+{% include "pages/header.html" %}
+
+<div class="container mt-4">
+
+    <h4>Salary History - {{ selected_user.username }}</h4>
+
+    <!-- Year Filter -->
+    <form method="get" class="mb-3">
+        <select name="year" onchange="this.form.submit()" class="form-control w-25">
+            <option value="">All Years</option>
+            {% for y in years %}
+                <option value="{{ y }}" {% if request.GET.year == y|stringformat:"s" %}selected{% endif %}>
+                    {{ y }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Year</th>
+                <th>Gross</th>
+                <th>PF</th>
+                <th>ESI</th>
+                <th>LOP Days</th>
+                <th>LOP Deduction</th>
+                <th>Net Salary</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for salary in salaries %}
+            <tr>
+                <td>{{ salary.get_month_display }}</td>
+                <td>{{ salary.year }}</td>
+                <td>{{ salary.gross_salary }}</td>
+                <td>{{ salary.pf }}</td>
+                <td>{{ salary.esi }}</td>
+                <td>{{ salary.lop_days }}</td>
+                <td>{{ salary.lop_deduction }}</td>
+                <td><strong>{{ salary.net_salary }}</strong></td>
+                <td>{{ salary.status }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9">No salary records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% include "pages/footer.html" %}
