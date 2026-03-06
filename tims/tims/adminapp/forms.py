@@ -343,7 +343,7 @@ class AssignstudentForm(forms.ModelForm):
             )
 
 from django import forms
-from adminapp.models import Certificate, Assignstudent
+from tims.adminapp.models import Certificate, Assignstudent
 
 
 class CertificateForm(forms.ModelForm):
@@ -391,11 +391,10 @@ class LeaveBalanceForm(forms.ModelForm):
 
 from django import forms
 from tims.adminapp.models import Salary, Holiday
-from adminapp.models import LeaveAllocation, LeaveType
+from tims.adminapp.models import LeaveAllocation, LeaveType
 
 
 from django import forms
-from adminapp.models import LeaveAllocation, LeaveType
 
 
 class HRLeaveAllocationForm(forms.ModelForm):
@@ -456,7 +455,7 @@ class HRLeaveAllocationForm(forms.ModelForm):
         return cleaned_data
     
 from django import forms
-from adminapp.models import Salary, Holiday
+from tims.adminapp.models import Salary, Holiday
 
 from django import forms
 
@@ -485,7 +484,7 @@ class HolidayForm(forms.ModelForm):
 
 from django import forms
 from django.utils.timezone import now
-from adminapp.models import Salary, SalaryStructure
+from tims.adminapp.models import Salary, SalaryStructure
 
 
 # ============================================

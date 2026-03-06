@@ -138,7 +138,7 @@ from django.views.generic import ListView
 from django.http import JsonResponse
 from tims.Student.models import JobApplication, Student
 from tims.Admin.models import Job, Jobtype
-from .forms import StudentForm, ApplicationForm
+from tims.Student.forms import StudentForm, ApplicationForm
 from django.utils import timezone
 
 User = get_user_model()
@@ -150,7 +150,7 @@ User = get_user_model()
 from django.shortcuts import render, redirect
 from django.views import View
 from tims.Student.models import Student
-from .forms import StudentForm
+from tims.Student.forms import StudentForm
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from tims.adminapp.models import Batch,FacultyAssignment,Assignstudent,Batch
@@ -191,7 +191,7 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.views import View
 from tims.faculty.models import FacultyCourseMaterial
-from adminapp.models import Assignstudent
+from tims.adminapp.models import Assignstudent
 
 class stdHome(View):
     def get(self, request):
@@ -201,7 +201,7 @@ class stdHome(View):
 # users/views.py
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from adminapp.models import Certificate
+from tims.adminapp.models import Certificate
 
 class MyIssuedCertificatesView(LoginRequiredMixin, View):
     login_url = 'users:login'
@@ -257,7 +257,7 @@ class StudentCourseMaterialsView(View):
             "materials": materials
         })
 
-from .forms import FeedbackForm
+from tims.Student.forms import FeedbackForm
 
 class FeedbackCreateView(LoginRequiredMixin, View):
     login_url = 'users:login'
@@ -570,7 +570,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.shortcuts import get_object_or_404
 from django.views import View
-from adminapp.models import Certificate
+from tims.adminapp.models import Certificate
 
 
 class CertificateDownloadView(View):

@@ -36,7 +36,7 @@ urlpatterns = [
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
     path("Student/", include("tims.Student.studentapp_urls", namespace="Student")),
-    path("faculty/", include("tims.faculty.faculty_urls")),
+    
 ]
 
 # ✅ Serve Media Files in Development

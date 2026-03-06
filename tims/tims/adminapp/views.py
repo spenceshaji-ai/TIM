@@ -6,11 +6,10 @@ from django.utils import timezone
 from django.http import HttpResponseForbidden, JsonResponse
 
 from tims.conftest import user
-from faculty.forms import LeaveApplicationForm
+from tims.faculty.forms import LeaveApplicationForm
 User = get_user_model()
-from adminapp.models import LeaveApplication, Salary, SalaryStructure
+from tims.adminapp.models import LeaveApplication, Salary, SalaryStructure
 from django.db.models import Case, When, Value, IntegerField
-from tims.adminapp.forms import LeaveBalanceForm
 from datetime import date
 from decimal import Decimal
 from django.views.generic import TemplateView
@@ -31,7 +30,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Case, When, Value, IntegerField
 from datetime import date
-from adminapp.forms import SalaryStructureForm, MonthlySalaryForm
+from tims.adminapp.forms import SalaryStructureForm, MonthlySalaryForm
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -68,8 +67,8 @@ from django.views.generic import CreateView, ListView, UpdateView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.shortcuts import redirect
-from adminapp.models import Salary, Holiday
-from adminapp.forms import HolidayForm
+from tims.adminapp.models import Salary, Holiday
+from tims.adminapp.forms import HolidayForm
 
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
@@ -467,8 +466,8 @@ from datetime import date
 
 
 
-from adminapp.models import LeaveType, LeaveAllocation, LeaveBalance
-from adminapp.forms import HRLeaveAllocationForm
+from tims.adminapp.models import LeaveType, LeaveAllocation, LeaveBalance
+from tims.adminapp.forms import HRLeaveAllocationForm
 
 User = get_user_model()
 
@@ -501,13 +500,13 @@ class LeaveRequestsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     
 from datetime import date
 from django.http import HttpResponseForbidden
-from adminapp.models import LeaveBalance
+from tims.adminapp.models import LeaveBalance
 from datetime import date
 from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponseForbidden
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from adminapp.models import LeaveApplication, LeaveBalance
+from tims.adminapp.models import LeaveApplication, LeaveBalance
 
 class UpdateLeaveStatusView(LoginRequiredMixin, UserPassesTestMixin, View):
 
@@ -604,7 +603,7 @@ class YearlyResetView(LoginRequiredMixin, UserPassesTestMixin, View):
         messages.success(request, "Yearly reset completed.")
         return redirect("adminapp:leave_requests")
     
-from adminapp.models import LeaveBalance
+from tims.adminapp.models import LeaveBalance
 from datetime import date
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
@@ -614,8 +613,8 @@ from datetime import date
 
 
 
-from adminapp.models import LeaveType, LeaveAllocation, LeaveBalance
-from adminapp.forms import HRLeaveAllocationForm
+from tims.adminapp.models import LeaveType, LeaveAllocation, LeaveBalance
+from tims.adminapp.forms import HRLeaveAllocationForm
 
 User = get_user_model()
 
@@ -761,15 +760,15 @@ class LeaveCalendarDataView(View):
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from tims.adminapp.forms import CourseForm,BatchForm
-from .models import Enquiry, FollowUp
-from .forms import EnquiryForm,FollowUpForm, LeaveApplicationForm
-from .models import Admission
-from .forms import AdmissionForm
+from tims.adminapp.models import Enquiry, FollowUp
+from tims.adminapp.forms import EnquiryForm,FollowUpForm, LeaveApplicationForm
+from tims.adminapp.models import Admission
+from tims.adminapp.forms import AdmissionForm
 from tims.adminapp.models import Course,Batch,FacultyAssignment,Assignstudent
 from tims.faculty.models import TrainingSession,FacultyDailyReport,StudentAttendance
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from .forms import CourseForm,BatchForm,FacultyAssignmentForm,AssignstudentForm,CertificateForm
+from tims.adminapp.forms import CourseForm,BatchForm,FacultyAssignmentForm,AssignstudentForm,CertificateForm
 from django.contrib import messages
 from django.utils.dateparse import parse_date, parse_time, parse_datetime
 from django.contrib.auth.mixins import LoginRequiredMixin

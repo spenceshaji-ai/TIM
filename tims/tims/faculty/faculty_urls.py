@@ -1,10 +1,8 @@
 from django.urls import path
 from django.views.generic import TemplateView
 from .views import ApplyLeaveView, FacultyDashboardView, FacultyMaterialAddView, LeaveCalendarDataView, MyLeavesView, DeleteLeaveView
-from .views import ApplyLeaveView, MyLeavesView
 
 
-from tims.faculty.views import ApplyLeaveView, MyLeavesView, DeleteLeaveView
 
 
 from tims.faculty.views import (

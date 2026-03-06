@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils.timezone import now
 from tims.adminapp.models import LeaveApplication, LeaveBalance, LeaveType
-from .forms import LeaveApplicationForm
+from tims.faculty.forms import LeaveApplicationForm
 from django.views import View
 
 
@@ -145,7 +145,7 @@ from tims.faculty.models import TrainingSession,StudentAttendance,FacultyDailyRe
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from tims.adminapp.models import Batch,FacultyAssignment,Assignstudent,Batch
-from .forms import TrainingSessionForm,StudentAttendanceForm,FacultyDailyReportForm
+from tims.faculty.forms import TrainingSessionForm,StudentAttendanceForm,FacultyDailyReportForm
 
 
 class TrainingSessionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -561,8 +561,8 @@ from django.views import View
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from adminapp.models import FacultyAssignment
-from .forms import FacultyCourseMaterialForm
+from tims.adminapp.models import FacultyAssignment
+from tims.faculty.forms import FacultyCourseMaterialForm
 
 class FacultyMaterialAddView(View):
     template_name = "course_material_form.html"

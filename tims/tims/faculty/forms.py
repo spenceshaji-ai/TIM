@@ -324,8 +324,8 @@ class FacultyDailyReportForm(forms.ModelForm):
         return cleaned_data
 
 
-from .models import FacultyCourseMaterial
-from adminapp.models import FacultyAssignment, Course, Batch
+from tims.faculty.models import FacultyCourseMaterial
+from tims.adminapp.models import FacultyAssignment, Course, Batch
 
 class FacultyCourseMaterialForm(forms.ModelForm):
     class Meta:

@@ -149,9 +149,7 @@ urlpatterns = [
     path("enquiry/<int:enquiry_id>/followup/add/",FollowUpCreateView.as_view(),name="followup_add"),
     path("admissions/", AdmissionListView.as_view(), name="admission_list"),
     path("enquiry/<int:enquiry_id>/convert/",ConvertToAdmissionView.as_view(),name="convert_admission"),
-    path("leave/apply/", ApplyLeaveView.as_view(), name="apply_leave"),
-    path("leave/my/", MyLeavesView.as_view(), name="my_leaves"),
-    path("leave/delete/<int:leave_id>/", DeleteLeaveView.as_view(), name="delete_leave"),
+    
     path("leave/requests/", LeaveRequestsView.as_view(), name="leave_requests"),
     path(
         "leave/<int:leave_id>/<str:status>/",
@@ -184,7 +182,7 @@ urlpatterns = [
     path("assignments/delete/<int:pk>/", AssignStudentDeleteView.as_view(),name="assign-student-delete"),
     path("faculty-reports/",AdminFacultyReportListView.as_view(),name="faculty_report_list",),
     path("training-sessions/",AdminTrainingSessionListView.as_view(),name="training_session_list",),
-    path("assignment-report/", AssignmentReportView.as_view(), name="assignment-report")
+    path("assignment-report/", AssignmentReportView.as_view(), name="assignment-report"),
 
 
 # from tims.adminapp.views import LeaveHistoryDetailView, LeaveRequestsView, LeaveUserListView, UpdateLeaveStatusView, LeaveRequestsView,UpdateLeaveStatusView,FollowUpCreateView, FollowUpListView
