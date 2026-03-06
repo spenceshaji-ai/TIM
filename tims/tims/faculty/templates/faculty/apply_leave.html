@@ -10,11 +10,10 @@ Apply Leave
 
 {% block form_body %}
 
-<!-- Leave Balance Table -->
 <h5 class="mb-3">Your Leave Balance ({{ today.year }})</h5>
 
 <table class="table table-bordered mb-4">
-    <thead>
+    <thead class="table-dark">
         <tr>
             <th>Leave Type</th>
             <th>Earned</th>
@@ -38,35 +37,91 @@ Apply Leave
     </tbody>
 </table>
 
+<hr>
+
+<!-- Leave Type -->
 <div class="mb-3">
     <label class="form-label">Leave Type</label>
-    <select name="leave_type" class="form-control" required>
-        {% for lt in leave_types %}
-        <option value="{{ lt.id }}">{{ lt.name }}</option>
-        {% endfor %}
-    </select>
+    {{ form.leave_type }}
 </div>
 
+<!-- Start Date -->
 <div class="mb-3">
     <label class="form-label">Start Date</label>
-    <input type="date" name="start_date" min="{{ today }}" class="form-control" required>
+    {{ form.start_date }}
 </div>
 
+<!-- End Date -->
 <div class="mb-3">
     <label class="form-label">End Date</label>
-    <input type="date" name="end_date" min="{{ today }}" class="form-control" required>
+    {{ form.end_date }}
 </div>
 
+<!-- Day Type -->
 <div class="mb-3">
     <label class="form-label">Day Type</label>
-    <select name="day_type" class="form-control">
-        <option value="Full">Full Day</option>
-        <option value="Half">Half Day</option>
-    </select>
+    {{ form.day_type }}
+</div>
+
+<!-- Half Day Session -->
+<div class="mb-3" id="halfDayBox" style="display:none;">
+    <label class="form-label">Half Day Session</label>
+    {{ form.half_day_session }}
+</div>
+
+<!-- Number of Days -->
+<div class="mb-3">
+    <label class="form-label">Number of Days</label>
+    <input type="text" id="num_days" class="form-control" readonly>
+</div>
+
+<!-- Reason -->
+<div class="mb-3">
+    <label class="form-label">Reason</label>
+    {{ form.reason }}
 </div>
 
 {% endblock %}
 
 {% block form_button %}
 <button type="submit" class="btn btn-primary">Submit Leave</button>
+
+<script>
+
+function calculateDays() {
+
+    const start = document.querySelector("input[name='start_date']").value;
+    const end = document.querySelector("input[name='end_date']").value;
+    const dayType = document.querySelector("select[name='day_type']").value;
+
+    if (!start || !end) {
+        document.getElementById("num_days").value = "";
+        return;
+    }
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    const diffTime = endDate - startDate;
+    const diffDays = diffTime / (1000 * 60 * 60 * 24) + 1;
+
+    if (diffDays <= 0) {
+        document.getElementById("num_days").value = "";
+        return;
+    }
+
+    if (dayType === "Half") {
+        document.getElementById("num_days").value = "0.5";
+    } else {
+        document.getElementById("num_days").value = diffDays;
+    }
+}
+
+
+// Trigger calculation
+document.querySelector("input[name='start_date']").addEventListener("change", calculateDays);
+document.querySelector("input[name='end_date']").addEventListener("change", calculateDays);
+document.querySelector("select[name='day_type']").addEventListener("change", calculateDays);
+
+</script>
 {% endblock %}

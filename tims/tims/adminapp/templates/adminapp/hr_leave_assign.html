@@ -43,24 +43,20 @@ Assign Leave - {{ employee.username }}
 
 <h5 class="mb-3">Assign / Update Leave Allocation</h5>
 
+{% if form.errors %}
+<div class="alert alert-danger">
+    {{ form.errors }}
+</div>
+{% endif %}
+
 <div class="mb-3">
-    <label class="form-label">Leave Type</label>
-    <select name="leave_type" class="form-control" required>
-        <option value="">Select Leave Type</option>
-        {% for leave in leave_types %}
-        <option value="{{ leave.id }}">
-            {{ leave.get_name_display }}
-        </option>
-        {% endfor %}
-    </select>
+    {{ form.leave_type.label_tag }}
+    {{ form.leave_type }}
 </div>
 
 <div class="mb-3">
-    <label class="form-label">Total Days for {{ year }}</label>
-    <input type="number"
-           name="total_days"
-           class="form-control"
-           required>
+    {{ form.total_days.label_tag }}
+    {{ form.total_days }}
 </div>
 
 {% endblock %}
@@ -70,8 +66,7 @@ Assign Leave - {{ employee.username }}
     Save Allocation
 </button>
 
-<a href="{% url 'adminapp:leave_users' %}"
-   class="btn btn-secondary">
+<a href="{% url 'adminapp:leave_users' %}" class="btn btn-secondary">
     Back
 </a>
 {% endblock %}

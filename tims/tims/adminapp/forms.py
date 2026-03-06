@@ -129,6 +129,71 @@ class LeaveBalanceForm(forms.ModelForm):
         }
 
 from django import forms
+from adminapp.models import LeaveAllocation, LeaveType
+
+
+from django import forms
+from adminapp.models import LeaveAllocation, LeaveType
+
+
+class HRLeaveAllocationForm(forms.ModelForm):
+
+    class Meta:
+        model = LeaveAllocation
+        fields = ["leave_type", "total_days"]
+
+        widgets = {
+            "leave_type": forms.Select(attrs={
+                "class": "form-control"
+            }),
+            "total_days": forms.NumberInput(attrs={
+                "class": "form-control",
+                "min": 0,
+                "step": "0.5"
+            }),
+        }
+
+        labels = {
+            "leave_type": "Leave Type",
+            "total_days": "Total Days",
+        }
+
+    def __init__(self, *args, **kwargs):
+
+        # These come from the view
+        self.user = kwargs.pop("employee", None)
+        self.year = kwargs.pop("year", None)
+
+        super().__init__(*args, **kwargs)
+
+        # Show all leave types
+        self.fields["leave_type"].queryset = LeaveType.objects.all()
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+        leave_type = cleaned_data.get("leave_type")
+
+        if self.user and leave_type and self.year:
+
+            # Prevent duplicate allocation for same year
+            existing = LeaveAllocation.objects.filter(
+                user=self.user,
+                leave_type=leave_type,
+                year=self.year
+            )
+
+            if self.instance.pk:
+                existing = existing.exclude(pk=self.instance.pk)
+
+            if existing.exists():
+                raise forms.ValidationError(
+                    "Leave already allocated for this type in this year."
+                )
+
+        return cleaned_data
+    
+from django import forms
 from adminapp.models import Salary, Holiday
 
 from django import forms
@@ -137,45 +202,7 @@ from django import forms
 from django.utils.timezone import now
 
 
-class SalaryForm(forms.ModelForm):
 
-    class Meta:
-        model = Salary
-        fields = [
-            "faculty",
-            "month",
-            "year",
-            "basic_salary",
-            "travel_allowance",
-            "special_allowance",
-            "bonus",
-            "incentive",
-        ]
-
-        widgets = {
-            "faculty": forms.Select(attrs={"class": "form-control"}),
-            "month": forms.Select(attrs={"class": "form-control"}),
-            "year": forms.NumberInput(attrs={
-                "class": "form-control",
-                "readonly": "readonly"
-            }),
-            "basic_salary": forms.NumberInput(attrs={"class": "form-control"}),
-            "travel_allowance": forms.NumberInput(attrs={"class": "form-control"}),
-            "special_allowance": forms.NumberInput(attrs={"class": "form-control"}),
-            "bonus": forms.NumberInput(attrs={"class": "form-control"}),
-            "incentive": forms.NumberInput(attrs={"class": "form-control"}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Auto Year
-        if not self.instance.pk:
-            self.fields["year"].initial = now().year
-
-        # Hide faculty field if coming from user-wise page
-        if self.initial.get("faculty"):
-            self.fields["faculty"].widget = forms.HiddenInput()
 
 class HolidayForm(forms.ModelForm):
     class Meta:
@@ -192,4 +219,55 @@ class HolidayForm(forms.ModelForm):
             "reason": forms.TextInput(
                 attrs={"class": "form-control"}
             )
+        }
+
+from django import forms
+from django.utils.timezone import now
+from adminapp.models import Salary, SalaryStructure
+
+
+# ============================================
+# 1️⃣ Salary Structure Form (One Time Setup)
+# ============================================
+
+# forms.py
+
+class SalaryStructureForm(forms.ModelForm):
+
+    class Meta:
+        model = SalaryStructure
+        fields = [
+            "basic_salary",
+            "travel_allowance",
+            "special_allowance",
+        ]
+
+        widgets = {
+            "basic_salary": forms.NumberInput(attrs={"class": "form-control"}),
+            "travel_allowance": forms.NumberInput(attrs={"class": "form-control"}),
+            "special_allowance": forms.NumberInput(attrs={"class": "form-control"}),
+        }
+
+# ============================================
+# 2️⃣ Monthly Salary Form
+# ============================================
+# forms.py
+
+
+
+
+class MonthlySalaryForm(forms.ModelForm):
+    class Meta:
+        model = Salary
+        fields = ["faculty", "year", "month", "bonus", "incentive"]
+
+        widgets = {
+            "faculty": forms.HiddenInput(),
+            "year": forms.NumberInput(attrs={
+                "class": "form-control",
+                "readonly": "readonly"
+            }),
+            "month": forms.Select(attrs={"class": "form-control"}),
+            "bonus": forms.NumberInput(attrs={"class": "form-control"}),
+            "incentive": forms.NumberInput(attrs={"class": "form-control"}),
         }
