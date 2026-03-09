@@ -12,7 +12,7 @@
     <meta content="Coderthemes" name="author" />
 
     <!-- App favicon -->
-    <link rel="shortcut icon" href="assets/images/favicon.ico">
+    <link rel="shortcut icon" href="{% static 'admin/assets/images/favicon.ico' %}">
 
     <!-- Daterangepicker css -->
     <link href="{% static 'admin/assets/vendor/daterangepicker/daterangepicker.css' %}" rel="stylesheet"
@@ -448,6 +448,13 @@
 
                     <li class="side-nav-item">
                         <a href="{% url 'adminapp:leave_requests' %}" class="side-nav-link">
+                             <i class="uil-calender"></i>
+                            <span> Leave Request</span>
+                        </a>
+                    </li>
+                             <li class="side-nav-item">
+                        
+                        <a href="{% url 'admin_app:jobtype_create' %}"  class="side-nav-link">
                             <i class="uil-calender"></i>
                             <span> Approve </span>
                         <a data-bs-toggle="collapse" href="#sidebarCrmm" aria-expanded="false"
@@ -472,7 +479,23 @@
                     <li class="side-nav-item">
                         <a href="{% url 'adminapp:leave_calendar' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
-                            <span> Leave Calendar </span>
+                            <span> Leave Calendar </span> </a> </li> <li class="side-nav-item">
+                        <a href="{% url 'adminapp:faculty_report_list' %}" class="side-nav-link">
+                        
+                            <span> Faculty Report </span>
+                        </a>
+                        </li>
+                        <li class="side-nav-item">
+                        <a href="{% url 'adminapp:admin_feedback_list' %}" class="side-nav-link">
+                            <i class="uil-comments-alt"></i>
+                            <span> Feedback list </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        
+                        <a href="{% url 'admin_app:job_create' %}" class="side-nav-link">
+                            <i class="uil-comments-alt"></i>
+                            <span> Create Jobs </span>
                         </a>
                     </li>
                      <li class="side-nav-item">
@@ -486,7 +509,7 @@
                         
                     
                          <li class="side-nav-item">
-                        <a href="{% url 'adminapp:salary_users' %}" class="side-nav-link">
+                        <a href="{% url 'adminapp:salary_structure_list' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
                             <span> Salary View </span>
                         </a>
@@ -507,8 +530,36 @@
 
                             </ul>
                         </div>
+                        <div class="collapse" id="sidebarCrm">
+                            <ul class="side-nav-second-level">
+                                <li>
+                                    <a href="{% url 'adminapp:training_session_list' %}">Daily Sessions</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'adminapp:assignment-report' %}">Users details</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'leave_requests' %}">Clients</a>
+                                    <a href="{% url 'adminapp:course_add' %}">create course</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'adminapp:batch_add' %}">create batch</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'adminapp:faculty_assignment' %}">Assign faculty</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'adminapp:assign-student' %}">Assign Student</a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
-
+                       <li class="side-nav-item">
+                        <a href="{% url 'adminapp:monthly_salary_users' %}" class="side-nav-link">
+                            <i class="uil-comments-alt"></i>
+                            <span> Monthly Salary Users </span>
+                        </a>
+                    </li>
                     <li class="side-nav-item">
                         <a data-bs-toggle="collapse" href="#sidebarEnquiry" aria-expanded="false"
                             aria-controls="sidebarEcommerce" class="side-nav-link">
@@ -520,6 +571,7 @@
                             <ul class="side-nav-second-level">
                                 <li>
                                     <a href="{% url 'adminapp:enquiry_add' %}"> Enquiry </a>
+                                    <a href="{% url 'adminapp:mark-completed' %}">Course completed students list</a>
                                 </li>
                                 <li>
                                     <a href="{% url 'adminapp:enquiry_list' %}">Edit Enquiry </a>
@@ -574,9 +626,9 @@
                     </li>
 
                     <li class="side-nav-item">
-                        <a href="apps-social-feed.html" class="side-nav-link">
+                        <a href="{% url 'admin_app:admin_application_list' %}" class="side-nav-link">
                             <i class="uil-rss"></i>
-                            <span> Social Feed </span>
+                            <span> Student Job Application</span>
                         </a>
                     </li>
 

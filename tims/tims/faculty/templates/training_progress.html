@@ -1,0 +1,78 @@
+{% include "header.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h4 class="mb-4">My Training Progress</h4>
+
+    <!-- Filter -->
+    <form method="get" class="mb-4 d-flex gap-3 align-items-end">
+
+        <div>
+            <label class="fw-bold">Filter by Status</label>
+            <select name="status" class="form-select" onchange="this.form.submit()">
+                <option value="">All Sessions</option>
+                <option value="Ongoing" {% if status_filter == "Ongoing" %}selected{% endif %}>
+                    Ongoing
+                </option>
+                <option value="Completed" {% if status_filter == "Completed" %}selected{% endif %}>
+                    Completed
+                </option>
+            </select>
+        </div>
+
+    </form>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Session Date</th>
+                    <th>Batch</th>
+                    <th>Topic Covered</th>
+                    <th>Hours Taken</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for session in sessions %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ session.session_date }}</td>
+                    <td>{{ session.batch }}</td>
+                    <td>{{ session.topic_covered }}</td>
+                    <td>{{ session.hours_taken }}</td>
+                    <td>
+                        {% if session.status == "Ongoing" %}
+                            <span class="badge bg-warning text-dark">
+                                Ongoing
+                            </span>
+                        {% else %}
+                            <span class="badge bg-success">
+                                Completed
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-danger">
+                        No approved training sessions found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% include "footer.html" %}

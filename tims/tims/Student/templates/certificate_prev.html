@@ -1,0 +1,65 @@
+ {% block content %}
+<style>
+    .certificate-container {
+        text-align: center;
+        padding: 50px;
+        font-family: Arial, sans-serif;
+    }
+
+    .certificate-container h1 { font-size: 40px; }
+    .certificate-container h2 { font-size: 30px; }
+    .certificate-container h3 { font-size: 25px; }
+    .certificate-container p  { font-size: 20px; }
+
+    .download-btn {
+        margin-top: 40px;
+    }
+
+    .download-btn button {
+        padding: 12px 25px;
+        background: green;
+        color: white;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .download-btn button:hover {
+        background: darkgreen;
+    }
+
+    @media print {
+        .download-btn {
+            display: none;
+        }
+    }
+</style>
+
+<div class="certificate-container">
+    
+
+    <h1>Certificate of Completion</h1>
+
+    <p>This is to certify that</p>
+
+    <h2>{{ certificate.student.student.name }}</h2>
+
+    <p>has successfully completed the course</p>
+
+    <h3>{{ certificate.student.course.course_name }}</h3>
+
+    <p>Batch: {{ certificate.student.batch.batch_name }}</p>
+
+    <p>Certificate Number: {{ certificate.certificate_number }}</p>
+
+    <p>Issued On: {{ certificate.issued_on }}</p>
+
+    <div class="download-btn">
+        <button onclick="window.print()">
+             Download Certificate
+        </button>
+    </div>
+
+</div>
+
+{% endblock %}

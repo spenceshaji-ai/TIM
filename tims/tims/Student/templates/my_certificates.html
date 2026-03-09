@@ -1,0 +1,45 @@
+{% include 'stdheader.html' %} 
+
+{% block form_title %}
+My Certificates
+{% endblock %}
+
+{% block form_action %}
+<!-- No form submission -->
+{% endblock %}
+
+{% block form_body %}
+
+{% if certificates %}
+    <ul class="list-group">
+        {% for cert in certificates %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>
+                {{ cert.student.course.course_name }} - Batch: {{ cert.student.batch.batch_name }}
+            </span>
+            <div>
+                <!-- View Certificate Button -->
+                <a href="{% url 'Student:certificate_detail' cert.pk %}" class="btn btn-primary btn-sm">
+                    View Certificate
+                </a>
+
+                <!-- Feedback Button: show only if feedback not submitted -->
+                {% if not cert.feedback %}
+                <a href="{% url 'Student:feedback_create' cert.pk %}" class="btn btn-warning btn-sm">
+                    Give Feedback
+                </a>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No certificates have been assigned to you.</p>
+{% endif %}
+
+{% endblock %}
+
+{% block form_button %}
+<a href="{% url 'Student:stdhome' %}" class="btn btn-success">Back to Home</a>
+{% endblock %}
+{% include 'stdfooter.html' %} 

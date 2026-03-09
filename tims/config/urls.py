@@ -4,20 +4,32 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
+import tims.faculty.faculty_urls
 from tims.users.views import LoginView
-
 urlpatterns = [
     path("", LoginView.as_view(), name="login"),
-    path("", TemplateView.as_view(template_name="pages/adminhome.html"), name="home"),
-    path("about/",TemplateView.as_view(template_name="pages/about.html"),name="about",),
-    # Django Admin, use {% url 'admin:index' %}
+    path("home/", TemplateView.as_view(template_name="pages/home.html"), name="home"),
+
+    path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
+
+    # Admin
     path(settings.ADMIN_URL, admin.site.urls),
 
     # Auth
     path("accounts/", include("allauth.urls")),
-    # Admin App
-    path("adminapp/", include("tims.adminapp.adminapp_urls")),
+    
+    #path('adminapp/', include(adminapp.adminapp_urls)),
+    # path('', include('tims.adminapp.adminapp_urls')),
+    # Your stuff: custom urls includes go here
+    # ...
+    # Media files
+
     path("faculty/", include("tims.faculty.faculty_urls")),
+    path("users/", include("tims.users.urls", namespace="users")),
+
+    path("adminapp/", include("tims.adminapp.adminapp_urls")),
+    path('Admin/', include("tims.Admin.admin_urls")),
+    path('Student/',include("tims.Student.student_urls")),
 
     # Your stuff: custom urls includes go here
     # ...

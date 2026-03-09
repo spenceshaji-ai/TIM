@@ -1,0 +1,127 @@
+{% include 'studentheader.html' %}
+{% block content %}
+
+<div class="container mt-5">
+
+    <!-- Page Title -->
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">My Learning Progress</h2>
+        <p class="text-muted">Track your course journey</p>
+    </div>
+
+    <div class="row g-4 align-items-stretch">
+
+        <!-- Student Info Card -->
+        <div class="col-md-6 d-flex">
+            <div class="card shadow-sm border-0 rounded-4 w-100">
+                <div class="card-body">
+
+                    <h5 class="text-primary mb-4">
+                        <i class="mdi mdi-account-circle me-1"></i>
+                        Student Information
+                    </h5>
+
+                    <div class="mb-2 text-muted">
+                        Name :
+                        <span class="text-dark fw-semibold">{{ student.name }}</span>
+                    </div>
+
+                    <div class="mb-2 text-muted">
+                        Batch :
+                        <span class="text-dark fw-semibold">{{ batch }}</span>
+                    </div>
+
+                    <div class="mb-2 text-muted">
+                        Course :
+                        <span class="text-dark fw-semibold">{{ course }}</span>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-2 text-muted">
+                        Start Date :
+                        <span class="text-dark fw-semibold">{{ batch.start_date }}</span>
+                    </div>
+
+                    <div class="mb-2 text-muted">
+                        End Date :
+                        <span class="text-dark fw-semibold">{{ batch.end_date }}</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Card -->
+        <div class="col-md-6 d-flex">
+            <div class="card shadow-sm border-0 rounded-4 w-100">
+                <div class="card-body text-center">
+
+                    <h5 class="text-success mb-4">
+                        <i class="mdi mdi-chart-donut me-1"></i>
+                        Attendance Overview
+                    </h5>
+
+                    <!-- Circular Progress -->
+                    <div class="mx-auto mb-3 progress-circle">
+                        <span class="percentage">
+                            {{ attendance_percentage }}%
+                        </span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="progress mt-3" style="height:8px;">
+                        <div class="progress-bar bg-success"
+                             style="width: {{ attendance_percentage }}%">
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <p class="mb-1">
+                            Total Classes :
+                            <strong>{{ total_classes }}</strong>
+                        </p>
+
+                        <p class="mb-0">
+                            Present :
+                            <strong>{{ present_classes }}</strong>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+.progress-circle {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: conic-gradient(
+        #28c76f {{ attendance_percentage }}%,
+        #e9ecef {{ attendance_percentage }}%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.percentage {
+    background: #fff;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 600;
+}
+</style>
+
+{% endblock %}
+{% include 'studentfooter.html' %}

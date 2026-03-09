@@ -1,4 +1,5 @@
-
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import authenticate, login
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import QuerySet
 from django.urls import reverse
@@ -27,6 +28,31 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
 from django.views.generic import UpdateView
+from django.views.generic import UpdateView
+from django.views.generic import ListView, CreateView, DeleteView
+from tims.users.models import User
+from .forms import UserForm
+from django.views.generic import TemplateView
+
+
+from django.views import View
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from tims.users.models import User
+from tims.faculty.models import FacultyCourseMaterial
+from .forms import UserForm, LoginForm
+from django.views.generic import TemplateView
+from tims.users.models import User,Role
+from django.contrib.auth import authenticate, login,logout
+
+
+# class UserDetailView(LoginRequiredMixin, DetailView):
+#     model = User
+#     slug_field = "username"
+#     slug_url_kwarg = "username"
+
+
+# user_detail_view = UserDetailView.as_view()
 
 
 from django.contrib import messages

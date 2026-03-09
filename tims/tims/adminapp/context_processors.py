@@ -1,4 +1,4 @@
-from adminapp.models import LeaveApplication
+from tims.adminapp.models import LeaveApplication
 
 
 

@@ -1,0 +1,31 @@
+{% extends "form.html" %}
+
+{% block form_title %}
+    {% if form.instance.pk %}
+        Update Student Attendance
+    {% else %}
+        Create Student Attendance
+    {% endif %}
+{% endblock %}
+
+{% block form_action %}
+    {% if form.instance.pk %}
+        {% url 'faculty:attendance-update' form.instance.pk %}
+    {% else %}
+        {% url 'faculty:attendance-create' %}
+    {% endif %}
+{% endblock %}
+
+{% block form_body %}
+    {{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+    <button type="submit" class="btn btn-success">
+        {% if form.instance.pk %}Update{% else %}Save{% endif %}
+    </button>
+
+    <a href="{% url 'faculty:attendance-list' %}" class="btn btn-secondary ms-2">
+        Cancel
+    </a>
+{% endblock %}

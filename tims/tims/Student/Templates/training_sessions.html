@@ -1,0 +1,62 @@
+{% include "studentheader.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+<h3 class="fw-bold mb-4">Training Sessions</h3>
+
+{% for assign in student_assignments %}
+
+    <!-- Batch + Course Heading -->
+    <div class="mb-3">
+        <h5 class="fw-bold text-primary">
+            Batch : {{ assign.batch.batch_name }}
+        </h5>
+
+        <p class="text-muted">
+            Course : {{ assign.course.course_name }}
+        </p>
+    </div>
+
+    {% for session in sessions %}
+        {% if session.batch.id == assign.batch.id %}
+
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-body">
+
+                <p class="mb-1">
+                    <strong>Date:</strong> {{ session.session_date }}
+                </p>
+
+                <p class="mb-1">
+                    <strong>Topic Covered:</strong> {{ session.topic_covered }}
+                </p>
+
+                <p class="mb-1">
+                    <strong>Hours Taken:</strong> {{ session.hours_taken }}
+                </p>
+
+                <p class="mb-2">
+                    <strong>Faculty:</strong> {{ session.faculty }}
+                </p>
+
+                <span class="badge bg-success">
+                    {{ session.status }}
+                </span>
+
+            </div>
+        </div>
+
+        {% endif %}
+    {% endfor %}
+
+{% empty %}
+<div class="alert alert-info">
+    No approved training sessions available.
+</div>
+{% endfor %}
+
+</div>
+
+{% endblock %}
+{% include "studentfooter.html" %}
