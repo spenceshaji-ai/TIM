@@ -22,6 +22,7 @@ class Migration(migrations.Migration):
             name='Assignstudent',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+            ],
             name='Course',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -29,6 +30,7 @@ class Migration(migrations.Migration):
                 ('duration', models.CharField(max_length=100)),
                 ('syllabus', models.TextField()),
                 ('fee', models.DecimalField(decimal_places=2, max_digits=10)),
+            ],
             name='Admission',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -136,7 +138,7 @@ class Migration(migrations.Migration):
         ),
     
            
-            migrations.CreateModel(
+        migrations.CreateModel(
                  name='LeaveType',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),

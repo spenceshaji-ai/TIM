@@ -1,83 +1,50 @@
 {% load static %}
 {% include 'student/header.html' %}
-<div class="content">
 
-    <!-- Start Content-->
+<div class="content">
     <div class="container-fluid">
 
-        <!-- start page title -->
+        <!-- Page Title -->
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box">
-                    <div class="page-title-right">
-                        <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Hyper</a></li>
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Forms</a></li>
-                            <li class="breadcrumb-item active">Form Elements</li>
-                        </ol>
-                    </div>
-                    <h4 class="page-title">Form Elements</h4>
+                    <h4 class="page-title">
+                        {% block form_title %}{% endblock %}
+                    </h4>
                 </div>
             </div>
         </div>
-        <!-- end page title -->
+        <!-- End Page Title -->
 
+        <!-- Form Card -->
         <div class="row">
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="header-title">{% block form_title %}{% endblock %}</h4>
-                        <p class="text-muted font-14">
-                            Most common form control, text-based input fields. Includes support for all HTML5 types:
-                            <code>text</code>, <code>password</code>, <code>datetime</code>,
-                            <code>datetime-local</code>, <code>date</code>, <code>month</code>, <code>time</code>,
-                            <code>week</code>, <code>number</code>, <code>email</code>, <code>url</code>,
-                            <code>search</code>, <code>tel</code>, and <code>color</code>.
-                        </p>
 
-                        <ul class="nav nav-tabs nav-bordered mb-3">
-                            <li class="nav-item">
-                                <a href="#input-types-preview" data-bs-toggle="tab" aria-expanded="false"
-                                    class="nav-link active">
-                                    Preview
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#input-types-code" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
-                                    Code
-                                </a>
-                            </li>
-                        </ul> <!-- end nav-->
+                        <form method="POST"
+                              action="{% block form_action %}{% endblock %}"
+                              enctype="multipart/form-data">
 
-                        <div class="tab-content">
-                            <div class="tab-pane show active" id="input-types-preview">
-                                <div class="row">
-                                    <div class="col-lg-6">
+                            {% csrf_token %}
 
-                                        <form method="POST" action="{% block form_action %}{% endblock %}" 
-                                             enctype="multipart/form-data">
-                                            
+                            {% block form_body %}
+                            {% endblock %}
 
-                                            {% csrf_token %}
-                                            {% block form_body %}{% endblock %}
-                                            {% block form_button %}{% endblock %}
+                            <div class="mt-3">
+                                {% block form_button %}
+                                {% endblock %}
+                            </div>
 
-                                        </form>
+                        </form>
 
-                                    </div> <!-- end col -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Form Card -->
 
+    </div>
+</div>
 
-                                </div>
-                                <!-- end row-->
-                            </div> <!-- end preview-->
-
-
-                        </div> <!-- end tab-content-->
-                    </div> <!-- end card-body -->
-                </div> <!-- end card -->
-            </div><!-- end col -->
-        </div><!-- end row -->
-    </div> <!-- container -->
-
-</div> <!-- content -->
 {% include 'student/footer.html' %}
