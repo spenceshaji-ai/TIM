@@ -29,7 +29,6 @@ urlpatterns = [
 
     path("adminapp/", include("tims.adminapp.adminapp_urls")),
     path('Admin/', include("tims.Admin.admin_urls")),
-    path('Student/',include("tims.Student.student_urls")),
 
     # Your stuff: custom urls includes go here
     # ...
