@@ -28,7 +28,16 @@ class UserAdminChangeForm(UserChangeForm):
 class UserForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ['username', 'name', 'email', 'phone_number', 'status', 'role']
+        fields = [
+            'username',
+            'name',
+            'email',
+            'phone_number',
+            'status',
+            'role',
+            'password1',
+            'password2'
+        ]
 
         widgets = {
             'username': forms.TextInput(attrs={
@@ -47,10 +56,23 @@ class UserForm(UserCreationForm):
                 'class': 'form-control',
                 'placeholder': 'Enter Phone Number'
             }),
-        
             'status': forms.Select(attrs={'class': 'form-control'}),
             'role': forms.Select(attrs={'class': 'form-control'}),
         }
+
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter Password'
+        })
+    )
+
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirm Password'
+        })
+    )
 
 
 # =========================
