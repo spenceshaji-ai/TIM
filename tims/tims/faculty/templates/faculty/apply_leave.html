@@ -4,124 +4,157 @@
 Apply Leave
 {% endblock %}
 
-{% block form_action %}
-{% url 'faculty:faculty_apply_leave' %}
-{% endblock %}
-
 {% block form_body %}
 
-<h5 class="mb-3">Your Leave Balance ({{ today.year }})</h5>
-
+<!-- Leave Balance Table -->
 <table class="table table-bordered mb-4">
-    <thead class="table-dark">
-        <tr>
-            <th>Leave Type</th>
-            <th>Earned</th>
-            <th>Used</th>
-            <th>Remaining</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for balance in leave_balances %}
-        <tr>
-            <td>{{ balance.leave_type.name }}</td>
-            <td>{{ balance.earned_days }}</td>
-            <td>{{ balance.used_days }}</td>
-            <td>{{ balance.remaining_days }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="4">No leave allocated yet.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
+<thead>
+<tr>
+<th>Leave Type</th>
+<th>Total Allocated</th>
+<th>Used</th>
+<th>Remaining</th>
+</tr>
+</thead>
+
+<tbody>
+{% for balance in leave_balances %}
+
+<tr>
+<td>{{ balance.leave_type.name }}</td>
+
+<td>{{ balance.earned_days }}</td>
+
+<td>{{ balance.used_days }}</td>
+
+<td>
+<span class="badge bg-success">
+{{ balance.remaining_days }}
+</span>
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="4">No leave balances found</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
 </table>
 
-<hr>
 
-<!-- Leave Type -->
+<form method="post">
+{% csrf_token %}
+
 <div class="mb-3">
-    <label class="form-label">Leave Type</label>
-    {{ form.leave_type }}
+<label>Leave Type</label>
+{{ form.leave_type }}
 </div>
 
-<!-- Start Date -->
 <div class="mb-3">
-    <label class="form-label">Start Date</label>
-    {{ form.start_date }}
+<label>Start Date</label>
+{{ form.start_date }}
 </div>
 
-<!-- End Date -->
 <div class="mb-3">
-    <label class="form-label">End Date</label>
-    {{ form.end_date }}
+<label>End Date</label>
+{{ form.end_date }}
 </div>
 
-<!-- Day Type -->
+
+<!-- UI Day Selection -->
 <div class="mb-3">
-    <label class="form-label">Day Type</label>
-    {{ form.day_type }}
+<label>Leave Duration</label>
+
+<select id="leaveDuration" class="form-control">
+<option value="">Select</option>
+<option value="FULL">Full Day</option>
+<option value="HALF_AM">Half Day A.M</option>
+<option value="HALF_PM">Half Day P.M</option>
+</select>
 </div>
 
-<!-- Half Day Session -->
-<div class="mb-3" id="halfDayBox" style="display:none;">
-    <label class="form-label">Half Day Session</label>
-    {{ form.half_day_session }}
+
+<!-- Hidden actual form fields -->
+<div style="display:none;">
+{{ form.day_type }}
+{{ form.half_day_session }}
 </div>
 
-<!-- Number of Days -->
+
 <div class="mb-3">
-    <label class="form-label">Number of Days</label>
-    <input type="text" id="num_days" class="form-control" readonly>
+<label>No. of Days</label>
+<input type="text" id="totalDays" class="form-control" readonly>
 </div>
 
-<!-- Reason -->
 <div class="mb-3">
-    <label class="form-label">Reason</label>
-    {{ form.reason }}
+<label>Reason</label>
+{{ form.reason }}
 </div>
 
-{% endblock %}
+<button type="submit" class="btn btn-primary">
+Apply Leave
+</button>
 
-{% block form_button %}
-<button type="submit" class="btn btn-primary">Submit Leave</button>
+</form>
+
 
 <script>
 
-function calculateDays() {
+const duration = document.getElementById("leaveDuration")
 
-    const start = document.querySelector("input[name='start_date']").value;
-    const end = document.querySelector("input[name='end_date']").value;
-    const dayType = document.querySelector("select[name='day_type']").value;
+const dayType = document.getElementById("id_day_type")
+const session = document.getElementById("id_half_day_session")
 
-    if (!start || !end) {
-        document.getElementById("num_days").value = "";
-        return;
+const start = document.getElementById("id_start_date")
+const end = document.getElementById("id_end_date")
+
+const totalDays = document.getElementById("totalDays")
+
+function calculateDays(){
+
+    if(duration.value === "FULL"){
+
+        dayType.value = "FULL"
+        session.value = ""
+
+        if(start.value && end.value){
+
+            let s = new Date(start.value)
+            let e = new Date(end.value)
+
+            let diff = (e - s) / (1000*60*60*24) + 1
+
+            totalDays.value = diff
+        }
     }
 
-    const startDate = new Date(start);
-    const endDate = new Date(end);
+    else if(duration.value === "HALF_AM"){
 
-    const diffTime = endDate - startDate;
-    const diffDays = diffTime / (1000 * 60 * 60 * 24) + 1;
+        dayType.value = "HALF"
+        session.value = "Morning"
 
-    if (diffDays <= 0) {
-        document.getElementById("num_days").value = "";
-        return;
+        totalDays.value = 0.5
     }
 
-    if (dayType === "Half") {
-        document.getElementById("num_days").value = "0.5";
-    } else {
-        document.getElementById("num_days").value = diffDays;
+    else if(duration.value === "HALF_PM"){
+
+        dayType.value = "HALF"
+        session.value = "Noon"
+
+        totalDays.value = 0.5
     }
+
 }
 
-
-// Trigger calculation
-document.querySelector("input[name='start_date']").addEventListener("change", calculateDays);
-document.querySelector("input[name='end_date']").addEventListener("change", calculateDays);
-document.querySelector("select[name='day_type']").addEventListener("change", calculateDays);
+duration.addEventListener("change", calculateDays)
+start.addEventListener("change", calculateDays)
+end.addEventListener("change", calculateDays)
 
 </script>
+
 {% endblock %}

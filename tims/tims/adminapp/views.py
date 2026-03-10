@@ -1,3 +1,5 @@
+from urllib import request
+
 from django.views.generic import ListView, View,DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect, get_object_or_404
@@ -209,9 +211,14 @@ class MonthlySalaryGenerateView(View):
 
         faculty = get_object_or_404(User, id=user_id)
 
+        structure = SalaryStructure.objects.filter(
+            faculty=faculty
+        ).first()
+
         context = {
             "faculty": faculty,
-            "months": Salary.MONTH_CHOICES
+            "months": Salary.MONTH_CHOICES,
+            "structure": structure
         }
 
         return render(request, self.template_name, context)
@@ -221,12 +228,12 @@ class MonthlySalaryGenerateView(View):
 
         faculty = get_object_or_404(User, id=user_id)
 
-        month = request.POST.get("month")
-        year = request.POST.get("year")
-        bonus = request.POST.get("bonus", 0)
-        incentive = request.POST.get("incentive", 0)
+        month = int(request.POST.get("month"))
+        year = int(request.POST.get("year"))
 
-        # Prevent duplicate salary
+        bonus = float(request.POST.get("bonus") or 0)
+        incentive = float(request.POST.get("incentive") or 0)
+
         if Salary.objects.filter(
             faculty=faculty,
             month=month,
@@ -236,13 +243,17 @@ class MonthlySalaryGenerateView(View):
             messages.error(request, "Salary already generated for this month.")
             return redirect("adminapp:salary_history", user_id=faculty.id)
 
-        salary = Salary.objects.create(
+        salary = Salary(
             faculty=faculty,
             month=month,
             year=year,
             bonus=bonus,
             incentive=incentive
         )
+
+        salary.copy_structure()
+        salary.calculate_salary()
+        salary.save()
 
         messages.success(request, "Salary generated successfully!")
 
@@ -613,8 +624,8 @@ from datetime import date
 
 
 
-from tims.adminapp.models import LeaveType, LeaveAllocation, LeaveBalance
-from tims.adminapp.forms import HRLeaveAllocationForm
+from adminapp.models import LeaveType, LeaveAllocation, LeaveBalance
+from adminapp.forms import HRLeaveAllocationForm,ManagementLeaveApplicationForm
 
 User = get_user_model()
 
@@ -707,34 +718,92 @@ class HRLeaveAssignView(View):
         return render(request, self.template_name, context)
 
         return render(request, self.template_name, context)
-class ManagementLeaveApplyView(LoginRequiredMixin, View):
+from django.views.generic import ListView, View
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from datetime import date
+
+from adminapp.models import LeaveApplication, LeaveBalance
+
+
+class ManagementApplyLeaveView(LoginRequiredMixin, View):
+
     template_name = "adminapp/management_leave_apply.html"
 
     def get(self, request):
-        form = LeaveApplicationForm()
-        return render(request, self.template_name, {"form": form})
+
+        form = ManagementLeaveApplicationForm(user=request.user)
+
+        leave_balances = LeaveBalance.objects.filter(
+            user=request.user,
+            year=date.today().year
+        ).select_related("leave_type")
+
+        return render(request, self.template_name, {
+            "form": form,
+            "leave_balances": leave_balances,
+            "today": date.today(),
+        })
+
 
     def post(self, request):
-        form = LeaveApplicationForm(request.POST)
+
+        form = ManagementLeaveApplicationForm(
+            request.POST,
+            user=request.user
+        )
 
         if form.is_valid():
+
             leave = form.save(commit=False)
             leave.user = request.user
-            leave.status = "Pending"
             leave.save()
-            return redirect("adminapp:management_leave_list")
 
-        return render(request, self.template_name, {"form": form})
-    
-class ManagementLeaveListView(LoginRequiredMixin, ListView):
-    template_name = "adminapp/management_leave_list.html"
+            messages.success(request, "Leave request submitted successfully.")
+
+            return redirect("adminapp:management_my_leaves")
+
+        leave_balances = LeaveBalance.objects.filter(
+            user=request.user,
+            year=date.today().year
+        ).select_related("leave_type")
+
+        return render(request, self.template_name, {
+            "form": form,
+            "leave_balances": leave_balances,
+            "today": date.today(),
+        })
+
+
+class ManagementMyLeavesView(LoginRequiredMixin, ListView):
+
+    model = LeaveApplication
+    template_name = "adminapp/management_my_leaves.html"
     context_object_name = "leaves"
 
     def get_queryset(self):
+
         return LeaveApplication.objects.filter(
             user=self.request.user
-        ).order_by("-id")
+        ).select_related("leave_type").order_by("-applied_at")
 
+
+class ManagementDeleteLeaveView(LoginRequiredMixin, View):
+
+    def get(self, request, leave_id):
+
+        leave = LeaveApplication.objects.filter(
+            id=leave_id,
+            user=request.user,
+            status="Pending"
+        ).first()
+
+        if leave:
+            leave.delete()
+            messages.info(request, "Pending leave deleted.")
+
+        return redirect("adminapp:management_my_leaves")
 from django.http import JsonResponse
 
 class LeaveCalendarDataView(View):

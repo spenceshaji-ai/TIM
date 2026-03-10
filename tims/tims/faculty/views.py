@@ -38,7 +38,7 @@ class ApplyLeaveView(LoginRequiredMixin, View):
 
     def post(self, request):
 
-        form = LeaveApplicationForm(request.POST)
+        form = LeaveApplicationForm(request.POST, user=request.user)
 
         # ⭐ attach user BEFORE validation
         form.instance.user = request.user
