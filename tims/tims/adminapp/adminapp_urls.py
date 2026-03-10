@@ -101,8 +101,23 @@ urlpatterns = [
     path("leave/yearly-reset/", YearlyResetView.as_view(), name="yearly_reset"),
 
     # ================= MANAGEMENT =================
-    path("management/leave/apply/", ManagementLeaveApplyView.as_view(), name="management_leave_apply"),
-    path("management/leave/list/", ManagementLeaveListView.as_view(), name="management_leave_list"),
+    path(
+        "management/apply-leave/",
+        ManagementApplyLeaveView.as_view(),
+        name="management_apply_leave"
+    ),
+
+    path(
+        "management/my-leaves/",
+        ManagementMyLeavesView.as_view(),
+        name="management_my_leaves"
+    ),
+
+    path(
+        "management/delete-leave/<int:leave_id>/",
+        ManagementDeleteLeaveView.as_view(),
+        name="management_delete_leave"
+    ),
 
     # ================= COURSES =================
     path("courses/", CourseListView.as_view(), name="course_list"),

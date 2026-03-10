@@ -13,7 +13,7 @@ class LeaveApplicationForm(forms.ModelForm):
     ]
 
     half_day_session = forms.ChoiceField(
-        choices=HALF_SESSION_CHOICES,
+        choices=[("", "Select Session")] + HALF_SESSION_CHOICES,
         required=False,
         widget=forms.Select(attrs={"class": "form-control"})
     )
@@ -25,6 +25,7 @@ class LeaveApplicationForm(forms.ModelForm):
             "start_date",
             "end_date",
             "day_type",
+            "half_day_session",
             "reason",
         ]
 
@@ -51,15 +52,12 @@ class LeaveApplicationForm(forms.ModelForm):
         today = date.today()
         current_time = now().time()
 
-        # ❌ No past dates
         if start and start < today:
             raise ValidationError("Past dates are not allowed.")
 
-        # ❌ End date validation
         if start and end and end < start:
             raise ValidationError("End date cannot be before start date.")
 
-        # ❌ Prevent duplicate leave request same day
         if start and self.user:
             exists = LeaveApplication.objects.filter(
                 user=self.user,
@@ -70,23 +68,19 @@ class LeaveApplicationForm(forms.ModelForm):
             if exists:
                 raise ValidationError("You already applied leave for this date.")
 
-        # HALF DAY LOGIC
         if day_type == "Half":
 
             if not half_session:
                 raise ValidationError("Select Morning or Noon for half day.")
 
-            # Today's leave restrictions
             if start == today:
 
-                # After 9:30 → Morning not allowed
                 if current_time >= datetime.strptime("09:30", "%H:%M").time():
                     if half_session == "Morning":
                         raise ValidationError(
                             "Morning half day cannot be applied after 9:30 AM."
                         )
 
-                # After 12:30 → No half day allowed
                 if current_time >= datetime.strptime("12:30", "%H:%M").time():
                     raise ValidationError(
                         "Half day leave cannot be applied after 12:30 PM."
