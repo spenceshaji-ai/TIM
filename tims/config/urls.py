@@ -17,7 +17,7 @@ urlpatterns = [
 
     # Auth
     path("accounts/", include("allauth.urls")),
-    
+
     #path('adminapp/', include(adminapp.adminapp_urls)),
     # path('', include('tims.adminapp.adminapp_urls')),
     # Your stuff: custom urls includes go here
@@ -35,32 +35,21 @@ urlpatterns = [
     # ...
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
-    path("users/", include("tims.users.urls", namespace="users")),
     path("Student/", include("tims.Student.studentapp_urls", namespace="Student")),
-    
-    path("users/", include("tims.users.urls", namespace="users")),
-
-    path("adminapp/", include("tims.adminapp.adminapp_urls")),
-
     path("facultyapp/",include("tims.facultyapp.faculty_url" )),
-
-    path("Admin/",include("tims.Admin.admin_urls" )),
-    
-    path("Student/", include("tims.Student.studentapp_urls")),
-
     path("superadmin/",include("tims.superadmin.superadmin_urls")),
 
 
 
-    
-    
+
+
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]
 
 # ✅ Serve Media Files in Development
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    
+
 
 
 [path("Student/", include("tims.Student.studentapp_urls", namespace="Student")),
@@ -82,6 +71,6 @@ if settings.DEBUG:
         import debug_toolbar
         urlpatterns = [
             path("__debug__/", include(debug_toolbar.urls)),
-            
+
         ] + urlpatterns
 
