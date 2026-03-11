@@ -1,4 +1,6 @@
-{% extends "base.html" %}
+
+{% include "pages/header.html" %}
+
 {% load crispy_forms_tags %}
 
 {% block content %}
@@ -11,6 +13,7 @@
         Enquiry: <strong>{{ enquiry.name }}</strong>
     </div>
 
+    
     <form method="POST">
         {% csrf_token %}
 
@@ -20,7 +23,7 @@
             Confirm Admission
         </button>
 
-        <a href="{% url 'enquiry_detail' enquiry.id %}" class="btn btn-secondary mt-3">
+        <a href="{% url 'adminapp:enquiry_detail' enquiry.id %}" class="btn btn-secondary mt-3">
             Cancel
         </a>
 
@@ -29,3 +32,4 @@
 </div>
 
 {% endblock %}
+{% include "pages/footer.html" %}

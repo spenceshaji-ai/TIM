@@ -1,132 +1,4 @@
 from django.db import models
-from tims.users.models import User
-
-
-from django.conf import settings
-# Create your models here.
-
-class Enquiry(models.Model):
-
-    name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=15)
-    email = models.EmailField(blank=True, null=True)
-
-    course_id = models.ForeignKey(
-        "Course",
-        on_delete=models.CASCADE
-    )
-
-    source = models.CharField(
-        max_length=20,
-        choices=[
-            ("Call", "Call"),
-            ("Website", "Website"),
-            ("Walk-in", "Walk-in"),
-            ("Reference", "Reference"),
-        ]
-    )
-
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ("New", "New"),
-            ("Contacted", "Contacted"),
-            ("Converted", "Converted"),
-            ("Closed", "Closed"),
-        ],
-        default="New"
-    )
-
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.name} - {self.course.course_name}"
-    
-class FollowUp(models.Model):
-
-    enquiry = models.ForeignKey(
-        Enquiry,
-        on_delete=models.CASCADE,
-        related_name="followups"
-    )
-
-    followup_date = models.DateField()
-
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ("Pending", "Pending"),
-            ("Completed", "Completed"),
-            ("Missed", "Missed"),
-        ],
-        default="Pending"
-    )
-
-    remarks = models.TextField(blank=True)
-
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.enquiry.name} - {self.followup_date}"
-
-class Admission(models.Model):
-
-    enquiry = models.OneToOneField(
-        Enquiry,
-        on_delete=models.CASCADE,
-        related_name="admission"
-    )
-
-    admission_date = models.DateField(auto_now_add=True)
-
-    student_name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=15)
-    email = models.EmailField()
-
-    course = models.ForeignKey(
-        "adminapp.Course",
-        on_delete=models.CASCADE
-    )
-
-    batch = models.ForeignKey(
-        "Batch",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
-
-    fees_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    total_fees = models.DecimalField(max_digits=10, decimal_places=2)
-
-    status = models.CharField(
-        max_length=50,
-        default="Admitted"
-    )
-
-    def __str__(self):
-        return self.student_name
-
-
-#class FacultyAssignment(models.Model):
-   # faculty = models.ForeignKey(User, on_delete=models.CASCADE)
-    #course = models.ForeignKey(Course, on_delete=models.CASCADE)
-  #  batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
-
-    #def __str__(self):
-        #return f"{self.faculty} - {self.course} - {self.batch}"
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -287,47 +159,73 @@ from django.conf import settings
 from decimal import Decimal
 from calendar import monthrange
 from datetime import date
+class SalaryStructure(models.Model):
 
+    faculty = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
 
+    basic_salary = models.DecimalField(max_digits=10, decimal_places=2)
+    travel_allowance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    special_allowance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    bonus = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    incentive = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.faculty.username} Salary Structure"
+    
+    
+
+    @property
+    def gross_salary(self):
+        return self.basic_salary + self.travel_allowance + self.special_allowance
+
+    @property
+    def pf(self):
+        return self.basic_salary * Decimal("0.12")
+
+    @property
+    def esi(self):
+        return self.gross_salary * Decimal("0.0075")
+
+    @property
+    def net_salary(self):
+        return self.gross_salary - self.pf - self.esi
+    
 class Salary(models.Model):
 
     faculty = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
+
     MONTH_CHOICES = [
-    (1, "January"),
-    (2, "February"),
-    (3, "March"),
-    (4, "April"),
-    (5, "May"),
-    (6, "June"),
-    (7, "July"),
-    (8, "August"),
-    (9, "September"),
-    (10, "October"),
-    (11, "November"),
-    (12, "December"),
-]
+        (1, "January"), (2, "February"), (3, "March"),
+        (4, "April"), (5, "May"), (6, "June"),
+        (7, "July"), (8, "August"), (9, "September"),
+        (10, "October"), (11, "November"), (12, "December"),
+    ]
 
     month = models.IntegerField(choices=MONTH_CHOICES)
     year = models.IntegerField()
 
-    # ===== EARNINGS =====
-    basic_salary = models.DecimalField(max_digits=10, decimal_places=2)
-    hra = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    # ===== EARNINGS (Monthly Snapshot) =====
+    basic_salary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     travel_allowance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     special_allowance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     bonus = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     incentive = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
+    hra = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     gross_salary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     # ===== DEDUCTIONS =====
     pf = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     esi = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     lop_deduction = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
     total_deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     # ===== FINAL =====
@@ -356,19 +254,40 @@ class Salary(models.Model):
         return f"{self.faculty.username} - {self.month}/{self.year}"
 
     # ======================================================
-    #                SALARY CALCULATION LOGIC
+    # COPY STRUCTURE ON FIRST SAVE
+    # ======================================================
+
+    def copy_structure(self):
+        if self.pk:
+            return  # already exists, don't overwrite old months
+
+        structure = SalaryStructure.objects.filter(
+            faculty=self.faculty
+        ).first()
+
+        if structure:
+            self.basic_salary = structure.basic_salary
+            self.travel_allowance = structure.travel_allowance
+            self.special_allowance = structure.special_allowance
+            self.bonus = structure.bonus
+            self.incentive = structure.incentive
+
+    # ======================================================
+    # SALARY CALCULATION (Your Same Logic)
     # ======================================================
 
     def calculate_salary(self):
         from .models import LeaveApplication, Holiday
+        from calendar import monthrange
+        from datetime import date
+        from decimal import Decimal
 
-        # 1️⃣ Calculate Working Days
         total_days = monthrange(self.year, self.month)[1]
 
-        sundays = 0
-        for day in range(1, total_days + 1):
-            if date(self.year, self.month, day).weekday() == 6:
-                sundays += 1
+        sundays = sum(
+            1 for day in range(1, total_days + 1)
+            if date(self.year, self.month, day).weekday() == 6
+        )
 
         holidays = Holiday.objects.filter(
             date__year=self.year,
@@ -377,10 +296,10 @@ class Salary(models.Model):
 
         self.working_days = total_days - sundays - holidays
 
-        # 2️⃣ HRA = 40% of Basic
+        # HRA = 40%
         self.hra = self.basic_salary * Decimal("0.40")
 
-        # 3️⃣ Gross Salary
+        # Gross
         self.gross_salary = (
             self.basic_salary
             + self.hra
@@ -390,16 +309,16 @@ class Salary(models.Model):
             + self.incentive
         )
 
-        # 4️⃣ PF = 12% of Basic
+        # PF = 12%
         self.pf = self.basic_salary * Decimal("0.12")
 
-        # 5️⃣ ESI = 0.75% if Gross <= 21000
+        # ESI rule
         if self.gross_salary <= Decimal("21000"):
             self.esi = self.gross_salary * Decimal("0.0075")
         else:
             self.esi = Decimal("0.00")
 
-        # 6️⃣ LOP Calculation from Approved Leaves
+        # LOP
         leaves = LeaveApplication.objects.filter(
             user=self.faculty,
             status="Approved",
@@ -415,21 +334,15 @@ class Salary(models.Model):
         else:
             self.lop_deduction = Decimal("0.00")
 
-        # 7️⃣ Total Deductions
-        self.total_deductions = (
-            self.pf
-            + self.esi
-            + self.lop_deduction
-        )
-
-        # 8️⃣ Net Salary
+        self.total_deductions = self.pf + self.esi + self.lop_deduction
         self.net_salary = self.gross_salary - self.total_deductions
 
     # ======================================================
-    #                     SAVE OVERRIDE
+    # SAVE
     # ======================================================
 
     def save(self, *args, **kwargs):
+        self.copy_structure()
         self.calculate_salary()
         super().save(*args, **kwargs)
 # Create your models here.
@@ -445,7 +358,7 @@ class Course(models.Model):
 
 class Batch(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    batch_name = models.CharField(max_length=100) 
+    batch_name = models.CharField(max_length=100)
     start_date = models.DateField()
     end_date = models.DateField()
     capacity = models.IntegerField()
@@ -454,6 +367,154 @@ class Batch(models.Model):
         return self.batch_name
 
 
+class Enquiry(models.Model):
+
+    name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=15,unique=True)
+    email = models.EmailField(blank=True, null=True)
+
+    course = models.ForeignKey(
+        "Course",
+        on_delete=models.CASCADE
+    )
+
+    source = models.CharField(
+        max_length=20,
+        choices=[
+            ("Call", "Call"),
+            ("Website", "Website"),
+            ("Walk-in", "Walk-in"),
+            ("Reference", "Reference"),
+        ]
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("New", "New"),
+            ("Contacted", "Contacted"),
+            ("Converted", "Converted"),
+            ("Not Interested", "Not Interested"),
+            ("Closed", "Closed"),
+
+        ],
+        default="New"
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    next_followup_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.course.course_name}"
+    
+class FollowUp(models.Model):
+
+    enquiry = models.ForeignKey(
+        Enquiry,
+        on_delete=models.CASCADE,
+        related_name="followups"
+    )
+    today_remark = models.TextField(blank=True, null=True)    # today's discussion
+    followup_date = models.DateField()
+    next_followup_date = models.DateField(null=True, blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("Pending", "Pending"),
+            ("Completed", "Completed"),
+            ("Missed", "Missed"),
+        ],
+        default="Pending"
+    )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.enquiry.name} - {self.followup_date}"
+
+class Admission(models.Model):
+
+    enquiry = models.OneToOneField(
+        Enquiry,
+        on_delete=models.CASCADE,
+        related_name="admission"
+    )
+
+    admission_date = models.DateField(auto_now_add=True)
+
+    student_name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=15)
+    email = models.EmailField()
+
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE
+    )
+
+    batch = models.ForeignKey(
+        "Batch",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    
+    total_fees = models.DecimalField(max_digits=10, decimal_places=2)
+
+    status = models.CharField(
+        max_length=50,
+        default="Admitted"
+    )
+
+    def __str__(self):
+        return self.student_name
+    
+
+
+class Payment(models.Model):
+
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Paid', 'Paid'),
+    )
+
+    admission = models.ForeignKey(
+        Admission,
+        on_delete=models.CASCADE,
+        related_name="payments"
+    )
+
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    payment_date = models.DateField(
+        auto_now_add=True
+    )
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='Pending'
+    )
+
+    def __str__(self):
+        return f"{self.admission.student_name} - {self.amount}"
+
+
+
+from django.db import models
+from django.core.exceptions import ValidationError
 
 class FacultyAssignment(models.Model):
     faculty = models.ForeignKey("users.User", on_delete=models.CASCADE)
@@ -593,10 +654,3 @@ def monthly_accrual():
 
         balance.earned_days += allocation.monthly_accrual()
         balance.save()
-    certificate_number = models.CharField(
-        max_length=100,
-        unique=True,
-        blank=True
-    )
-
-    

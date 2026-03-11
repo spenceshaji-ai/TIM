@@ -1,5 +1,3 @@
-
-
 # from django.views import View
 # from django.shortcuts import render, redirect, get_object_or_404
 # from Student.models import JobApplication,Student
@@ -645,4 +643,3 @@ class CourseRatingsView(View):
         }
 
         return render(request, self.template_name, context)
-        

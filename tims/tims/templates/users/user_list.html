@@ -1,38 +1,62 @@
 {% extends "base.html" %}
 
+{% block title %}User List{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
 
-  <h2>User Management</h2>
+<h2 class="mb-4">All Users</h2>
 
-  <a href="{% url 'user_add' %}" class="btn btn-primary mb-3">
-    ➕ Add User
-  </a>
-
-  <table class="table table-bordered">
-    <tr>
-      <th>Username</th>
-      <th>Email</th>
-      <th>Role</th>
-      <th>Status</th>
-      <th>Actions</th>
-    </tr>
-
-    {% for user in users %}
-    <tr>
-      <td>{{ user.username }}</td>
-      <td>{{ user.email }}</td>
-      <td>{{ user.role.role_name }}</td>
-      <td>{{ user.status }}</td>
-
-      <td>
-        <a href="{% url 'user_detail' user.id %}">View</a> |
-        <a href="{% url 'user_edit' user.id %}">Edit</a> |
-        <a href="{% url 'users:user_delete' user.id %}">Delete</a>
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
-
+<!-- 🔥 Filter Buttons -->
+<div class="mb-3">
+    <a href="{% url 'users:user_list' %}" class="btn btn-secondary btn-sm">All</a>
+    <a href="{% url 'users:user_list' %}?role=student" class="btn btn-primary btn-sm">Students</a>
+    <a href="{% url 'users:user_list' %}?role=faculty" class="btn btn-info btn-sm">Faculty</a>
+    <a href="{% url 'users:user_list' %}?role=staff" class="btn btn-warning btn-sm">Admin / HR / Manager</a>
+    <a href="{% url 'users:user_list' %}?role=superadmin" class="btn btn-dark btn-sm">Super Admin</a>
 </div>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Created At</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.phone_number }}</td>
+            <td>
+                {% if user.role %}
+                {{ user.role.role_name }}
+                {% else %}
+                <span class="text-danger">No Role</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if user.status %}
+                <span class="badge bg-success">Active</span>
+                {% else %}
+                <span class="badge bg-danger">Inactive</span>
+                {% endif %}
+            </td>
+            <td>{{ user.created_at|date:"d M Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" class="text-center">No users found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}
