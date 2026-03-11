@@ -95,7 +95,6 @@ LOCAL_APPS = [
     "tims.adminapp",
     "tims.faculty",
     "tims.Student",
-    "tims.Student",
     "tims.Admin",
     "tims.superadmin",
     

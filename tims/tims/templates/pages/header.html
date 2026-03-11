@@ -445,7 +445,12 @@
                     <li class="side-nav-title">Leave Management</li>
 
 
-
+                       <li class="side-nav-item">
+                        <a href="{% url 'adminapp:leave_users' %}" class="side-nav-link">
+                            <i class="uil-comments-alt"></i>
+                            <span> Leave Users </span>
+                        </a>
+                    </li>
                     <li class="side-nav-item">
                         <a href="{% url 'adminapp:leave_requests' %}" class="side-nav-link">
                              <i class="uil-calender"></i>
@@ -498,12 +503,7 @@
                             <span> Create Jobs </span>
                         </a>
                     </li>
-                     <li class="side-nav-item">
-                        <a href="{% url 'adminapp:leave_users' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> Leave Users </span>
-                        </a>
-                    </li>
+                  
                                         <li class="side-nav-title">Salary Management</li>
 
                         
@@ -539,7 +539,6 @@
                                     <a href="{% url 'adminapp:assignment-report' %}">Users details</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'leave_requests' %}">Clients</a>
                                     <a href="{% url 'adminapp:course_add' %}">create course</a>
                                 </li>
                                 <li>

@@ -4,7 +4,6 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
-import tims.faculty.faculty_urls
 from tims.users.views import LoginView
 urlpatterns = [
     path("", LoginView.as_view(), name="login"),
@@ -51,8 +50,7 @@ urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 
-[path("Student/", include("tims.Student.studentapp_urls", namespace="Student")),
-]
+
 # Media files
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
