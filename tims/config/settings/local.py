@@ -31,13 +31,6 @@ CACHES = {
 EMAIL_BACKEND = env(
     "DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend",
 )
-# django-allauth (Development Override)
-# ------------------------------------------------------------------------------
-ACCOUNT_AUTHENTICATION_METHOD = "username"
-ACCOUNT_EMAIL_REQUIRED = False
-ACCOUNT_USERNAME_REQUIRED = True
-
-
 
 # WhiteNoise
 # ------------------------------------------------------------------------------

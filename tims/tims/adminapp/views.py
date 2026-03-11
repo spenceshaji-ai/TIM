@@ -61,7 +61,8 @@ def is_admin(user):
 def is_manager(user):
     return hasattr(user, "role") and user.role.role_name == "Manager"
 
-
+class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "pages/home.html"
 
 
 from django.views.generic import CreateView, ListView, UpdateView
@@ -623,8 +624,8 @@ from datetime import date
 
 
 
-from tims.adminapp.models import LeaveType, LeaveAllocation, LeaveBalance
-from tims.adminapp.forms import HRLeaveAllocationForm,ManagementLeaveApplicationForm
+from adminapp.models import LeaveType, LeaveAllocation, LeaveBalance
+from adminapp.forms import HRLeaveAllocationForm,ManagementLeaveApplicationForm
 
 User = get_user_model()
 
@@ -723,7 +724,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from datetime import date
 
-from tims.adminapp.models import LeaveApplication, LeaveBalance
+from adminapp.models import LeaveApplication, LeaveBalance
 
 
 class ManagementApplyLeaveView(LoginRequiredMixin, View):

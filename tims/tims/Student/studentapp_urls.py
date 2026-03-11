@@ -18,6 +18,7 @@ urlpatterns=[
     path('std/', HomeView1.as_view(), name='studenthome'),
 
     path("student_register/", StudentRegisterView.as_view(), name="student_register"),
+    #path("dashboard/", StudentDashboardView.as_view(), name="dashboard"),
     path('stdhome/', stdHome.as_view(), name='stdhome'),
 
     path("progress/",StudentProgressView.as_view(),name="progress"),

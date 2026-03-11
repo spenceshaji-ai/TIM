@@ -445,29 +445,26 @@
                     <li class="side-nav-title">Leave Management</li>
 
 
-                       <li class="side-nav-item">
-                        <a href="{% url 'adminapp:leave_users' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> Leave Users </span>
-                        </a>
-                    </li>
+
                     <li class="side-nav-item">
                         <a href="{% url 'adminapp:leave_requests' %}" class="side-nav-link">
                              <i class="uil-calender"></i>
                             <span> Leave Request</span>
                         </a>
                     </li>
-                             <li class="side-nav-item">
+                    <li class="side-nav-item">
                         
                         <a href="{% url 'admin_app:jobtype_create' %}"  class="side-nav-link">
                             <i class="uil-calender"></i>
                             <span> Approve </span>
+                        </a>    
                         <a data-bs-toggle="collapse" href="#sidebarCrmm" aria-expanded="false"
                             aria-controls="sidebarCrm" class="side-nav-link">
                             <i class="uil course"></i>
-
-                            <span> Course </span>
                         </a>
+                        </li>
+                          <span> Course </span>
+                    
                         <div class="collapse" id="sidebarCrmm">
                             <ul class="side-nav-second-level">
                                 <li>
@@ -479,7 +476,7 @@
 
                             </ul>
                         </div>
-                    </li>
+                    
 
                     <li class="side-nav-item">
                         <a href="{% url 'adminapp:leave_calendar' %}" class="side-nav-link">
@@ -503,7 +500,12 @@
                             <span> Create Jobs </span>
                         </a>
                     </li>
-                  
+                     <li class="side-nav-item">
+                        <a href="{% url 'adminapp:leave_users' %}" class="side-nav-link">
+                            <i class="uil-comments-alt"></i>
+                            <span> Leave Users </span>
+                        </a>
+                    </li>
                                         <li class="side-nav-title">Salary Management</li>
 
                         
@@ -538,7 +540,7 @@
                                 <li>
                                     <a href="{% url 'adminapp:assignment-report' %}">Users details</a>
                                 </li>
-                                <li>
+                                <li>            
                                     <a href="{% url 'adminapp:course_add' %}">create course</a>
                                 </li>
                                 <li>

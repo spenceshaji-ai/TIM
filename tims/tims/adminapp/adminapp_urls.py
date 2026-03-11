@@ -2,6 +2,7 @@ from django.urls import path
 from django.views.generic import TemplateView
 from .views import *
 
+from .views import *
 from .views import AdmissionListView
 from .views import StaffListCreateView, FacultyListCreateView,EditStaffView
 
@@ -11,6 +12,7 @@ app_name = "adminapp"
 urlpatterns = [
 
     # Dashboard
+    path("", AdminDashboardView.as_view(), name="home"),
 
     # ================= SALARY =================
 # ===============================

@@ -597,6 +597,7 @@ from django.core.exceptions import ValidationError
 from datetime import date, datetime
 from django.utils.timezone import now
 
+from adminapp.models import LeaveApplication
 
 
 class ManagementLeaveApplicationForm(forms.ModelForm):

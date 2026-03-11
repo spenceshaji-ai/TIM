@@ -1,4 +1,3 @@
-
 from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
