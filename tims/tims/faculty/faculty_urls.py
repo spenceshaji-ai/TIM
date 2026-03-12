@@ -1,10 +1,8 @@
 from django.urls import path
 from django.views.generic import TemplateView
 from .views import ApplyLeaveView, FacultyDashboardView, FacultyMaterialAddView, LeaveCalendarDataView, MyLeavesView, DeleteLeaveView
-from .views import ApplyLeaveView, MyLeavesView
 
 
-from tims.faculty.views import ApplyLeaveView, MyLeavesView, DeleteLeaveView
 
 
 from tims.faculty.views import (
@@ -34,19 +32,20 @@ urlpatterns = [
 path(
         "apply-leave/",
         ApplyLeaveView.as_view(),
-        name="faculty_apply_leave",
-    ),    
-path(
-        "my-leaves/",
-        MyLeavesView.as_view(),
-        name="faculty_my_leaves",
-    ),
-path(
-        "delete-leave/<int:leave_id>/",
-        DeleteLeaveView.as_view(),
-        name="faculty_delete_leave",
+        name="faculty_apply_leave"
     ),
 
+    path(
+        "my-leaves/",
+        MyLeavesView.as_view(),
+        name="faculty_my_leaves"
+    ),
+
+    path(
+        "delete-leave/<int:leave_id>/",
+        DeleteLeaveView.as_view(),
+        name="delete_leave"
+    ),
     path(
         "leave-calendar/",
         TemplateView.as_view(

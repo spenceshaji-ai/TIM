@@ -4,10 +4,25 @@ from .views import *
 app_name = "Student"
 
 urlpatterns=[
+    path('students/register/', StudentRegisterView.as_view(), name='student_register'),
+
+    # Student Apply for Job
+    path("student/apply/<int:job_id>/", StudentApplyJobView.as_view(), name="student_apply_job"),
+
+    path("studentjobs/", StudentJobListView.as_view(), name="job_list"),
+
+    path("studentjobs/<int:pk>/", StudentJobDetailView.as_view(), name="student_job_detail"),
+
+    path('studentjobtrack/', StudentApplicationTrackingView.as_view(), name='track_applications'),
+
+    path('std/', HomeView1.as_view(), name='studenthome'),
+
     path("student_register/", StudentRegisterView.as_view(), name="student_register"),
+    path('stdhome/', stdHome.as_view(), name='stdhome'),
+
     path("progress/",StudentProgressView.as_view(),name="progress"),
     path('std/', HomeView1.as_view(), name='studenthome'),
-    path("student/training-sessions/",StudentTrainingSessionView.as_view(),name="student_training_sessions")
+    path("student/training-sessions/",StudentTrainingSessionView.as_view(),name="student_training_sessions"),
 
 
 
@@ -15,21 +30,21 @@ urlpatterns=[
 
     path('mycertificates/', MyIssuedCertificatesView.as_view(), name='my_certificates'),
 
-    path('certificate/<int:pk>/', 
-         CertificateDetailView.as_view(), 
+    path('certificate/<int:pk>/',
+         CertificateDetailView.as_view(),
          name='certificate_detail'),
 
-    path('certificate/<int:pk>/download/', 
-         CertificateDownloadView.as_view(), 
+    path('certificate/<int:pk>/download/',
+         CertificateDownloadView.as_view(),
          name='download_certificate'),
 
-    path('course-materials/', 
-         StudentCourseMaterialsView.as_view(), 
+    path('course-materials/',
+         StudentCourseMaterialsView.as_view(),
          name='student_course_materials'),
 
-    path('feedback/<int:certificate_id>/', 
-         FeedbackCreateView.as_view(), 
+    path('feedback/<int:certificate_id>/',
+         FeedbackCreateView.as_view(),
          name='feedback_create'),
-    
-    path("courseratings/", CourseRatingsView.as_view(), name="course_ratings"),     
+
+    path("courseratings/", CourseRatingsView.as_view(), name="course_ratings"),
 ]

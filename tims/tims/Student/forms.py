@@ -1,6 +1,5 @@
 from django import forms
-from tims.Student.models import Student,JobApplication
-from .models import Student, Feedback  # ✅ same-app relative import
+from tims.Student.models import Student,JobApplication, Feedback 
 
 from tims.adminapp.models import Course  
 from django.contrib.auth import get_user_model

@@ -1,0 +1,117 @@
+{% include "header.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="mb-3">Edit Staff</h3>
+
+    <!-- 🔔 Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header bg-warning">
+            Update Staff Details
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <!-- Name -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="name"
+                               value="{{ user.name }}"
+                               class="form-control" required>
+                    </div>
+
+                    <!-- Username -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username"
+                               value="{{ user.username }}"
+                               class="form-control" required>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email"
+                               value="{{ user.email }}"
+                               class="form-control">
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Phone</label>
+                        <input type="text" name="phone"
+                               value="{{ user.phone_number }}"
+                               class="form-control" required>
+                    </div>
+
+                    <!-- Password (optional) -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">New Password (optional)</label>
+                        <input type="password" name="password"
+                               class="form-control">
+                    </div>
+
+                    <!-- Role -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Role</label>
+                        <select name="role" class="form-select">
+
+                            {% for role in roles %}
+                                <option value="{{ role.role_name }}"
+                                    {% if user.role == role %}selected{% endif %}>
+                                    {{ role.role_name }}
+                                </option>
+                            {% endfor %}
+
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="active"
+                                {% if user.status == "active" %}selected{% endif %}>
+                                Active
+                            </option>
+                            <option value="inactive"
+                                {% if user.status == "inactive" %}selected{% endif %}>
+                                Inactive
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Update Staff
+                </button>
+
+                <a href="{% url 'adminapp:staff_list' %}"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% include "footer.html" %}

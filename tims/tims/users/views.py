@@ -8,6 +8,26 @@ from django.utils.translation import gettext_lazy as _
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
 from django.views.generic import RedirectView
+
+#from django.views.generic import ListView, CreateView
+from tims.users.models import User,Role
+from .forms import UserForm
+from django.views.generic import TemplateView
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.views import View
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+
+from django.views.generic import UpdateView
 from django.views.generic import UpdateView
 from django.views.generic import ListView, CreateView, DeleteView
 from tims.users.models import User
@@ -35,39 +55,16 @@ from django.contrib.auth import authenticate, login,logout
 # user_detail_view = UserDetailView.as_view()
 
 
-class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
-    model = User
-    fields = ["name"]
-    success_message = _("Information successfully updated")
-
-    def get_success_url(self) -> str:
-        assert self.request.user.is_authenticated  # type guard
-        return self.request.user.get_absolute_url()
-
-    def get_object(self, queryset: QuerySet | None=None) -> User:
-        assert self.request.user.is_authenticated  # type guard
-        return self.request.user
+from django.contrib import messages
 
 
-user_update_view = UserUpdateView.as_view()
+
+from .forms import LoginForm, RegisterForm
+
+from .forms import RoleForm
+from django.contrib.auth import login
 
 
-class UserRedirectView(LoginRequiredMixin, RedirectView):
-    permanent = False
-
-    def get_redirect_url(self):
-        user = self.request.user
-
-        if user.role and user.role.role_name == "Faculty":
-            return reverse("faculty:dashboard")
-
-        elif user.role and user.role.role_name == "Admin":
-            return reverse("adminapp:home")
-
-        elif user.role and user.role.role_name == "Student":
-            return reverse("student:home")
-
-        return reverse("users:login")
 
 
 
@@ -104,7 +101,7 @@ class LoginView(View):
                 # 🔥 Role Based Redirection
                   # 🔥 SUPER ADMIN CHECK
                 if user.is_superuser:
-                    return redirect("adminapp:home2")   # or superadmin dashboard
+                    return redirect("superadmin:home5")   # or superadmin dashboard
 
                 if user.role and user.role.role_name in ["Admin", "HR","Manager"]:
                     return redirect("adminapp:home2")
@@ -201,76 +198,85 @@ class UserRegisterView(View):
         return render(request, self.template_name, {"form": form})
 
 
-from .forms import RoleForm
+
+
+
+
+
+
+
+class UserListView(View):
+
+    def get(self, request):
+
+        if not request.user.is_authenticated:
+            return redirect("users:login")
+
+        role_filter = request.GET.get("role")  # get role from URL
+
+        users = User.objects.select_related("role").all()
+
+        # 🎯 Apply filtering
+        if role_filter == "student":
+            users = users.filter(role__role_name__iexact="Student")
+
+        elif role_filter == "faculty":
+            users = users.filter(role__role_name__iexact="Faculty")
+
+        elif role_filter == "staff":
+            users = users.filter(role__role_name__in=["Admin", "HR", "Manager"])
+
+        elif role_filter == "superadmin":
+            users = users.filter(role__role_name__iexact="Super Admin")
+
+        return render(request, "users/user_list.html", {"users": users})
+
+
+
 
 class RoleCreateView(View):
     template_name = "role_form.html"
 
     def get(self, request):
+
+        # Only Superadmin and Admin can access
+        if not request.user.is_authenticated:
+            return redirect("login")
+
         form = RoleForm()
         return render(request, self.template_name, {"form": form})
 
+
+
     def post(self, request):
+
+        if not request.user.is_authenticated:
+            return redirect("login")
+
         form = RoleForm(request.POST)
 
         if form.is_valid():
+
+            role_name = form.cleaned_data["role_name"]
+
+            # ⭐ SUPERADMIN can create Admin, HR, Manager
+            if request.user.is_superuser:
+                if role_name not in ["Admin", "HR", "Manager"]:
+                    messages.error(request, "Superadmin can only create Admin, HR, Manager roles")
+                    return redirect("users:role_add")
+
+            # ⭐ ADMIN can create Student, Faculty
+            elif request.user.role.role_name == "Admin":
+                if role_name not in ["Student", "Faculty"]:
+                    messages.error(request, "Admin can only create Student and Faculty roles")
+                    return redirect("users:role_add")
+
+            else:
+                messages.error(request, "You are not allowed to create roles")
+                return redirect("login")
+
             form.save()
             messages.success(request, "Role created successfully")
             return redirect("users:role_add")
-
-        return render(request, self.template_name, {"form": form})
-    
-from django.contrib.auth.views import LoginView
-from django.shortcuts import redirect
-
-class RoleBasedLoginView(LoginView):
-    template_name = "users/login.html"  # your login template
-
-    def get_success_url(self):
-        user = self.request.user
-
-        if user.role and user.role.role_name == "Faculty":
-            return reverse_lazy("faculty:dashboard")
-
-        elif user.role and user.role.role_name == "Admin":
-            return reverse_lazy("adminapp:home")
-
-        elif user.role and user.role.role_name == "Student":
-            return reverse_lazy("student:home")
-
-        return reverse_lazy("users:redirect")  # fallback
-    
-
-class LoginView(View):
-    template_name = "login.html"
-
-    def get(self, request):
-        form = LoginForm()
-        return render(request, self.template_name, {"form": form})
-
-    def post(self, request):
-        form = LoginForm(request, data=request.POST)
-
-        if form.is_valid():
-            username = form.cleaned_data.get("username")
-            password = form.cleaned_data.get("password")
-
-            user = authenticate(username=username, password=password)
-
-            if user is not None:
-                login(request, user)
-
-                # 🔥 Role Based Redirection
-                if user.role and user.role.role_name in ["Admin", "HR"]:
-                    return redirect("adminapp:home2")
-
-                elif user.role and user.role.role_name == "Faculty":
-                    return redirect("faculty:home1")
-
-                elif user.role and user.role.role_name == "student":
-                     return redirect("Student:stdhome")
-
-                else:
-                    return redirect("login")
 
         return render(request, self.template_name, {"form": form})

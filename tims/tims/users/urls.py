@@ -1,25 +1,26 @@
 from django.urls import path
-from .views import(
+from .views import *
+from .views import (
+    LoginView,
+    LogoutView,   
     UserRegisterView,
     RoleCreateView,
-    LoginView,
-    RoleBasedLoginView,
-    UserRedirectView,
-    ) 
+    UserListView,
+    ForcePasswordChangeView
+)
+
 
 
 app_name = "users"
 urlpatterns = [
-    path("login/", RoleBasedLoginView.as_view(), name="login"),
+    
+    path("login/", LoginView.as_view(), name="login"),
+    path("change-password/",ForcePasswordChangeView.as_view(),name="change_password"),
+    path("logout/", LogoutView.as_view(), name="logout"),   
     path("register/", UserRegisterView.as_view(), name="user_register"),
     path("role/add/", RoleCreateView.as_view(), name="role_add"),
-    path("redirect/", UserRedirectView.as_view(), name="redirect"),
-
-    # KEEP THIS LAST
-    # path("<str:username>/", user_detail_view, name="detail"),
-    path("login/", LoginView.as_view(), name="login"),
-    # path("redirect/", role_based_redirect.as_view(), name="role_redirect"),
-    # path("staff/dashboard/", staff_dashboard.as_view(), name="staff_dashboard"),
+    path("user-list/", UserListView.as_view(), name="user_list"),
+    path("logout/", LogoutView.as_view(), name="logout"),
 ]
 
 

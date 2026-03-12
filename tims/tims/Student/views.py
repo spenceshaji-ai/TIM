@@ -1,5 +1,3 @@
-
-
 # from django.views import View
 # from django.shortcuts import render, redirect, get_object_or_404
 # from Student.models import JobApplication,Student
@@ -191,7 +189,7 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.views import View
 from tims.faculty.models import FacultyCourseMaterial
-from adminapp.models import Assignstudent
+from tims.adminapp.models import Assignstudent
 
 class stdHome(View):
     def get(self, request):
@@ -201,7 +199,7 @@ class stdHome(View):
 # users/views.py
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from adminapp.models import Certificate
+from tims.adminapp.models import Certificate
 
 class MyIssuedCertificatesView(LoginRequiredMixin, View):
     login_url = 'users:login'
@@ -570,7 +568,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.shortcuts import get_object_or_404
 from django.views import View
-from adminapp.models import Certificate
+from tims.adminapp.models import Certificate
 
 
 class CertificateDownloadView(View):
@@ -645,4 +643,3 @@ class CourseRatingsView(View):
         }
 
         return render(request, self.template_name, context)
-        

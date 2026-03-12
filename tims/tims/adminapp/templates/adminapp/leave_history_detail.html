@@ -25,7 +25,7 @@ Leave History - {{ leaves.0.user.username }}
     <tbody>
         {% for leave in leaves %}
         <tr>
-            <td>{{ leave.leave_type.leave_name }}</td>
+            <td>{{ leave.leave_type }}</td>
             <td>{{ leave.start_date }}</td>
             <td>{{ leave.end_date }}</td>
             <td>{{ leave.status }}</td>

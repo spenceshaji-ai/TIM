@@ -1,0 +1,47 @@
+{% extends "adminapp/forms.html" %}
+
+{% block form_title %}
+Set Salary - {{ selected_user.username }}
+{% endblock %}
+
+{% block form_action %}
+{% url 'adminapp:salary_set' selected_user.id %}
+{% endblock %}
+
+{% block form_body %}
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="mb-3">
+    <label class="form-label">Basic Salary</label>
+    {{ form.basic_salary }}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Travel Allowance</label>
+    {{ form.travel_allowance }}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Special Allowance</label>
+    {{ form.special_allowance }}
+</div>
+
+{% endblock %}
+
+{% block form_button %}
+<button type="submit" class="btn btn-success">
+    Save Salary
+</button>
+
+<a href="{% url 'adminapp:salary_structure_list' %}"
+   class="btn btn-secondary">
+   Back
+</a>
+{% endblock %}
