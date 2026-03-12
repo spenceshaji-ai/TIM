@@ -623,9 +623,8 @@ from datetime import date
 
 
 
-
-from adminapp.models import LeaveType, LeaveAllocation, LeaveBalance
-from adminapp.forms import HRLeaveAllocationForm,ManagementLeaveApplicationForm
+from tims.adminapp.models import LeaveType, LeaveAllocation, LeaveBalance
+from .forms import HRLeaveAllocationForm, ManagementLeaveApplicationForm
 
 User = get_user_model()
 
@@ -724,7 +723,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from datetime import date
 
-from adminapp.models import LeaveApplication, LeaveBalance
+from tims.adminapp.models import LeaveApplication, LeaveBalance
 
 
 class ManagementApplyLeaveView(LoginRequiredMixin, View):
