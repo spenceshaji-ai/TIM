@@ -8,7 +8,6 @@ from .forms import UserAdminChangeForm
 from .forms import UserAdminCreationForm
 from .models import User,Role 
 
-
 if settings.DJANGO_ADMIN_FORCE_ALLAUTH:
     # Force the `admin` sign in process to go through the `django-allauth` workflow:
     # https://docs.allauth.org/en/latest/common/admin.html#admin
@@ -22,7 +21,7 @@ class UserAdmin(auth_admin.UserAdmin):
     add_form = UserAdminCreationForm
     fieldsets = (
         (None, {"fields": ("username", "password")}),
-        (_("Personal info"), {"fields": ("name", "email", "phone_number", "role", "status")}),
+        (_("Personal info"), {"fields": ("name", "email", "phone", "role", "status")}),
         (
             _("Permissions"),
             {

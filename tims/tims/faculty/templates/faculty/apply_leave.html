@@ -4,157 +4,69 @@
 Apply Leave
 {% endblock %}
 
+{% block form_action %}
+{% url 'faculty:faculty_apply_leave' %}
+{% endblock %}
+
 {% block form_body %}
 
 <!-- Leave Balance Table -->
+<h5 class="mb-3">Your Leave Balance ({{ today.year }})</h5>
+
 <table class="table table-bordered mb-4">
-<thead>
-<tr>
-<th>Leave Type</th>
-<th>Total Allocated</th>
-<th>Used</th>
-<th>Remaining</th>
-</tr>
-</thead>
-
-<tbody>
-{% for balance in leave_balances %}
-
-<tr>
-<td>{{ balance.leave_type.name }}</td>
-
-<td>{{ balance.earned_days }}</td>
-
-<td>{{ balance.used_days }}</td>
-
-<td>
-<span class="badge bg-success">
-{{ balance.remaining_days }}
-</span>
-</td>
-
-</tr>
-
-{% empty %}
-
-<tr>
-<td colspan="4">No leave balances found</td>
-</tr>
-
-{% endfor %}
-
-</tbody>
+    <thead>
+        <tr>
+            <th>Leave Type</th>
+            <th>Earned</th>
+            <th>Used</th>
+            <th>Remaining</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for balance in leave_balances %}
+        <tr>
+            <td>{{ balance.leave_type.name }}</td>
+            <td>{{ balance.earned_days }}</td>
+            <td>{{ balance.used_days }}</td>
+            <td>{{ balance.remaining_days }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No leave allocated yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 
-
-<form method="post">
-{% csrf_token %}
-
 <div class="mb-3">
-<label>Leave Type</label>
-{{ form.leave_type }}
-</div>
-
-<div class="mb-3">
-<label>Start Date</label>
-{{ form.start_date }}
+    <label class="form-label">Leave Type</label>
+    <select name="leave_type" class="form-control" required>
+        {% for lt in leave_types %}
+        <option value="{{ lt.id }}">{{ lt.name }}</option>
+        {% endfor %}
+    </select>
 </div>
 
 <div class="mb-3">
-<label>End Date</label>
-{{ form.end_date }}
-</div>
-
-
-<!-- UI Day Selection -->
-<div class="mb-3">
-<label>Leave Duration</label>
-
-<select id="leaveDuration" class="form-control">
-<option value="">Select</option>
-<option value="FULL">Full Day</option>
-<option value="HALF_AM">Half Day A.M</option>
-<option value="HALF_PM">Half Day P.M</option>
-</select>
-</div>
-
-
-<!-- Hidden actual form fields -->
-<div style="display:none;">
-{{ form.day_type }}
-{{ form.half_day_session }}
-</div>
-
-
-<div class="mb-3">
-<label>No. of Days</label>
-<input type="text" id="totalDays" class="form-control" readonly>
+    <label class="form-label">Start Date</label>
+    <input type="date" name="start_date" min="{{ today }}" class="form-control" required>
 </div>
 
 <div class="mb-3">
-<label>Reason</label>
-{{ form.reason }}
+    <label class="form-label">End Date</label>
+    <input type="date" name="end_date" min="{{ today }}" class="form-control" required>
 </div>
 
-<button type="submit" class="btn btn-primary">
-Apply Leave
-</button>
+<div class="mb-3">
+    <label class="form-label">Day Type</label>
+    <select name="day_type" class="form-control">
+        <option value="Full">Full Day</option>
+        <option value="Half">Half Day</option>
+    </select>
+</div>
 
-</form>
+{% endblock %}
 
-
-<script>
-
-const duration = document.getElementById("leaveDuration")
-
-const dayType = document.getElementById("id_day_type")
-const session = document.getElementById("id_half_day_session")
-
-const start = document.getElementById("id_start_date")
-const end = document.getElementById("id_end_date")
-
-const totalDays = document.getElementById("totalDays")
-
-function calculateDays(){
-
-    if(duration.value === "FULL"){
-
-        dayType.value = "FULL"
-        session.value = ""
-
-        if(start.value && end.value){
-
-            let s = new Date(start.value)
-            let e = new Date(end.value)
-
-            let diff = (e - s) / (1000*60*60*24) + 1
-
-            totalDays.value = diff
-        }
-    }
-
-    else if(duration.value === "HALF_AM"){
-
-        dayType.value = "HALF"
-        session.value = "Morning"
-
-        totalDays.value = 0.5
-    }
-
-    else if(duration.value === "HALF_PM"){
-
-        dayType.value = "HALF"
-        session.value = "Noon"
-
-        totalDays.value = 0.5
-    }
-
-}
-
-duration.addEventListener("change", calculateDays)
-start.addEventListener("change", calculateDays)
-end.addEventListener("change", calculateDays)
-
-</script>
-
+{% block form_button %}
+<button type="submit" class="btn btn-primary">Submit Leave</button>
 {% endblock %}

@@ -13,12 +13,11 @@ from datetime import date
 from tims.adminapp.models import LeaveApplication, LeaveBalance, Salary
 
 
-from django.utils import timezone
-from .models import Enquiry,FollowUp,Admission,Course,Batch,Payment, FacultyAssignment,Assignstudent
+
+from tims.adminapp.models import Enquiry
+from tims.adminapp.models import FollowUp
+from tims.adminapp.models import Admission
 from django.contrib.auth import get_user_model
-
-
-
 User = get_user_model()
 from tims.adminapp.models import Course, Batch, FacultyAssignment,Assignstudent,Certificate
 from tims.adminapp.models import LeaveApplication
@@ -74,7 +73,6 @@ class BatchForm(forms.ModelForm):
             "start_date",
             "end_date",
             "capacity",
-            
         ]
 
         widgets = {
@@ -114,16 +112,6 @@ class BatchForm(forms.ModelForm):
 
         return cleaned_data
 class EnquiryForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # ✅ Populate dropdown with courses
-        self.fields["course"].queryset = Course.objects.all()
-
-        # ✅ Optional: Add placeholder
-        self.fields["course"].empty_label = "Select Course"
-         # ⭐ FORCE DATE INPUT TYPE
-        self.fields["next_followup_date"].widget.input_type = "date"
     class Meta:
         model = Enquiry
 
@@ -131,10 +119,9 @@ class EnquiryForm(forms.ModelForm):
             "name",
             "phone",
             "email",
-            "course",
+            "course_id",
             "source",
             "status",
-            "next_followup_date", 
         ]
 
         widgets = {
@@ -158,7 +145,7 @@ class EnquiryForm(forms.ModelForm):
             }),
 
             # Course Dropdown
-            "course": forms.Select(attrs={
+            "course_id": forms.Select(attrs={
                 "class": "form-control"
             }),
 
@@ -170,11 +157,6 @@ class EnquiryForm(forms.ModelForm):
             # Status Dropdown
             "status": forms.Select(attrs={
                 "class": "form-control"
-            }),
-            # ✅ Next Follow-up Date
-            "next_followup_date": forms.DateInput(attrs={
-                "class": "form-control",
-                "type": "date"   # 👈 IMPORTANT for calendar picker
             }),
         }
 
@@ -188,8 +170,7 @@ class FollowUpForm(forms.ModelForm):
 
         fields = [
             "followup_date",
-            "today_remark",
-            "next_followup_date",
+            "remarks",
             "status",
         ]
 
@@ -200,21 +181,17 @@ class FollowUpForm(forms.ModelForm):
                 "type": "date"
             }),
 
-            "today_remark": forms.Textarea(attrs={
+            "remarks": forms.Textarea(attrs={
                 "class": "form-control",
-                "placeholder": "Enter Today's Discussion",
+                "placeholder": "Enter Follow Up Remarks",
                 "rows": 3
-            }),
-
-            "next_followup_date": forms.DateInput(attrs={
-                "class": "form-control",
-                "type": "date"
             }),
 
             "status": forms.Select(attrs={
                 "class": "form-control"
             }),
         }
+
 
 class AdmissionForm(forms.ModelForm):
     class Meta:
@@ -227,7 +204,7 @@ class AdmissionForm(forms.ModelForm):
             "course",
             "batch",
             "total_fees",
-            
+            "fees_paid",
         ]
 
         widgets = {
@@ -259,41 +236,7 @@ class AdmissionForm(forms.ModelForm):
                 "class": "form-control"
             }),
 
-           
-        }
-
-
-
-class PaymentForm(forms.ModelForm):
-
-      # ➜ Extra field (not in model)
-    pending_fee = forms.DecimalField(
-        required=False,
-        label="Pending Fee",
-        widget=forms.NumberInput(attrs={
-            "class": "form-control",
-            "readonly": "readonly",
-            "placeholder": "Pending Fee"
-        })
-    )
-    class Meta:
-        model = Payment
-        fields = [
-            "admission",
-            "pending_fee",   # ➜ Add here to display in form
-            "amount",
-            "status",
-        ]
-
-        widgets = {
-            "admission": forms.Select(attrs={
-                "class": "form-control"
-            }),
-            "amount": forms.NumberInput(attrs={
-                "class": "form-control",
-                "placeholder": "Enter Payment Amount"
-            }),
-            "status": forms.Select(attrs={
+            "fees_paid": forms.NumberInput(attrs={
                 "class": "form-control"
             }),
         }
@@ -365,8 +308,6 @@ class LeaveApplicationForm(forms.ModelForm):
                     f"Maximum {leave_type.max_days} days allowed for {leave_type.leave_name}"
                 )
 
-        # Optional: only staff as faculty
-       # self.fields["faculty"].queryset = User.objects.filter(is_staff=True)
         return cleaned_data
 
 class AssignstudentForm(forms.ModelForm):
@@ -402,7 +343,7 @@ class AssignstudentForm(forms.ModelForm):
             )
 
 from django import forms
-from tims.adminapp.models import Certificate, Assignstudent
+from adminapp.models import Certificate, Assignstudent
 
 
 class CertificateForm(forms.ModelForm):
@@ -450,71 +391,6 @@ class LeaveBalanceForm(forms.ModelForm):
 
 from django import forms
 from tims.adminapp.models import Salary, Holiday
-from tims.adminapp.models import LeaveAllocation, LeaveType
-
-
-from django import forms
-
-
-class HRLeaveAllocationForm(forms.ModelForm):
-
-    class Meta:
-        model = LeaveAllocation
-        fields = ["leave_type", "total_days"]
-
-        widgets = {
-            "leave_type": forms.Select(attrs={
-                "class": "form-control"
-            }),
-            "total_days": forms.NumberInput(attrs={
-                "class": "form-control",
-                "min": 0,
-                "step": "0.5"
-            }),
-        }
-
-        labels = {
-            "leave_type": "Leave Type",
-            "total_days": "Total Days",
-        }
-
-    def __init__(self, *args, **kwargs):
-
-        # These come from the view
-        self.user = kwargs.pop("employee", None)
-        self.year = kwargs.pop("year", None)
-
-        super().__init__(*args, **kwargs)
-
-        # Show all leave types
-        self.fields["leave_type"].queryset = LeaveType.objects.all()
-
-    def clean(self):
-
-        cleaned_data = super().clean()
-        leave_type = cleaned_data.get("leave_type")
-
-        if self.user and leave_type and self.year:
-
-            # Prevent duplicate allocation for same year
-            existing = LeaveAllocation.objects.filter(
-                user=self.user,
-                leave_type=leave_type,
-                year=self.year
-            )
-
-            if self.instance.pk:
-                existing = existing.exclude(pk=self.instance.pk)
-
-            if existing.exists():
-                raise forms.ValidationError(
-                    "Leave already allocated for this type in this year."
-                )
-
-        return cleaned_data
-    
-from django import forms
-from tims.adminapp.models import Salary, Holiday
 
 from django import forms
 
@@ -522,7 +398,45 @@ from django import forms
 from django.utils.timezone import now
 
 
+class SalaryForm(forms.ModelForm):
 
+    class Meta:
+        model = Salary
+        fields = [
+            "faculty",
+            "month",
+            "year",
+            "basic_salary",
+            "travel_allowance",
+            "special_allowance",
+            "bonus",
+            "incentive",
+        ]
+
+        widgets = {
+            "faculty": forms.Select(attrs={"class": "form-control"}),
+            "month": forms.Select(attrs={"class": "form-control"}),
+            "year": forms.NumberInput(attrs={
+                "class": "form-control",
+                "readonly": "readonly"
+            }),
+            "basic_salary": forms.NumberInput(attrs={"class": "form-control"}),
+            "travel_allowance": forms.NumberInput(attrs={"class": "form-control"}),
+            "special_allowance": forms.NumberInput(attrs={"class": "form-control"}),
+            "bonus": forms.NumberInput(attrs={"class": "form-control"}),
+            "incentive": forms.NumberInput(attrs={"class": "form-control"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Auto Year
+        if not self.instance.pk:
+            self.fields["year"].initial = now().year
+
+        # Hide faculty field if coming from user-wise page
+        if self.initial.get("faculty"):
+            self.fields["faculty"].widget = forms.HiddenInput()
 
 class HolidayForm(forms.ModelForm):
     class Meta:
@@ -540,153 +454,4 @@ class HolidayForm(forms.ModelForm):
                 attrs={"class": "form-control"}
             )
         }
-
-from django import forms
-from django.utils.timezone import now
-from tims.adminapp.models import Salary, SalaryStructure
-
-
-# ============================================
-# 1️⃣ Salary Structure Form (One Time Setup)
-# ============================================
-
-# forms.py
-
-class SalaryStructureForm(forms.ModelForm):
-
-    class Meta:
-        model = SalaryStructure
-        fields = [
-            "basic_salary",
-            "travel_allowance",
-            "special_allowance",
-        ]
-
-        widgets = {
-            "basic_salary": forms.NumberInput(attrs={"class": "form-control"}),
-            "travel_allowance": forms.NumberInput(attrs={"class": "form-control"}),
-            "special_allowance": forms.NumberInput(attrs={"class": "form-control"}),
-        }
-
-# ============================================
-# 2️⃣ Monthly Salary Form
-# ============================================
-# forms.py
-
-
-
-
-class MonthlySalaryForm(forms.ModelForm):
-    class Meta:
-        model = Salary
-        fields = ["faculty", "year", "month", "bonus", "incentive"]
-
-        widgets = {
-            "faculty": forms.HiddenInput(),
-            "year": forms.NumberInput(attrs={
-                "class": "form-control",
-                "readonly": "readonly"
-            }),
-            "month": forms.Select(attrs={"class": "form-control"}),
-            "bonus": forms.NumberInput(attrs={"class": "form-control"}),
-            "incentive": forms.NumberInput(attrs={"class": "form-control"}),
-        }
-
-from django import forms
-from django.core.exceptions import ValidationError
-from datetime import date, datetime
-from django.utils.timezone import now
-
-from adminapp.models import LeaveApplication
-
-
-class ManagementLeaveApplicationForm(forms.ModelForm):
-
-    HALF_SESSION_CHOICES = [
-        ("Morning", "Morning"),
-        ("Noon", "Noon"),
-    ]
-
-    half_day_session = forms.ChoiceField(
-        choices=HALF_SESSION_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={"class": "form-control"})
-    )
-
-    class Meta:
-        model = LeaveApplication
-        fields = [
-            "leave_type",
-            "start_date",
-            "end_date",
-            "day_type",
-            "reason",
-        ]
-
-        widgets = {
-            "leave_type": forms.Select(attrs={"class": "form-control"}),
-            "start_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
-            "end_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
-            "day_type": forms.Select(attrs={"class": "form-control"}),
-            "reason": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-        }
-
-
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop("user", None)
-        super().__init__(*args, **kwargs)
-
-
-    def clean(self):
-
-        cleaned_data = super().clean()
-
-        start = cleaned_data.get("start_date")
-        end = cleaned_data.get("end_date")
-        day_type = cleaned_data.get("day_type")
-        half_session = cleaned_data.get("half_day_session")
-
-        today = date.today()
-        current_time = now().time()
-
-        if start and start < today:
-            raise ValidationError("Past dates are not allowed.")
-
-        if start and end and end < start:
-            raise ValidationError("End date cannot be before start date.")
-
-        if start and self.user:
-
-            exists = LeaveApplication.objects.filter(
-                user=self.user,
-                start_date=start,
-                status__in=["Pending", "Approved"]
-            ).exists()
-
-            if exists:
-                raise ValidationError(
-                    "You already applied leave for this date."
-                )
-
-        if day_type == "Half":
-
-            if not half_session:
-                raise ValidationError(
-                    "Select Morning or Noon for half day."
-                )
-
-            if start == today:
-
-                if current_time >= datetime.strptime("09:30", "%H:%M").time():
-
-                    if half_session == "Morning":
-                        raise ValidationError(
-                            "Morning half day cannot be applied after 9:30 AM."
-                        )
-
-                if current_time >= datetime.strptime("12:30", "%H:%M").time():
-                    raise ValidationError(
-                        "Half day leave cannot be applied after 12:30 PM."
-                    )
-
-        return cleaned_data
+        

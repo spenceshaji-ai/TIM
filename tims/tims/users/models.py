@@ -13,35 +13,32 @@ class Role(models.Model):
          return self.role_name
      
 class User(AbstractUser):
-    name = models.CharField(max_length=255)
-    phone_number = models.CharField(
+     name = models.CharField(max_length=255)
+     phone_number = models.CharField(
      max_length=15,
      unique=True,
      null=True,
      blank=True
      )
-    created_at=models.DateTimeField(auto_now_add=True,null=True,blank=True)
-
-    role = models.ForeignKey(
+     role = models.ForeignKey(
      Role,
      on_delete=models.SET_NULL,  
      null=True,
      blank=True
     )
 
-    STATUS_CHOICES = (
+     STATUS_CHOICES = (
          ("active", "Active"),
          ("inactive", "Inactive"),
      )
 
-    status = models.CharField(
+     status = models.CharField(
         max_length=10,
         choices=STATUS_CHOICES,
         default="active"
      )
-    must_change_password = models.BooleanField(default=True)
-    
-    def __str__(self):
+
+     def __str__(self):
     # Shows full name if available, else username
       return self.name if self.name else self.username
     def get_absolute_url(self):

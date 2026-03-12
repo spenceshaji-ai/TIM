@@ -62,7 +62,7 @@ class FacultyDailyReport(models.Model):
     def __str__(self):
         return f"{self.faculty} - {self.report_date} ({self.start_time.strftime('%H:%M')} to {self.end_time.strftime('%H:%M')})"    
 from tims.users.models import User
-from tims.adminapp.models import Course, Batch
+from adminapp.models import Course, Batch
 
 
 class FacultyCourseMaterial(models.Model):

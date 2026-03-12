@@ -1,162 +1,28 @@
 {% extends "adminapp/forms.html" %}
+{% block content %}
 
-{% block form_title %}
-Management Apply Leave
-{% endblock %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4>Apply Leave</h4>
+        </div>
 
-{% block form_body %}
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
 
-<!-- Leave Balance Table -->
-<table class="table table-bordered mb-4">
-<thead>
-<tr>
-<th>Leave Type</th>
-<th>Total Allocated</th>
-<th>Used</th>
-<th>Remaining</th>
-</tr>
-</thead>
+                <button type="submit" class="btn btn-success">
+                    Submit
+                </button>
 
-<tbody>
-{% for balance in leave_balances %}
-
-<tr>
-<td>{{ balance.leave_type.name }}</td>
-
-<td>{{ balance.earned_days }}</td>
-
-<td>{{ balance.used_days }}</td>
-
-<td>
-<span class="badge bg-success">
-{{ balance.remaining_days }}
-</span>
-</td>
-
-</tr>
-
-{% empty %}
-
-<tr>
-<td colspan="4">No leave balances found</td>
-</tr>
-
-{% endfor %}
-</tbody>
-</table>
-
-
-<form method="post">
-{% csrf_token %}
-
-<div class="mb-3">
-<label>Leave Type</label>
-{{ form.leave_type }}
+                <a href="{% url 'adminapp:management_leave_list' %}"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
 </div>
-
-<div class="mb-3">
-<label>Start Date</label>
-{{ form.start_date }}
-</div>
-
-<div class="mb-3">
-<label>End Date</label>
-{{ form.end_date }}
-</div>
-
-
-<!-- Leave Duration -->
-<div class="mb-3">
-<label>Leave Duration</label>
-
-<select id="leaveDuration" class="form-control">
-<option value="">Select</option>
-<option value="FULL">Full Day</option>
-<option value="HALF_AM">Half Day A.M</option>
-<option value="HALF_PM">Half Day P.M</option>
-</select>
-
-</div>
-
-
-<!-- Hidden fields -->
-<div style="display:none;">
-{{ form.day_type }}
-{{ form.half_day_session }}
-</div>
-
-
-<div class="mb-3">
-<label>No. of Days</label>
-<input type="text" id="totalDays" class="form-control" readonly>
-</div>
-
-
-<div class="mb-3">
-<label>Reason</label>
-{{ form.reason }}
-</div>
-
-
-<button type="submit" class="btn btn-primary">
-Apply Leave
-</button>
-
-</form>
-
-
-<script>
-
-const duration = document.getElementById("leaveDuration")
-
-const dayType = document.getElementById("id_day_type")
-const session = document.getElementById("id_half_day_session")
-
-const start = document.getElementById("id_start_date")
-const end = document.getElementById("id_end_date")
-
-const totalDays = document.getElementById("totalDays")
-
-function calculateDays(){
-
-    if(duration.value === "FULL"){
-
-        dayType.value = "FULL"
-        session.value = ""
-
-        if(start.value && end.value){
-
-            let s = new Date(start.value)
-            let e = new Date(end.value)
-
-            let diff = (e - s) / (1000*60*60*24) + 1
-
-            totalDays.value = diff
-        }
-    }
-
-    else if(duration.value === "HALF_AM"){
-
-        dayType.value = "HALF"
-        session.value = "Morning"
-
-        totalDays.value = 0.5
-    }
-
-    else if(duration.value === "HALF_PM"){
-
-        dayType.value = "HALF"
-        session.value = "Noon"
-
-        totalDays.value = 0.5
-    }
-
-}
-
-duration.addEventListener("change", calculateDays)
-start.addEventListener("change", calculateDays)
-end.addEventListener("change", calculateDays)
-
-</script>
 
 {% endblock %}

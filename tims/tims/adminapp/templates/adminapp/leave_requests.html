@@ -14,65 +14,34 @@ Leave Requests
     <thead class="table-dark">
         <tr>
             <th>User</th>
-            <th>Leave Type</th>
             <th>From</th>
             <th>To</th>
-            <th>Days</th>
             <th>Reason</th>
             <th>Status</th>
             <th>Action</th>
         </tr>
     </thead>
-
     <tbody>
-
-        {% for leave in leaves %}
+        {% for leave in leave_requests %}
         <tr>
-            <td>{{ leave.user.username }}</td>
-            <td>{{ leave.leave_type }}</td>
+            <td>{{ leave.user.get_full_name }}</td>
             <td>{{ leave.start_date }}</td>
             <td>{{ leave.end_date }}</td>
-            <td>{{ leave.total_days }}</td>
             <td>{{ leave.reason }}</td>
+            <td>{{ leave.status }}</td>
             <td>
-                <span class="badge 
-                    {% if leave.status == 'Pending' %}bg-warning
-                    {% elif leave.status == 'Approved' %}bg-success
-                    {% else %}bg-danger
-                    {% endif %}">
-                    {{ leave.status }}
-                </span>
-            </td>
-
-            <td>
-
-                {% if leave.status == "Pending" %}
-
                 <a href="{% url 'adminapp:update_leave_status' leave.id 'Approved' %}"
-                   class="btn btn-success btn-sm">
-                   Approve
-                </a>
+                   class="btn btn-success btn-sm">Approve</a>
 
                 <a href="{% url 'adminapp:update_leave_status' leave.id 'Rejected' %}"
-                   class="btn btn-danger btn-sm">
-                   Reject
-                </a>
-
-                {% else %}
-                <span class="text-muted">Processed</span>
-                {% endif %}
-
+                   class="btn btn-danger btn-sm">Reject</a>
             </td>
         </tr>
-
         {% empty %}
         <tr>
-            <td colspan="8" class="text-center">
-                No leave requests found
-            </td>
+            <td colspan="6" class="text-center">No requests found</td>
         </tr>
         {% endfor %}
-
     </tbody>
 </table>
 

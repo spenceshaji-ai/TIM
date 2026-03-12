@@ -1,19 +1,10 @@
-
-{% include "pages/header.html" %}
-
+{% extends "base.html" %}
 
 {% block content %}
 
 <div class="container mt-4">
 
     <h2>Admissions List</h2>
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-success">
-                 {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <table class="table table-bordered table-hover mt-3">
         <thead class="table-dark">
@@ -23,68 +14,31 @@
                 <th>Batch</th>
                 <th>Total Fees</th>
                 <th>Paid</th>
-                <th>Pending</th>
                 <th>Date</th>
-                <th>Actions</th>
             </tr>
         </thead>
+
         <tbody>
             {% for a in admissions %}
             <tr>
                 <td>{{ a.student_name }}</td>
                 <td>{{ a.course.course_name }}</td>
                 <td>{{ a.batch }}</td>
-
-                <!-- ✅ Total Fee -->
-                <td>{{ a.course.fee }}</td>
-
-                <!-- ✅ Paid Amount -->
-                <td>{{ a.paid_amount }}</td>
-
-                <!-- ✅ Pending -->
-                <td>{{ a.pending_amount }}</td>
-
+                <td>{{ a.total_fees }}</td>
+                <td>{{ a.fees_paid }}</td>
                 <td>{{ a.admission_date }}</td>
-
-                <td>
-
-                {% if request.user.role and request.user.role.role_name == "Admin" %}
-
-                    {% if a.enquiry.phone|default:'' in users_usernames %}
-                        <button class="btn btn-secondary btn-sm" disabled>
-                           Registered
-                        </button>
-                    {% else %}
-                        <form method="POST"
-                              action="{% url 'adminapp:create_student_account' a.id %}">
-                            {% csrf_token %}
-                            <button type="submit"
-                                    class="btn btn-success btn-sm">
-                              Register Student
-                            </button>
-                        </form>
-                    {% endif %}
-
-                {% endif %}
-
-                </td>
-                
             </tr>
-
-             {% empty %}
+            {% empty %}
             <tr>
-                <td colspan="7" class="text-center">
+                <td colspan="6" class="text-center">
                     No Admissions Found
                 </td>
             </tr>
             {% endfor %}
         </tbody>
 
-
-
     </table>
 
 </div>
-{% endblock %}
 
-{% include "pages/footer.html" %}
+{% endblock %}

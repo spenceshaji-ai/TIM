@@ -1,7 +1,6 @@
 from django.apps import AppConfig
 
 
-class AdminappConfig(AppConfig):
+class SuperadminappConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'tims.adminapp'
-    
+    name = 'superadminapp'

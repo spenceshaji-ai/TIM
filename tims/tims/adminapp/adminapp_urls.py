@@ -1,12 +1,13 @@
 from django.urls import path
 from django.views.generic import TemplateView
 from .views import *
-
-from .views import *
-from .views import AdmissionListView
-from .views import StaffListCreateView, FacultyListCreateView,EditStaffView
-
-
+# from .views import (
+#     EnquiryListView,
+#     EnquiryCreateView,
+#     EnquiryDetailView,
+#     EnquiryUpdateView,
+#     EnquiryDeleteView,
+# )
 app_name = "adminapp"
 
 urlpatterns = [
@@ -15,52 +16,27 @@ urlpatterns = [
     path("", AdminDashboardView.as_view(), name="home"),
 
     # ================= SALARY =================
-# ===============================
-    # 1️⃣ SALARY STRUCTURE
-    # ===============================
-    path("salary/structure/",
-         SalaryStructureListView.as_view(),
-         name="salary_structure_list"),
+path("salary-users/", SalaryUsersView.as_view(), name="salary_users"),
 
-    path("salary/set/<int:user_id>/",
-         SalaryStructureCreateUpdateView.as_view(),
-         name="salary_set"),
+path("salary-history/<int:pk>/",
+     UserSalaryHistoryView.as_view(),
+     name="user_salary_history"),
 
-    path("salary/preview/<int:pk>/",
-         SalaryPreviewView.as_view(),
-         name="salary_preview"),   
+path("salary-add/<int:pk>/",
+     UserSalaryCreateView.as_view(),
+     name="user_salary_add"),
 
-    # ===============================
-    # 2️⃣ MONTHLY SALARY GENERATION
-    # ===============================
-    path(
-        "salary/monthly/",
-        MonthlySalaryUserListView.as_view(),
-        name="monthly_salary_users"
-    ),
+path("salary-update/<int:pk>/",
+     SalaryUpdateView.as_view(),
+     name="salary_update"),
 
-        path(
-    "salary/generate/<int:user_id>/",
-    MonthlySalaryGenerateView.as_view(),
-    name="generate_salary"
-),
+path("salary-delete/<int:pk>/",
+     SalaryDeleteView.as_view(),
+     name="salary_delete"),
 
-    path(
-        "salary/history/<int:user_id>/",
-        SalaryHistoryView.as_view(),
-        name="salary_history"
-    ),
-
-    # ===============================
-    # 4️⃣ ALL GENERATED SALARIES
-    # ===============================
-    path(
-        "salary/list/",
-        SalaryListView.as_view(),
-        name="salary_list"
-    ),
-
-
+path("salary-paid/<int:pk>/",
+     SalaryMarkPaidView.as_view(),
+     name="salary_mark_paid"),
 
     # ================= HOLIDAY =================
     path("holiday/add/", HolidayCreateView.as_view(), name="holiday_add"),
@@ -106,26 +82,10 @@ urlpatterns = [
     path("leave/yearly-reset/", YearlyResetView.as_view(), name="yearly_reset"),
 
     # ================= MANAGEMENT =================
-    path(
-        "management/apply-leave/",
-        ManagementApplyLeaveView.as_view(),
-        name="management_apply_leave"
-    ),
-
-    path(
-        "management/my-leaves/",
-        ManagementMyLeavesView.as_view(),
-        name="management_my_leaves"
-    ),
-
-    path(
-        "management/delete-leave/<int:leave_id>/",
-        ManagementDeleteLeaveView.as_view(),
-        name="management_delete_leave"
-    ),
+    path("management/leave/apply/", ManagementLeaveApplyView.as_view(), name="management_leave_apply"),
+    path("management/leave/list/", ManagementLeaveListView.as_view(), name="management_leave_list"),
 
     # ================= COURSES =================
-    path("",Home2View.as_view(),name='home2'),
     path("courses/", CourseListView.as_view(), name="course_list"),
     path("courses/add/", CourseCreateView.as_view(), name="course_add"),
     path("courses/edit/<int:id>/", CourseEditView.as_view(), name="course_edit"),
@@ -138,33 +98,6 @@ urlpatterns = [
     path("batches/delete/<int:id>/", BatchDeleteView.as_view(), name="batch_delete"),
 
     # ================= FACULTY =================
-    path("enquiries/", EnquiryListView.as_view(), name="enquiry_list"),
-    path("enquiries/add/", EnquiryCreateView.as_view(), name="enquiry_add"),
-    path("enquiries/<int:pk>/", EnquiryDetailView.as_view(), name="enquiry_detail"),
-    path("enquiries/<int:pk>/edit/", EnquiryUpdateView.as_view(), name="enquiry_edit"),
-    path("enquiries/<int:pk>/delete/", EnquiryDeleteView.as_view(), name="enquiry_delete"),
-    path("followups/<int:enquiry_id>/", FollowUpListView.as_view(), name="followup_list"),
-    path("enquiry/<int:enquiry_id>/followup/add/",FollowUpCreateView.as_view(),name="followup_add"),
-    path("followup/edit/<int:pk>/",FollowUpUpdateView.as_view(),name="followup_edit"),
-    path("enquiry/<int:enquiry_id>/not-interested/",MarkNotInterestedView.as_view(),name="not_interested"),
-
-    path("admissions/", AdmissionListView.as_view(), name="admission_list"),
-    path("enquiry/<int:enquiry_id>/convert/",ConvertToAdmissionView.as_view(),name="convert_admission"),
-    path("enquiry/<int:admission_id>/create-student/",CreateStudentAccountView.as_view(),name="create_student_account"),
-    path("payments/add/", PaymentCreateView.as_view(), name="payment_create"),
-    path("payments/", PaymentListView.as_view(), name="payment_list"),
-    path("payments/edit/<int:pk>/", PaymentUpdateView.as_view(), name="payment_edit"),
-    path("payments/delete/<int:pk>/", PaymentDeleteView.as_view(), name="payment_delete"),
-    
-    path("staff/", StaffListCreateView.as_view(), name="staff_list"),
-    path("faculty/", FacultyListCreateView.as_view(), name="faculty_list"),
-   
-    path("staff/edit/<int:pk>/", EditStaffView.as_view(), name="edit_staff"),
-    path("staff/delete/<int:pk>/", DeleteStaffView.as_view(), name="delete_staff"),
-    path("faculty/edit/<int:pk>/",EditFacultyView.as_view(),name="edit_faculty"),
-
-    path("faculty/delete/<int:pk>/",DeleteFacultyView.as_view(),name="delete_faculty"),
-
     path("faculty-assignments/add/", FacultyAssignmentCreateView.as_view(), name="faculty_assignment"),
     path("faculty-assignments/view/", FacultyCoursesView.as_view(), name="faculty_courses"),
 
@@ -173,15 +106,7 @@ urlpatterns = [
     path("assignments/", AssignStudentListView.as_view(), name="assign_student_list"),
     path("assignments/edit/<int:pk>/", AssignStudentEditView.as_view(), name="assign_student_edit"),
     path("assignments/delete/<int:pk>/", AssignStudentDeleteView.as_view(), name="assign_student_delete"),
-
-    path("assignments/delete/<int:pk>/", AssignStudentDeleteView.as_view(),
-         name="assign-student-delete"),
-
-     
-
- 
-  
-    path("courses/", CourseListView.as_view(), name="course_list"),
+     path("courses/", CourseListView.as_view(), name="course_list"),
     path("courses/add/", CourseCreateView.as_view(), name="course_add"),
     path("courses/edit/<int:id>/", CourseEditView.as_view(), name="course_edit"),
     path("courses/delete/<int:id>/", CourseDeleteView.as_view(), name="course_delete"),
@@ -199,7 +124,9 @@ urlpatterns = [
     path("enquiry/<int:enquiry_id>/followup/add/",FollowUpCreateView.as_view(),name="followup_add"),
     path("admissions/", AdmissionListView.as_view(), name="admission_list"),
     path("enquiry/<int:enquiry_id>/convert/",ConvertToAdmissionView.as_view(),name="convert_admission"),
-    
+    path("leave/apply/", ApplyLeaveView.as_view(), name="apply_leave"),
+    path("leave/my/", MyLeavesView.as_view(), name="my_leaves"),
+    path("leave/delete/<int:leave_id>/", DeleteLeaveView.as_view(), name="delete_leave"),
     path("leave/requests/", LeaveRequestsView.as_view(), name="leave_requests"),
     path(
         "leave/<int:leave_id>/<str:status>/",
@@ -232,7 +159,7 @@ urlpatterns = [
     path("assignments/delete/<int:pk>/", AssignStudentDeleteView.as_view(),name="assign-student-delete"),
     path("faculty-reports/",AdminFacultyReportListView.as_view(),name="faculty_report_list",),
     path("training-sessions/",AdminTrainingSessionListView.as_view(),name="training_session_list",),
-    path("assignment-report/", AssignmentReportView.as_view(), name="assignment-report"),
+    path("assignment-report/", AssignmentReportView.as_view(), name="assignment-report")
 
 
 # from tims.adminapp.views import LeaveHistoryDetailView, LeaveRequestsView, LeaveUserListView, UpdateLeaveStatusView, LeaveRequestsView,UpdateLeaveStatusView,FollowUpCreateView, FollowUpListView

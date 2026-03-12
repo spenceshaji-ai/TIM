@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}
+Delete User
+{% endblock title %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="text-danger">
+        Delete User
+    </h2>
+
+    <p>
+        Are you sure you want to delete this user?
+    </p>
+
+    <table class="table table-bordered mt-3">
+        <tr>
+            <th>Username</th>
+            <td>{{ object.username }}</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>{{ object.email }}</td>
+        </tr>
+        <tr>
+            <th>Role</th>
+            <td>{{ object.role.role_name }}</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>{{ object.status }}</td>
+        </tr>
+    </table>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <button type="submit" class="btn btn-danger">
+            ✅ Yes, Delete
+        </button>
+
+        <a href="{% url 'users:user_list' %}" class="btn btn-secondary">
+            Cancel
+        </a>
+    </form>
+
+</div>
+
+{% endblock content %}

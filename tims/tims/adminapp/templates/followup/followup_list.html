@@ -1,78 +1,32 @@
-
-{% include "pages/header.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 
 <div class="container mt-4">
 
-    <h2>Follow Ups — {{ enquiry.name }}</h2>
+    <h2 class="mb-3">Follow Up List</h2>
 
-    <!-- ✅ Add FollowUp Form -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            Add Follow Up
-        </div>
-
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-
-                <div class="row g-3">
-
-                    <div class="col-md-4">
-                        {{ form.followup_date.label_tag }}
-                        {{ form.followup_date }}
-                    </div>
-
-                    <div class="col-md-4">
-                        {{ form.status.label_tag }}
-                        {{ form.status }}
-                    </div>
-
-                    <div class="col-md-4">
-                        {{ form.today_remark.label_tag }}
-                        {{ form.today_remark }}
-                    </div>
-
-                </div>
-
-                <button type="submit" class="btn btn-success mt-3">
-                    Save Follow Up
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- ✅ Follow Up Table -->
     <table class="table table-bordered table-hover">
         <thead class="table-dark">
             <tr>
+                <th>Enquiry</th>
                 <th>Date</th>
                 <th>Status</th>
-                <th>Today Remark</th>
-                
+                <th>Remarks</th>
             </tr>
         </thead>
 
         <tbody>
             {% for f in followups %}
             <tr>
-                <td>{{ f.followup_date|date:"M d, Y" }}</td>
-
-                <td>
-                    {% if f.status == "Completed" %}
-                        <span class="badge bg-success">Completed</span>
-                    {% else %}
-                        <span class="badge bg-warning text-dark">Pending</span>
-                    {% endif %}
-                </td>
-
-                <td>{{ f.today_remark }}</td>
-                
+                <td>{{ f.enquiry.name }}</td>
+                <td>{{ f.followup_date }}</td>
+                <td>{{ f.status }}</td>
+                <td>{{ f.remarks }}</td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="3" class="text-center">
+                <td colspan="4" class="text-center">
                     No FollowUps Found
                 </td>
             </tr>
@@ -83,5 +37,3 @@
 </div>
 
 {% endblock %}
-
-{% include "pages/footer.html" %}
