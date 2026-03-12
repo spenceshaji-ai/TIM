@@ -70,9 +70,113 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
         return reverse("users:login")
 
 
-from django.views import View
-from django.shortcuts import render, redirect, get_object_or_404
-#from faculty.models import TrainingSession,StudentAttendance
+
+
+
+
+class LoginView(View):
+    template_name = "login.html"
+
+    def get(self, request):
+        form = LoginForm()
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request):
+        form = LoginForm(data=request.POST)
+
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
+
+            user = authenticate(username=username, password=password)
+
+            if user is not None:
+
+                  # 🔐 1️⃣ INACTIVE CHECK (ADD HERE)
+                if user.status != "active":
+                    messages.error(request, "Your account is inactive")
+                    return redirect("login")
+                login(request, user)
+                 # ⭐ FORCE PASSWORD CHANGE (ADD HERE)
+                if user.must_change_password and not user.is_superuser:
+                    return redirect("users:change_password")
+               
+                # 🔥 Role Based Redirection
+                  # 🔥 SUPER ADMIN CHECK
+                if user.is_superuser:
+                    return redirect("adminapp:home2")   # or superadmin dashboard
+
+                if user.role and user.role.role_name in ["Admin", "HR","Manager"]:
+                    return redirect("adminapp:home2")
+
+                elif user.role and user.role.role_name == "Faculty":
+                    return redirect("faculty:home1")
+
+                elif user.role and user.role.role_name == "Student":
+                    return redirect("Student:stdhome")
+
+                else:
+                    messages.error(request, "Role not assigned properly")
+                    return redirect("login")
+        messages.error(request, "Invalid username or password")
+        return render(request, self.template_name, {"form": form})
+
+
+class ForcePasswordChangeView(View):
+
+    template_name = "change_password.html"
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
+
+        if password1 != password2:
+            messages.error(request, "Passwords do not match")
+            return redirect("users:change_password")
+
+        user = request.user
+
+        user.set_password(password1)
+
+        user.must_change_password = False
+
+        user.save()
+
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+        # ROLE BASED REDIRECT
+        if user.role:
+            role = user.role.role_name
+
+            if role == "Admin":
+                return redirect("adminapp:home2")
+
+            elif role == "HR":
+                return redirect("adminapp:home2")
+
+            elif role == "Manager":
+                return redirect("adminapp:home2")
+
+            elif role == "Faculty":
+                return redirect("faculty:home1")
+
+            elif role == "Student":
+                return redirect("Student:stdhome")
+
+        return redirect("login")
+
+class LogoutView(View):
+    def post(self, request):
+        logout(request)
+        return redirect("login")
+
+    def get(self, request):
+        return render(request, "logout.html")
+
 
 class UserRegisterView(View):
     template_name = "user_form.html"
