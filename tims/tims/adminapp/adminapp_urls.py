@@ -11,8 +11,7 @@ app_name = "adminapp"
 
 urlpatterns = [
 
-    # Dashboard
-    path("", AdminDashboardView.as_view(), name="home"),
+    
 
     # ================= SALARY =================
 # ===============================

@@ -61,8 +61,7 @@ def is_admin(user):
 def is_manager(user):
     return hasattr(user, "role") and user.role.role_name == "Manager"
 
-class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "pages/home.html"
+
 
 
 from django.views.generic import CreateView, ListView, UpdateView
