@@ -406,7 +406,7 @@ class UpdateLeaveStatusView(LoginRequiredMixin, UserPassesTestMixin, View):
             )
 
             requested_days = leave.total_days
-            available_days = balance.remaining_days()
+            available_days = balance.remaining_days
 
             # 🔥 LOP Logic
             if requested_days <= available_days:
@@ -432,42 +432,9 @@ class UpdateLeaveStatusView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 
 
-class LeaveHistoryDetailView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    template_name = "adminapp/leave_history_detail.html"
-    context_object_name = "leaves"
 
-    def test_func(self):
-        return self.request.user.is_superuser or (
-            hasattr(self.request.user, "role") and
-            self.request.user.role.role_name == "HR"
-        )
 
-    def get_queryset(self):
-        user_id = self.kwargs["user_id"]
-        return LeaveApplication.objects.filter(
-            user_id=user_id,
-            status="Approved"
-        ).select_related("leave_type")
 
-class MonthlyAccrualView(LoginRequiredMixin, UserPassesTestMixin, View):
-
-    def test_func(self):
-        return self.request.user.is_superuser
-
-    def get(self, request):
-        monthly_accrual()
-        messages.success(request, "Monthly leave credited successfully.")
-        return redirect("adminapp:leave_requests")
-    
-class YearlyResetView(LoginRequiredMixin, UserPassesTestMixin, View):
-
-    def test_func(self):
-        return self.request.user.is_superuser
-
-    def get(self, request):
-        yearly_leave_reset()
-        messages.success(request, "Yearly reset completed.")
-        return redirect("adminapp:leave_requests")
     
 from tims.adminapp.models import LeaveBalance
 from datetime import date
@@ -486,30 +453,7 @@ User = get_user_model()
 
 
 
-class LeaveRequestsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    model = LeaveApplication
-    template_name = "adminapp/leave_requests.html"
-    context_object_name = "leaves"
 
-    def test_func(self):
-        user = self.request.user
-        return user.is_superuser or (
-            hasattr(user, "role") and user.role.role_name == "HR"
-        )
-
-    def get_queryset(self):
-        return (
-            LeaveApplication.objects.select_related("user", "leave_type")
-            .annotate(
-                status_priority=Case(
-                    When(status="Pending", then=Value(1)),
-                    When(status="Approved", then=Value(2)),
-                    When(status="Rejected", then=Value(3)),
-                    output_field=IntegerField(),
-                )
-            )
-            .order_by("status_priority", "-applied_at")
-        )
     
 from datetime import date
 from django.http import HttpResponseForbidden
@@ -520,62 +464,6 @@ from django.http import HttpResponseForbidden
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from tims.adminapp.models import LeaveApplication, LeaveBalance
-
-class UpdateLeaveStatusView(LoginRequiredMixin, UserPassesTestMixin, View):
-
-    def test_func(self):
-        user = self.request.user
-        return user.is_superuser or (
-            hasattr(user, "role") and user.role.role_name == "HR"
-        )
-
-    def get(self, request, leave_id, status):
-
-        leave = get_object_or_404(LeaveApplication, id=leave_id)
-
-        if leave.status != "Pending":
-            messages.warning(request, "Already processed.")
-            return redirect("adminapp:leave_requests")
-
-        if status == "Approved":
-
-            year = leave.start_date.year
-
-            balance, created = LeaveBalance.objects.get_or_create(
-                user=leave.user,
-                leave_type=leave.leave_type,
-                year=year,
-                defaults={
-                    "earned_days": 0,
-                    "used_days": 0,
-                    "lop_days": 0
-                }
-            )
-
-            requested_days = leave.total_days
-            available_days = balance.remaining_days()
-
-            # 🔥 LOP Logic
-            if requested_days <= available_days:
-                balance.used_days += requested_days
-                leave.lop_days = 0
-            else:
-                balance.used_days += available_days
-                leave.lop_days = requested_days - available_days
-                balance.lop_days += leave.lop_days
-
-            balance.save()
-
-        else:
-            leave.lop_days = 0
-
-        leave.status = status
-        leave.save()
-
-        messages.success(request, f"Leave {status} successfully.")
-        return redirect("adminapp:leave_requests")
-
-
 
 
 
@@ -605,6 +493,7 @@ class MonthlyAccrualView(LoginRequiredMixin, UserPassesTestMixin, View):
         monthly_accrual()
         messages.success(request, "Monthly leave credited successfully.")
         return redirect("adminapp:leave_requests")
+ 
     
 class YearlyResetView(LoginRequiredMixin, UserPassesTestMixin, View):
 
@@ -615,7 +504,7 @@ class YearlyResetView(LoginRequiredMixin, UserPassesTestMixin, View):
         yearly_leave_reset()
         messages.success(request, "Yearly reset completed.")
         return redirect("adminapp:leave_requests")
-    
+
 from tims.adminapp.models import LeaveBalance
 from datetime import date
 from django.views import View
@@ -1455,47 +1344,15 @@ User = get_user_model()
 from tims.adminapp.models import LeaveApplication
 
 
-class LeaveRequestsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    model = LeaveApplication
-    template_name = "adminapp/leave_requests.html"
-    context_object_name = "leaves"
-
-    def test_func(self):
-        return self.request.user.is_staff
-
-
-class UpdateLeaveStatusView(LoginRequiredMixin, UserPassesTestMixin, View):
-    def test_func(self):
-        return self.request.user.is_staff
-
-    def get(self, request, leave_id, status):
-        leave = get_object_or_404(LeaveApplication, id=leave_id)
-        leave.status = status
-        leave.save()
-        return redirect("leave_requests")
 
 
 
 
 
-class LeaveHistoryDetailView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    model = LeaveApplication
-    template_name = "adminapp/leave_history.html"
-    context_object_name = "leaves"
 
-    def test_func(self):
-        return self.request.user.is_staff
 
-    def get_queryset(self):
-        return LeaveApplication.objects.filter(
-            user_id=self.kwargs["user_id"],
-            status="Approved"
-        )
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["faculty"] = User.objects.get(id=self.kwargs["user_id"])
-        return context
+
 
 
 class TrainingSessionApprovalListView(View):

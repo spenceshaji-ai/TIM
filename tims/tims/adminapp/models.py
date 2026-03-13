@@ -137,6 +137,7 @@ class LeaveBalance(models.Model):
     used_days = models.FloatField(default=0)
     lop_days = models.FloatField(default=0)
 
+    @property
     def remaining_days(self):
         return self.earned_days - self.used_days
 
