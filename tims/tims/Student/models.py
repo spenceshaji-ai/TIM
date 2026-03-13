@@ -22,6 +22,7 @@ class Student(models.Model):
 
 
 class JobApplication(models.Model):
+
     STATUS_CHOICES = [
         ('Applied', 'Applied'),
         ('Selected', 'Selected'),
@@ -30,7 +31,6 @@ class JobApplication(models.Model):
         ('Interview', 'Interview'),
     ]
 
-    
     job = models.ForeignKey(
         'Admin.Job',
         on_delete=models.CASCADE,
@@ -38,12 +38,16 @@ class JobApplication(models.Model):
     )
 
     student = models.ForeignKey(
-        'Student.Student',
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='applications'
     )
 
-    resume = models.FileField(upload_to='resumes/', null=True, blank=True)
+    resume = models.FileField(
+        upload_to='resumes/',
+        null=True,
+        blank=True
+    )
 
     status = models.CharField(
         max_length=20,
@@ -51,10 +55,12 @@ class JobApplication(models.Model):
         default='Applied'
     )
 
-    applied_date = models.DateField(auto_now_add=True)
+    applied_date = models.DateField(
+        auto_now_add=True
+    )
 
     def __str__(self):
-        return f"{self.job.title} - {self.student.name}"
+        return f"{self.job.title} - {self.student}"
 
 class Feedback(models.Model):
     certificate = models.OneToOneField(
