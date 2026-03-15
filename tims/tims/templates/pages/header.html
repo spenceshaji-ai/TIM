@@ -421,30 +421,10 @@
                             <span class="badge bg-success float-end">5</span>
                             <span> Dashboards </span>
                         </a>
-                        <div class="collapse" id="sidebarDashboards">
-                            <ul class="side-nav-second-level">
-                                <li>
-                                    <a href="dashboard-analytics.html">Analytics</a>
-                                </li>
-                                <li>
-                                    <a href="index.html">Ecommerce</a>
-                                </li>
-                                <li>
-                                    <a href="dashboard-projects.html">Projects</a>
-                                </li>
-                                <li>
-                                    <a href="dashboard-crm.html">CRM</a>
-                                </li>
-                                <li>
-                                    <a href="dashboard-wallet.html">E-Wallet</a>
-                                </li>
-                            </ul>
-                        </div>
+
                     </li>
 
                     <li class="side-nav-title">Leave Management</li>
-
-
 
                     <li class="side-nav-item">
                         <a href="{% url 'adminapp:leave_requests' %}" class="side-nav-link">
@@ -452,37 +432,35 @@
                             <span> Leave Request</span>
                         </a>
                     </li>
+
+                    <!-- Course Dropdown -->
                     <li class="side-nav-item">
+                        <a data-bs-toggle="collapse" href="#sidebarCourse" aria-expanded="false"
+                            aria-controls="sidebarCourse" class="side-nav-link">
+                            <i class="uil-book-open"></i>
+                            <span> Course </span>
+                            <span class="menu-arrow"></span>
+                        </a>
 
-                        <a href="{% url 'admin_app:jobtype_create' %}" class="side-nav-link">
-                            <i class="uil-calender"></i>
-                            <span> Approve </span>
-                        </a>
-                        <a data-bs-toggle="collapse" href="#sidebarCrmm" aria-expanded="false"
-                            aria-controls="sidebarCrm" class="side-nav-link">
-                            <i class="uil course"></i>
-                        </a>
+                        <div class="collapse" id="sidebarCourse">
+                            <ul class="side-nav-second-level">
+                                <li>
+                                    <a href="{% url 'adminapp:course_list' %}">Edit Course</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'adminapp:course_add' %}">Add Course</a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
-                    <span> Course </span>
-
-                    <div class="collapse" id="sidebarCrmm">
-                        <ul class="side-nav-second-level">
-                            <li>
-                                <a href="{% url 'adminapp:course_list' %}"> Edit Course</a>
-                            </li>
-                            <li>
-                                <a href="{% url 'adminapp:course_add' %}"> Add Course</a>
-                            </li>
-
-                        </ul>
-                    </div>
-
 
                     <li class="side-nav-item">
                         <a href="{% url 'adminapp:leave_calendar' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
-                            <span> Leave Calendar </span> </a>
+                            <span> Leave Calendar </span>
+                        </a>
                     </li>
+
                     <li class="side-nav-item">
                         <a href="{% url 'adminapp:faculty_report_list' %}" class="side-nav-link">
 
@@ -493,13 +471,6 @@
                         <a href="{% url 'adminapp:admin_feedback_list' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
                             <span> Feedback list </span>
-                        </a>
-                    </li>
-                    <li class="side-nav-item">
-
-                        <a href="{% url 'admin_app:job_create' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> Create Jobs </span>
                         </a>
                     </li>
                     <li class="side-nav-item">
@@ -633,28 +604,12 @@
                                     <a href="{% url 'adminapp:faculty_list' %}">Faculty</a>
 
                                 </li>
-                                <li>
-                                    <a href="apps-projects-gantt.html">Gantt <span
-                                            class="badge rounded-pill bg-light text-dark font-10 float-end">New</span></a>
-                                </li>
-                                <li>
-                                    <a href="apps-projects-add.html">Create Project</a>
-                                </li>
+
                             </ul>
                         </div>
                     </li>
 
-                    <li class="side-nav-item">
-                        <a href="{% url 'admin_app:admin_application_list' %}" class="side-nav-link">
-                            <i class="uil-rss"></i>
-                            <span> Student Job Application</span>
-                        </a>
-                    </li>
-
                     
-
-                    
-
                     <li class="side-nav-title">Create Users</li>
 
                     <li class="side-nav-item">
@@ -674,7 +629,52 @@
                         </div>
                     </li>
 
+                    <li class="side-nav-title">Job Management</li>
 
+                    <li class="side-nav-item">
+                        <a data-bs-toggle="collapse" href="#sidebarJobManagement" aria-expanded="false"
+                            aria-controls="sidebarJobManagement" class="side-nav-link">
+                            <i class="uil-briefcase"></i>
+                            <span> Job Module </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+
+                        <div class="collapse" id="sidebarJobManagement">
+                            <ul class="side-nav-second-level">
+
+                                <li>
+                                    <a href="{% url 'admin_app:jobtype_create' %}">
+                                        Create Job Type
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="{% url 'admin_app:jobtype_list' %}">
+                                        View Job Types
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="{% url 'admin_app:job_create' %}">
+                                        Create Job Vacancy
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="{% url 'admin_app:job_list' %}">
+                                        View Job Vacancies
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="{% url 'admin_app:admin_application_list' %}">
+                                        Student Job Application
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </li>
 
                     <li class="side-nav-title">Account</li>
 
