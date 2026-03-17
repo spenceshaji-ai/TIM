@@ -286,90 +286,62 @@ class FeedbackCreateView(LoginRequiredMixin, View):
 
         return render(request, "feedback_form.html", {"form": form, "certificate": certificate})
 
+# ===============================
+# Apply Job
+# ===============================
 
+class StudentApplyJobView(LoginRequiredMixin, View):
 
-# Student Job Application
-
-class StudentApplyJobView(View):
     template_name = "student/studentapplyjob.html"
 
-    # -------- GET METHOD --------
     def get(self, request, job_id):
 
-        # 1. Check if user is logged in
-        if not request.user.is_authenticated:
-            return redirect("login")
-
-        # 2. Get the selected job
         job = get_object_or_404(Job, id=job_id)
 
-        # 🚨 Deadline check
+        # deadline check
         if job.application_deadline < timezone.now().date():
             return redirect("job_list")
 
-        # 3. Find Student profile using logged-in user's email
-        try:
-            student = Student.objects.get(email=request.user.email)
-        except Student.DoesNotExist:
-            return redirect("student_register")
-
-        # 🚨 Duplicate application check
-        already_applied = JobApplication.objects.filter(
+        # duplicate check
+        if JobApplication.objects.filter(
             job=job,
-            student=student
-        ).exists()
-
-        if already_applied:
+            student=request.user
+        ).exists():
             return redirect("job_list")
 
-        # 4. Create empty form
         form = ApplicationForm()
 
-        # 5. Send form and job to template
         return render(request, self.template_name, {
             "form": form,
             "job": job
         })
 
-    # -------- POST METHOD --------
+
     def post(self, request, job_id):
 
-        # 1. Check login
-        if not request.user.is_authenticated:
-            return redirect("login")
-
-        # 2. Get job
         job = get_object_or_404(Job, id=job_id)
 
-        # 🚨 Deadline check
         if job.application_deadline < timezone.now().date():
             return redirect("job_list")
 
-        # 3. Get student profile
-        try:
-            student = Student.objects.get(email=request.user.email)
-        except Student.DoesNotExist:
-            return redirect("student_register")
-
-        # 🚨 Duplicate check
-        if JobApplication.objects.filter(job=job, student=student).exists():
+        if JobApplication.objects.filter(
+            job=job,
+            student=request.user
+        ).exists():
             return redirect("job_list")
 
-        # 4. Get form data + resume file
         form = ApplicationForm(request.POST, request.FILES)
 
-        # 5. Validate form
         if form.is_valid():
 
             application = form.save(commit=False)
-            application.student = student
+            application.student = request.user
             application.job = job
             application.status = "Applied"
             application.save()
 
             return redirect("job_list")
 
-        # 6. If form invalid, reload page
         return render(request, self.template_name, {
             "form": form,
             "job": job
@@ -377,33 +349,51 @@ class StudentApplyJobView(View):
 
 
 
+# ===============================
+# Job List
+# ===============================
 
-# Student Job List
+class StudentJobListView(LoginRequiredMixin, ListView):
 
-class StudentJobListView(ListView):
     model = Job
     template_name = "student/Studentjoblist.html"
     context_object_name = "jobs"
 
     def get_queryset(self):
-        queryset = Job.objects.select_related("job_type").order_by("-posted_date")
+
+        queryset = Job.objects.select_related(
+            "job_type"
+        ).order_by("-posted_date")
+
         job_type_id = self.request.GET.get("job_type")
+
         if job_type_id:
-            queryset = queryset.filter(job_type_id=job_type_id)
+            queryset = queryset.filter(
+                job_type_id=job_type_id
+            )
+
         return queryset
 
+
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
+
         context["job_types"] = Jobtype.objects.all()
         context["selected_job_type"] = self.request.GET.get("job_type")
-        context["today"] = timezone.now().date()   # <-- ADD THIS
+        context["today"] = timezone.now().date()
+
         return context
 
 
-# Student Job Detail (JSON)
+# ===============================
+# Job Detail (AJAX)
+# ===============================
 
-class StudentJobDetailView(View):
+class StudentJobDetailView(LoginRequiredMixin, View):
+
     def get(self, request, pk):
+
         job = get_object_or_404(Job, pk=pk)
 
         is_expired = job.application_deadline < timezone.now().date()
@@ -418,6 +408,7 @@ class StudentJobDetailView(View):
             "application_deadline": job.application_deadline.strftime("%Y-%m-%d"),
             "is_expired": is_expired,
         }
+
         return JsonResponse(data)
 
 
@@ -452,46 +443,39 @@ class StudentJobDetailView(View):
 #         })
 
 
-class StudentApplicationTrackingView(View):
+
+# ===============================
+# Application Tracking
+# ===============================
+
+class StudentApplicationTrackingView(LoginRequiredMixin, View):
+
     template_name = "student/studentapplicationtracking.html"
 
     def get(self, request):
 
-        if not request.user.is_authenticated:
-            return redirect("login")
-
-        try:
-            student = Student.objects.get(email=request.user.email)
-        except Student.DoesNotExist:
-            return redirect("student_register")
-
-        # Get filter value from URL
         status_filter = request.GET.get("status")
 
         applications = JobApplication.objects.filter(
-            student=student
+            student=request.user
         ).select_related(
             "job",
             "interview"
         )
 
-        # Apply status filter
         if status_filter:
-            applications = applications.filter(status=status_filter)
+            applications = applications.filter(
+                status=status_filter
+            )
 
-        applications = applications.order_by("-applied_date")
+        applications = applications.order_by(
+            "-applied_date"
+        )
 
         return render(request, self.template_name, {
             "applications": applications,
             "selected_status": status_filter
         })
-
-        # return render(
-        #     request,
-        #     'admin/application_edit.html',
-        #     {'form': form, 'application': application}
-        # )
-
 
 class StudentProgressView(LoginRequiredMixin, View):
     template_name = "progress.html"
