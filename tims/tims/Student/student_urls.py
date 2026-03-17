@@ -9,7 +9,7 @@ from .views import (
 )
 urlpatterns = [
     # Student
-    path('students/register/', StudentRegisterView.as_view(), name='student_register'),
+    
     
     #Student Apply for Job
     path("student/apply/<int:job_id>/", StudentApplyJobView.as_view(), name="student_apply_job"),
