@@ -12,7 +12,7 @@
     <meta content="Coderthemes" name="author" />
 
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{% static 'admin/assets/images/favicon.ico' %}">
+    <link rel="shortcut icon" href="assets/images/favicon.ico">
 
     <!-- Daterangepicker css -->
     <link href="{% static 'admin/assets/vendor/daterangepicker/daterangepicker.css' %}" rel="stylesheet"
@@ -162,9 +162,7 @@
                             </form>
                         </div>
                     </li>
-                    <li class="dropdown notification-list">
-    <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#">
-        <i class="uil-bell"></i>
+
 
 
 
@@ -203,33 +201,37 @@
                             </a>
 
                         </div>
-                   <li class="dropdown notification-list">
-    <a class="nav-link dropdown-toggle arrow-none position-relative"
-       data-bs-toggle="dropdown" href="#">
+                    </li>
 
-        <i class="ri-notification-3-line font-22
-           {% if admin_pending_leave_count > 0 %}text-danger{% endif %}">
-        </i>
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle arrow-none position-relative" data-bs-toggle="dropdown"
+                            href="#">
 
-        {% if admin_pending_leave_count > 0 %}
-        <span class="notification-dot"></span>
-        {% endif %}
-    </a>
+                            <i class="ri-notification-3-line font-22
+           {% if faculty_leave_update %}text-danger{% endif %}">
+                            </i>
 
-    <div class="dropdown-menu dropdown-menu-end dropdown-lg py-0">
-        <div class="p-2 border-bottom">
-            <h6 class="m-0 font-16 fw-semibold">Leave Notifications</h6>
-        </div>
+                            {% if faculty_leave_update %}
+                            <span class="notification-dot"></span>
+                            {% endif %}
+                        </a>
 
-        <div class="text-center py-3">
-            <p class="mb-2">New leave request received</p>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-lg py-0">
+                            <div class="p-2 border-bottom">
+                                <h6 class="m-0 font-16 fw-semibold">Leave Update</h6>
+                            </div>
 
-            <a href="{% url 'adminapp:leave_requests' %}" class="btn btn-sm btn-primary">
-                View Requests
-            </a>
-        </div>
-    </div>
-</li>
+                            <div class="text-center py-3">
+                                <p class="mb-2">Your leave status has been updated</p>
+
+                                <a href="{% url 'faculty:faculty_my_leaves' %}" class="btn btn-sm btn-primary">
+                                    View My Leaves
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+
+
 
 
                     <li class="dropdown d-none d-sm-inline-block">
@@ -443,118 +445,99 @@
                     </li>
 
                     <li class="side-nav-title">Leave Management</li>
-
-                       {% if request.user.is_superuser or request.user.role.role_name == "HR" %}
-
-                       <li class="side-nav-item">
-                        <a href="{% url 'adminapp:leave_users' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> Leave Users </span>
-                        </a>
-                    </li>
                     <li class="side-nav-item">
-                        <a href="{% url 'adminapp:leave_requests' %}" class="side-nav-link">
-                             <i class="uil-calender"></i>
-                            <span> Leave Request</span>
+                        <a data-bs-toggle="collapse" href="#sidebarEcommerc" aria-expanded="false"
+                            aria-controls="sidebarEcommerc" class="side-nav-link">
+                            <i class="uil-store"></i>
+                            <span> Leave </span>
+                            <span class="menu-arrow"></span>
                         </a>
-                    </li>
-                    <li class="side-nav-item">
-                        <a href="{% url 'adminapp:leave_calendar' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> Leave Calendar </span> </a> </li> 
-                             <li class="side-nav-item">
-                        {% endif %}
-                        <a href="{% url 'admin_app:jobtype_create' %}"  class="side-nav-link">
-                            <i class="uil-calender"></i>
-                            <span> Approve </span>
-                        <a data-bs-toggle="collapse" href="#sidebarCrmm" aria-expanded="false"
-                            aria-controls="sidebarCrm" class="side-nav-link">
-                            <i class="uil course"></i>
-
-                            
-                        </a>
-                        <div class="collapse" id="sidebarCrmm">
+                        <div class="collapse" id="sidebarEcommerc">
                             <ul class="side-nav-second-level">
-                                 <li class="side-nav-title">Course</li>
-                                 <li class="side-nav-item">
+                                <li><a href="{% url 'adminapp:leave_users' %}"> Leave Users</a></li>
+                                <li><a href="{% url 'adminapp:leave_requests' %}"> Leave Request</a></li>
+                                <li><a href="{% url 'adminapp:leave_calendar' %}"> Leave Calendar</a></li>
+
+                            </ul>
+                        </div>
+                    </li>
+                      <li class="side-nav-item">
+                        <a data-bs-toggle="collapse" href="#sidebarEcommer" aria-expanded="false"
+                            aria-controls="sidebarEcommer" class="side-nav-link">
+                            <i class="uil-store"></i>
+                            <span> Salary </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse" id="sidebarEcommer">
+                            <ul class="side-nav-second-level">
+                                <li><a href="{% url 'adminapp:salary_structure_list' %}"> Salary Create and View</a></li>
+                                <li><a href="{% url 'adminapp:monthly_salary_users' %}"> Monthly Salary Users</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="side-nav-item">
+                        <a data-bs-toggle="collapse" href="#sidebarEcomme" aria-expanded="false"
+                            aria-controls="sidebarEcomme" class="side-nav-link">
+                            <i class="uil-store"></i>
+                            <span> My Leave</span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse" id="sidebarEcomme">
+                            <ul class="side-nav-second-level">
+                                <li><a href="{% url 'adminapp:management_apply_leave' %}" > Apply Leave</a></li>
+                                <li><a href="{% url 'adminapp:management_my_leaves' %}" > View Leaves</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="side-nav-title">Course & Batch Management</li>
+                    <li class="side-nav-item">
+                        <a data-bs-toggle="collapse" href="#sidebarEcommerce" aria-expanded="false"
+                            aria-controls="sidebarEcommerce" class="side-nav-link">
+                            <i class="uil-store"></i>
+                            <span> Course </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse" id="sidebarEcommerce">
+                            <ul class="side-nav-second-level">
                                 <li>
                                     <a href="{% url 'adminapp:course_add' %}"> Add Course</a>
                                 </li>
                                 <li>
                                     <a href="{% url 'adminapp:course_list' %}"> View Course</a>
                                 </li>
-                               </li> 
-
                             </ul>
                         </div>
                     </li>
-                        </a>
-                        </li>
-                        <li class="side-nav-title">View Feedbacks</li>
-                        <li class="side-nav-item">
-                        <a href="{% url 'adminapp:admin_feedback_list' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> Feedback list </span>
-                        </a>
-                    </li>
                     <li class="side-nav-item">
-                        
-                        <a href="{% url 'admin_app:job_create' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> Create Jobs </span>
-                        </a>
-                    </li>
-                  
-                        <li class="side-nav-title">Salary Management</li>
-
-                        
-                    
-                         <li class="side-nav-item">
-                       {% if request.user.is_superuser or request.user.role.role_name == "HR" %}
-                        <a href="{% url 'adminapp:salary_structure_list' %}" class="side-nav-link">
-                        <i class="uil-comments-alt"></i>
-                        <span> Salary Create and View </span>
-                        </a>
-                        
-                       
-                       <li class="side-nav-item">
-                        <a href="{% url 'adminapp:monthly_salary_users' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> Monthly Salary Users </span>
-                        </a>
-                    </li>
-                    {% endif %}
-                     <a data-bs-toggle="collapse" href="#sidebarCrm" aria-expanded="false" aria-controls="sidebarCrm"
-                            class="side-nav-link">
-                            <i class="uil uil-batch"></i>
-
+                        <a data-bs-toggle="collapse" href="#sidebarE" aria-expanded="false"
+                            aria-controls="sidebarE" class="side-nav-link">
+                            <i class="uil-store"></i>
                             <span> Batch </span>
+                            <span class="menu-arrow"></span>
                         </a>
-                        <div class="collapse" id="sidebarCrm">
+                        <div class="collapse" id="sidebarE">
                             <ul class="side-nav-second-level">
-                                <li class="side-nav-title">Batch</li>
-                                <li class="side-nav-item">
-
-                                <li>
-                                    <a href="{% url 'adminapp:batch_list' %}"> Edit Batch</a>
-                                </li>
                                 <li>
                                     <a href="{% url 'adminapp:batch_add' %}"> Add Batch</a>
                                 </li>
+                                <li>
+                                    <a href="{% url 'adminapp:batch_list' %}"> Edit Batch</a>
                                 </li>
-
                             </ul>
                         </div>
-                        <div class="collapse" id="sidebarCrm">
-                            <ul class="side-nav-second-level">
-                                
-                                <li>
-                                    <a href="{% url 'adminapp:assignment-report' %}">Users details</a>
-                                </li>
-                                <li class="side-nav-title">Faculty</li>
-                                <li class="side-nav-item">
+                    </li>
+                    <li class="side-nav-title">Faculty Management</li>
 
-                                <li>
+                    <li class="side-nav-item">
+                        <a data-bs-toggle="collapse" href="#sidebarEmail" aria-expanded="false"
+                            aria-controls="sidebarEmail" class="side-nav-link">
+                            <i class="uil-envelope"></i>
+                            <span> Faculty </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse" id="sidebarEmail">
+                            <ul class="side-nav-second-level">
+                               <li>
                                     <a href="{% url 'adminapp:faculty_assignment' %}">Assign faculty</a>
                                 </li>
                                 <li>   
@@ -566,108 +549,44 @@
                                 <li>
                                     <a href="{% url 'adminapp:admin_training_approval_list' %}">Training approval</a>
                                 </li>
-                            </li>
                             </ul>
                         </div>
                     </li>
-                
-                        <li class="side-nav-title">My Leaves</li>
-                        <li class="side-nav-item">
-                        <li><a href="{% url 'admin_app:jobtype_create' %}">Create Job Type</a></li>
-                        <li><a href="{% url 'admin_app:jobtype_list' %}">View Job Types</a></li>
-                        <li><a href="{% url 'admin_app:job_create' %}">Create Job Vacancy</a></li>
-                        <li><a href="{% url 'admin_app:job_list' %}">View Job Vacancies</a></li>
-                        <li><a href="{% url 'admin_app:admin_application_list' %}">Student Job Application</a></li>
-                        </li>
-                        <li class="side-nav-title">My Leaves</li>
-                        <li class="side-nav-item">
-                        <a href="{% url 'adminapp:management_apply_leave' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> Apply Leave </span>
-                        </a>
-                    </li>
-                       <li class="side-nav-item">
-                        <a href="{% url 'adminapp:management_my_leaves' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
-                            <span> View Leaves </span>
-                        </a>
-                    </li>
-                    <li class="side-nav-title">Student</li>
+                    <li class="side-nav-title">Job Management</li>
                     <li class="side-nav-item">
-                        <li><a href="{% url 'adminapp:assignment-report' %}">Users details</a></li>
-                        <li><a href="{% url 'adminapp:assign-student' %}">Assign Student</a></li>
-                        <li><a href="{% url 'adminapp:add' %}">Add Certificate</a></li>
-                        <li><a href="{% url 'adminapp:mark-completed' %}">Course Completed Students</a></li>
-                        <li><a href="{% url 'adminapp:admin_feedback_list' %}">Feedback list</a></li>
-                    </li>
-                         
-                    <li class="side-nav-item">
-                        <a data-bs-toggle="collapse" href="#sidebarEnquiry" aria-expanded="false"
-                            aria-controls="sidebarEcommerce" class="side-nav-link">
-                            <i class="uil-store"></i>
-                            <span> Enquiry </span>
-                            <span class="menu-arrow"></span>
-                        </a>
-                        <div class="collapse" id="sidebarEnquiry">
-                            <ul class="side-nav-second-level">
-                                <li class="side-nav-title">Enquiry</li>
-                                <li class="side-nav-item">
-                                <li>
-                                    <a href="{% url 'adminapp:enquiry_add' %}"> Enquiry </a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'adminapp:enquiry_list' %}">View Enquiry </a>
-                                </li>
-                                </li> 
-
-
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="side-nav-item">
-                        <a data-bs-toggle="collapse" href="#sidebarPayment" aria-expanded="false"
-                            aria-controls="sidebarEmail" class="side-nav-link">
+                        <a data-bs-toggle="collapse" href="#sidebarEmai" aria-expanded="false"
+                            aria-controls="sidebarEmai" class="side-nav-link">
                             <i class="uil-envelope"></i>
-                            <span> Payment </span>
+                            <span> Job </span>
                             <span class="menu-arrow"></span>
                         </a>
-                        <div class="collapse" id="sidebarPayment">
+                        <div class="collapse" id="sidebarEmai">
                             <ul class="side-nav-second-level">
-                                <li class="side-nav-title">Payments</li>
-                                <li class="side-nav-item">
-                                <li>
-                                    <a href="{% url 'adminapp:payment_create' %}">Payments</a>
-                                </li>
-                                <li>
-                                   <a href="{% url 'adminapp: payment_list' %}">View Payments </a>
-                                </li>
-                                </li>
+                                <li><a href="{% url 'admin_app:jobtype_create' %}">Create Job Type</a></li>
+                                <li><a href="{% url 'admin_app:jobtype_list' %}">View Job Types</a></li>
+                                <li><a href="{% url 'admin_app:job_create' %}">Create Job Vacancy</a></li>
+                                <li><a href="{% url 'admin_app:job_list' %}">View Job Vacancies</a></li>
+                                <li><a href="{% url 'admin_app:admin_application_list' %}">Student Job Application</a></li>
                             </ul>
                         </div>
-
                     </li>
+                    <li class="side-nav-title">Job Management</li>
 
                     <li class="side-nav-item">
                         <a data-bs-toggle="collapse" href="#sidebarProjects" aria-expanded="false"
                             aria-controls="sidebarProjects" class="side-nav-link">
                             <i class="uil-briefcase"></i>
-                            <span> Registration </span>
+                            <span> Projects </span>
                             <span class="menu-arrow"></span>
                         </a>
                         <div class="collapse" id="sidebarProjects">
                             <ul class="side-nav-second-level">
-                                <li class="side-nav-title">Registration</li>
-                                <li class="side-nav-item">
-
                                 <li>
-                                    <a href="{% url 'adminapp:staff_list' %}">Staff</a>
+                                    <a href="apps-projects-list.html">List</a>
                                 </li>
-                                <li>  
-                                    <a href="{% url 'adminapp:faculty_list' %}">Faculty</a>
-                                    
+                                <li>
+                                    <a href="apps-projects-details.html">Details</a>
                                 </li>
-                                </li> 
                                 <li>
                                     <a href="apps-projects-gantt.html">Gantt <span
                                             class="badge rounded-pill bg-light text-dark font-10 float-end">New</span></a>
@@ -680,9 +599,9 @@
                     </li>
 
                     <li class="side-nav-item">
-                        <a href="{% url 'admin_app:admin_application_list' %}" class="side-nav-link">
+                        <a href="apps-social-feed.html" class="side-nav-link">
                             <i class="uil-rss"></i>
-                            <span> Student Job Application</span>
+                            <span> Social Feed </span>
                         </a>
                     </li>
 
@@ -721,13 +640,13 @@
                         <a data-bs-toggle="collapse" href="#sidebarPages" aria-expanded="false"
                             aria-controls="sidebarPages" class="side-nav-link">
                             <i class="uil-copy-alt"></i>
-                            <span> role creation </span>
+                            <span> Pages </span>
                             <span class="menu-arrow"></span>
                         </a>
                         <div class="collapse" id="sidebarPages">
                             <ul class="side-nav-second-level">
                                 <li>
-                                    <a href="{% url 'users:role_add' %}">Staff</a>
+                                    <a href="pages-profile.html">Profile</a>
                                 </li>
                                 <li>
                                     <a href="pages-profile-2.html">Profile 2</a>
@@ -1200,42 +1119,83 @@
                         <a data-bs-toggle="collapse" href="#sidebarMultiLevel" aria-expanded="false"
                             aria-controls="sidebarMultiLevel" class="side-nav-link">
                             <i class="uil-folder-plus"></i>
-                            <span> Log out </span>
+                            <span> Multi Level </span>
                             <span class="menu-arrow"></span>
                         </a>
                         <div class="collapse" id="sidebarMultiLevel">
                             <ul class="side-nav-second-level">
                                 <li class="side-nav-item">
-                                <li>
-                                    <a href="{% url 'users:logout' %}"> Logout</a>
+                                    <a data-bs-toggle="collapse" href="#sidebarSecondLevel" aria-expanded="false"
+                                        aria-controls="sidebarSecondLevel">
+                                        <span> Second Level </span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <div class="collapse" id="sidebarSecondLevel">
+                                        <ul class="side-nav-third-level">
+                                            <li>
+                                                <a href="javascript: void(0);">Item 1</a>
+                                            </li>
+                                            <li>
+                                                <a href="javascript: void(0);">Item 2</a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </li>
+                                <li class="side-nav-item">
+                                    <a data-bs-toggle="collapse" href="#sidebarThirdLevel" aria-expanded="false"
+                                        aria-controls="sidebarThirdLevel">
+                                        <span> Third Level </span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <div class="collapse" id="sidebarThirdLevel">
+                                        <ul class="side-nav-third-level">
+                                            <li>
+                                                <a href="javascript: void(0);">Item 1</a>
+                                            </li>
+                                            <li class="side-nav-item">
+                                                <a data-bs-toggle="collapse" href="#sidebarFourthLevel"
+                                                    aria-expanded="false" aria-controls="sidebarFourthLevel">
+                                                    <span> Item 2 </span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <div class="collapse" id="sidebarFourthLevel">
+                                                    <ul class="side-nav-forth-level">
+                                                        <li>
+                                                            <a href="javascript: void(0);">Item 2.1</a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="javascript: void(0);">Item 2.2</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
+
+
+                    <!-- Help Box -->
+                    <div class="help-box text-white text-center">
+                        <a href="javascript: void(0);" class="float-end close-btn text-white">
+                            <i class="mdi mdi-close"></i>
+                        </a>
+                        <img src="{% static 'admin/assets/images/svg/help-icon.svg' %}" height="90"
+                            alt="Helper Icon Image" />
+                        <h5 class="mt-3">Unlimited Access</h5>
+                        <p class="mb-3">Upgrade to plan to get access to unlimited reports</p>
+                        <a href="javascript: void(0);" class="btn btn-secondary btn-sm">Upgrade</a>
+                    </div>
+                    <!-- end Help Box -->
+
+
                 </ul>
+                <!--- End Sidemenu -->
+
+                <div class="clearfix"></div>
             </div>
-            </li>
-
-
-
-
-
-            <!-- Help Box -->
-            <div class="help-box text-white text-center">
-                <a href="javascript: void(0);" class="float-end close-btn text-white">
-                    <i class="mdi mdi-close"></i>
-                </a>
-                <img src="{% static 'admin/assets/images/svg/help-icon.svg' %}" height="90" alt="Helper Icon Image" />
-                <h5 class="mt-3">Unlimited Access</h5>
-                <p class="mb-3">Upgrade to plan to get access to unlimited reports</p>
-                <a href="javascript: void(0);" class="btn btn-secondary btn-sm">Upgrade</a>
-            </div>
-            <!-- end Help Box -->
-
-
-            </ul>
-            <!--- End Sidemenu -->
-
-            <div class="clearfix"></div>
         </div>
-    </div>
-    <!-- ========== Left Sidebar End ========== -->
-    <div class="content-page">
+        <!-- ========== Left Sidebar End ========== -->
+        <div class="content-page">

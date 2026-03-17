@@ -493,6 +493,27 @@
                             <span class="badge bg-success float-end">5</span>
                             <span> Dashboards </span>
                         </a>
+                        <li class="side-nav-title">Leave Management</li>
+
+                    <li class="side-nav-item">
+                        <a href="{% url 'faculty:faculty_my_leaves' %}" class="side-nav-link">
+                            <i class="uil-calender"></i>
+                            <span> My Leaves </span>
+                        </a>
+                    </li>
+
+                    <li class="side-nav-item">
+                        <a href="{% url 'faculty:faculty_apply_leave' %}" class="side-nav-link">
+                            <i class="uil-comments-alt"></i>
+                            <span> Leave Apply </span>
+                        </a>
+                    </li>
+                     <li class="side-nav-item">
+                        <a href="{% url 'faculty:leave_calendar' %}" class="side-nav-link">
+                            <i class="uil-comments-alt"></i>
+                            <span> Leave Calendar </span>
+                        </a>
+                    </li>
                         <div class="collapse" id="sidebarDashboards">
                             <ul class="side-nav-second-level">
                                 <li>
