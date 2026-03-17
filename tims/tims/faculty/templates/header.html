@@ -517,38 +517,65 @@
                     <li class="side-nav-title">Apps</li>
 
                     <li class="side-nav-item">
-                        <a href="{% url 'faculty:faculty_report_create' %}" class="side-nav-link">
-                            <i class="uil-calender"></i>
-                            <span> Daily Report </span>
-                        </a>
-                    </li>
-
-                    <li class="side-nav-item">
                         <a href="{% url 'faculty:faculty_student_list' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
                             <span> Student tracking </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href="{% url 'faculty:faculty_training_progress' %}" class="side-nav-link">
+                            <i class="uil-comments-alt"></i>
+                            <span> Training progress </span>
                         </a>
                     </li>
 
                     <li class="side-nav-item">
                         <a data-bs-toggle="collapse" href="#sidebarCrm" aria-expanded="false" aria-controls="sidebarCrm" class="side-nav-link">
                             <i class="uil uil-tachometer-fast"></i>
-                            <span class="badge bg-danger text-white float-end">New</span>
-                            <span> CRM </span>
+                            <span class="badge bg-danger text-white float-end"></span>
+                            <span> Training Session </span>
                         </a>
                         <div class="collapse" id="sidebarCrm">
                             <ul class="side-nav-second-level">
                                 <li>
-                                    <a href="{% url 'faculty:faculty_training_progress' %}">Training progress</a>
+                                    <a href="{% url 'faculty:training_create' %}">Create Sessions</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'faculty:training_create' %}">Training Session</a>
+                                    <a href="{% url 'faculty:training_list' %}">Edit Sessions</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="side-nav-item">
+                        <a data-bs-toggle="collapse" href="#sidebarCr" aria-expanded="false" aria-controls="sidebarCr" class="side-nav-link">
+                            <i class="uil uil-tachometer-fast"></i>
+                            <span class="badge bg-danger text-white float-end"></span>
+                            <span> Student Attendence </span>
+                        </a>
+                        <div class="collapse" id="sidebarCr">
+                            <ul class="side-nav-second-level">
+                                <li>
+                                    <a href="{% url 'faculty:attendance-create' %}">Mark Attendence </a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'faculty:attendance-create' %}">Attendance</a>
+                                    <a href="{% url 'faculty:attendance-list' %}">Edit Attendence</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                     <li class="side-nav-item">
+                        <a data-bs-toggle="collapse" href="#sidebarC" aria-expanded="false" aria-controls="sidebarC" class="side-nav-link">
+                            <i class="uil uil-tachometer-fast"></i>
+                            <span class="badge bg-danger text-white float-end"></span>
+                            <span> Daily Report </span>
+                        </a>
+                        <div class="collapse" id="sidebarC">
+                            <ul class="side-nav-second-level">
+                                <li>
+                                    <a href="{% url 'faculty:faculty_report_create' %}">Create Reports </a>
                                 </li>
                                 <li>
-                                    <a href="crm-management.html">Management</a>
+                                    <a href="{% url 'faculty:faculty_report_list' %}">Edit Reports</a>
                                 </li>
                             </ul>
                         </div>
@@ -558,7 +585,7 @@
                         <a data-bs-toggle="collapse" href="#sidebarEcommerce" aria-expanded="false" aria-controls="sidebarEcommerce" class="side-nav-link">
                             <i class="uil-store"></i>
                             <span> Ecommerce </span>
-                            <span class="menu-arrow"></span>
+                            <span class="badge bg-danger text-white float-end"></span>
                         </a>
                         <div class="collapse" id="sidebarEcommerce">
                             <ul class="side-nav-second-level">
