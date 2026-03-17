@@ -101,7 +101,7 @@ class LoginView(View):
                 # 🔥 Role Based Redirection
                   # 🔥 SUPER ADMIN CHECK
                 if user.is_superuser:
-                    return redirect("superadmin:home5")   # or superadmin dashboard
+                    return redirect("adminapp:home2")   # or superadmin dashboard
 
                 if user.role and user.role.role_name in ["Admin", "HR","Manager"]:
                     return redirect("adminapp:home2")
