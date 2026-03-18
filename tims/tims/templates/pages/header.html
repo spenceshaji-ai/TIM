@@ -592,17 +592,17 @@
                         </div>
                     </li>
                    
-                    <li class="side-nav-title">Users</li>
+                    <li class="side-nav-title">Roles</li>
                     <li class="side-nav-item">
                         <a data-bs-toggle="collapse" href="#sidebaruser" aria-expanded="false"
                             aria-controls="sidebaruser" class="side-nav-link">
                             <i class="uil-envelope"></i>
-                            <span> Users </span>
+                            <span> Roles </span>
                             <span class="menu-arrow"></span>
                         </a>
                         <div class="collapse" id="sidebaruser">
                             <ul class="side-nav-second-level">
-                                <li><a href="{% url 'users:user_register' %}">User Register</a></li>
+                                
                                 <li><a href="{% url 'users:role_add' %}">Role Add</a></li>
                                 <li><a href="{% url 'adminapp:assignment-report' %}">Assignment Report</a></li>
                                 
