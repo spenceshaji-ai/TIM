@@ -91,7 +91,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "tims.users",
     
-    "tims.facultyapp",
+    
     "tims.adminapp",
     "tims.faculty",
     "tims.Student",

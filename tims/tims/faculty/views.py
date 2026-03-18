@@ -160,7 +160,7 @@ class DeleteLeaveView(LoginRequiredMixin, View):
         return redirect("faculty:faculty_my_leaves")
     
 class FacultyDashboardView(LoginRequiredMixin, TemplateView):
-    template_name = "home.html"
+    template_name = "fahome.html"
 
 from django.views import View
 from django.http import JsonResponse

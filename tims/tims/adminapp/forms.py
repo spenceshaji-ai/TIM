@@ -321,27 +321,18 @@ class FacultyAssignmentForm(forms.ModelForm):
             "batch": forms.Select(attrs={"class": "form-control"}),
         }
 
-def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    faculty_role = Role.objects.filter(role_name="Faculty").first()
+        faculty_role = Role.objects.filter(role_name="Faculty").first()
 
-    if faculty_role:
-        self.fields["faculty"].queryset = User.objects.filter(
-        role=faculty_role,
-            status="active"
-        )
-    else:
-        self.fields["faculty"].queryset = User.objects.none()
-
-
-
-
-
-        # Optional: only staff as faculty
-       # self.fields["faculty"].queryset = User.objects.filter(is_staff=True)
-
-
+        if faculty_role:
+            self.fields["faculty"].queryset = User.objects.filter(
+                role=faculty_role,
+                status="active"
+            )
+        else:
+            self.fields["faculty"].queryset = User.objects.none()
 
 
 class AssignstudentForm(forms.ModelForm):
@@ -676,3 +667,4 @@ class ManagementLeaveApplicationForm(forms.ModelForm):
                     )
 
         return cleaned_data
+    
