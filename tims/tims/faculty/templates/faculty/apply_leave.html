@@ -19,33 +19,53 @@ Apply Leave
 
 <tbody>
 {% for balance in leave_balances %}
-
 <tr>
 <td>{{ balance.leave_type.name }}</td>
-
 <td>{{ balance.earned_days }}</td>
-
 <td>{{ balance.used_days }}</td>
-
 <td>
 <span class="badge bg-success">
 {{ balance.remaining_days }}
 </span>
 </td>
-
 </tr>
-
 {% empty %}
-
 <tr>
 <td colspan="4">No leave balances found</td>
 </tr>
-
 {% endfor %}
-
 </tbody>
 </table>
 
+
+<!-- 🔥 Hidden Leave Data (IMPORTANT) -->
+<select id="leaveTypeData" style="display:none;">
+    {% for balance in leave_balances %}
+        <option 
+            value="{{ balance.leave_type.id }}" 
+            data-remaining="{{ balance.remaining_days }}">
+        </option>
+    {% endfor %}
+</select>
+{% if lop_warning %}
+<div class="alert alert-danger">
+    {{ lop_warning }}
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" name="confirm" class="btn btn-danger">
+        Yes, Continue with LOP
+    </button>
+    <a href="" class="btn btn-secondary ms-2">
+        Cancel
+    </a>
+</form>
+
+<hr>
+{% else %}
 
 <form method="post">
 {% csrf_token %}
@@ -66,7 +86,7 @@ Apply Leave
 </div>
 
 
-<!-- UI Day Selection -->
+<!-- Leave Duration -->
 <div class="mb-3">
 <label>Leave Duration</label>
 
@@ -79,7 +99,7 @@ Apply Leave
 </div>
 
 
-<!-- Hidden actual form fields -->
+<!-- Hidden fields -->
 <div style="display:none;">
 {{ form.day_type }}
 {{ form.half_day_session }}
@@ -90,6 +110,7 @@ Apply Leave
 <label>No. of Days</label>
 <input type="text" id="totalDays" class="form-control" readonly>
 </div>
+
 
 <div class="mb-3">
 <label>Reason</label>
@@ -102,18 +123,18 @@ Apply Leave
 
 </form>
 
+{% endif %}
 
 <script>
 
 const duration = document.getElementById("leaveDuration")
-
 const dayType = document.getElementById("id_day_type")
 const session = document.getElementById("id_half_day_session")
 
 const start = document.getElementById("id_start_date")
 const end = document.getElementById("id_end_date")
 
-const totalDays = document.getElementById("totalDays")
+const totalDaysInput = document.getElementById("totalDays")
 
 function calculateDays(){
 
@@ -129,7 +150,7 @@ function calculateDays(){
 
             let diff = (e - s) / (1000*60*60*24) + 1
 
-            totalDays.value = diff
+            totalDaysInput.value = diff
         }
     }
 
@@ -138,7 +159,7 @@ function calculateDays(){
         dayType.value = "HALF"
         session.value = "Morning"
 
-        totalDays.value = 0.5
+        totalDaysInput.value = 0.5
     }
 
     else if(duration.value === "HALF_PM"){
@@ -146,14 +167,43 @@ function calculateDays(){
         dayType.value = "HALF"
         session.value = "Noon"
 
-        totalDays.value = 0.5
+        totalDaysInput.value = 0.5
     }
-
 }
 
 duration.addEventListener("change", calculateDays)
 start.addEventListener("change", calculateDays)
 end.addEventListener("change", calculateDays)
+
+
+/* 🔥 LOP WARNING (NEW) */
+document.querySelector("form").addEventListener("submit", function(e){
+
+    let leaveType = document.getElementById("id_leave_type").value;
+    let days = parseFloat(document.getElementById("totalDays").value) || 0;
+
+    let options = document.querySelectorAll("#leaveTypeData option");
+
+    let remaining = 0;
+
+    options.forEach(opt => {
+        if(parseInt(opt.value) === parseInt(leaveType)){
+            remaining = parseFloat(opt.dataset.remaining) || 0;
+        }
+    });
+
+    if(days > remaining){
+
+        let lop = days - remaining;
+
+        let msg = lop + " day(s) will be LOP. Do you want to continue?";
+
+        if(!confirm(msg)){
+            e.preventDefault();
+        }
+    }
+
+});
 
 </script>
 

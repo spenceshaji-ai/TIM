@@ -85,6 +85,8 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.utils.timezone import now
 
+
+
 class LeaveUserListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     template_name = "adminapp/leave_users.html"
     context_object_name = "users"
@@ -378,16 +380,38 @@ class UpdateLeaveStatusView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         user = self.request.user
-        return user.is_superuser or (
-            hasattr(user, "role") and user.role.role_name == "HR"
-        )
+        user_role = getattr(user, "role", None)
 
+        return user.is_superuser or (
+            user_role and user_role.role_name == "HR"
+        )
+    
     def get(self, request, leave_id, status):
 
         leave = get_object_or_404(LeaveApplication, id=leave_id)
+         # 🔴 HR restriction
+        user = request.user
+        user_role = getattr(user, "role", None)
+        leave_user_role = getattr(leave.user, "role", None)
 
-        if leave.status != "Pending":
-            messages.warning(request, "Already processed.")
+        # ✅ SUPERUSER → allow everything
+        if user.is_superuser:
+            pass
+
+        # ✅ HR LOGIC
+        elif user_role and user_role.role_name == "HR":
+
+            # ❌ HR cannot approve Admin / Manager / HR
+            if (
+                leave_user_role
+                and leave_user_role.role_name in ["Admin", "Manager", "HR"]
+            ):
+                messages.error(request, "You cannot approve this leave.")
+                return redirect("adminapp:leave_requests")
+
+        # ❌ Others → block
+        else:
+            messages.error(request, "You are not authorized.")
             return redirect("adminapp:leave_requests")
 
         if status == "Approved":
@@ -411,7 +435,7 @@ class UpdateLeaveStatusView(LoginRequiredMixin, UserPassesTestMixin, View):
             # 🔥 LOP Logic
             if requested_days <= available_days:
                 balance.used_days += requested_days
-                leave.lop_days = 0
+
             else:
                 balance.used_days += available_days
                 leave.lop_days = requested_days - available_days
@@ -631,30 +655,91 @@ class ManagementApplyLeaveView(LoginRequiredMixin, View):
             year=date.today().year
         ).select_related("leave_type")
 
+        total_remaining = sum(b.remaining_days for b in leave_balances)
+
         return render(request, self.template_name, {
-            "form": form,
-            "leave_balances": leave_balances,
-            "today": date.today(),
+        "form": form,
+        "leave_balances": leave_balances,
+        "total_remaining": total_remaining,
+        "today": date.today(),
         })
 
 
     def post(self, request):
 
+        # ✅ If user already confirmed LOP
+        if "confirm" in request.POST:
+
+            form = ManagementLeaveApplicationForm(
+                request.POST,
+                user=request.user
+            )
+            form.instance.user = request.user
+
+            if form.is_valid():
+                leave = form.save(commit=False)
+                leave.user = request.user
+                if leave.day_type == "HALF":
+                    leave.total_days = 0.5
+                else:
+                    leave.total_days = (leave.end_date - leave.start_date).days + 1
+                leave.save()
+
+                messages.success(request, "Leave submitted with LOP.")
+                return redirect("adminapp:management_my_leaves")
+
+        # ✅ Normal submit
         form = ManagementLeaveApplicationForm(
             request.POST,
             user=request.user
         )
         form.instance.user = request.user
+
         if form.is_valid():
 
             leave = form.save(commit=False)
+            if leave.day_type == "HALF":
+                leave.total_days = 0.5
+            else:
+                leave.total_days = (leave.end_date - leave.start_date).days + 1
+            allocation = LeaveAllocation.objects.filter(
+                user=request.user,
+                leave_type=leave.leave_type,
+                year=date.today().year
+            ).first()
+
+            if allocation:
+                monthly_allowed = allocation.monthly_accrual()
+                requested = leave.total_days
+
+                if requested > monthly_allowed:
+                    lop = requested - monthly_allowed
+                    leave.lop_days = lop
+                
+
+
+                 # 🚨 SHOW WARNING (NO SAVE YET)
+                    leave_balances = LeaveBalance.objects.filter(
+                        user=request.user,
+                        year=date.today().year
+                    ).select_related("leave_type")
+
+                    return render(request, self.template_name, {
+                        "form": form,
+                        "leave_balances": leave_balances,
+                        "lop_warning": f"{lop} day(s) will be LOP. Do you want to continue?",
+                        "today": date.today(),
+                    })
+                else:
+                    leave.lop_days = 0
+            # ✅ SAVE normally
             leave.user = request.user
             leave.save()
 
             messages.success(request, "Leave request submitted successfully.")
-
             return redirect("adminapp:management_my_leaves")
 
+        # ❌ Form invalid
         leave_balances = LeaveBalance.objects.filter(
             user=request.user,
             year=date.today().year
@@ -740,7 +825,7 @@ from django.contrib import messages
 
 from tims.adminapp.forms import CourseForm,BatchForm
 from tims.adminapp.models import Enquiry, FollowUp
-from tims.adminapp.forms import EnquiryForm,FollowUpForm, LeaveApplicationForm
+from tims.adminapp.forms import EnquiryForm,FollowUpForm
 from tims.adminapp.models import Admission
 from tims.adminapp.forms import AdmissionForm
 from tims.adminapp.models import Course,Batch,FacultyAssignment,Assignstudent

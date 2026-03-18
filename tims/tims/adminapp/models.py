@@ -139,7 +139,8 @@ class LeaveBalance(models.Model):
 
     @property
     def remaining_days(self):
-        return self.earned_days - self.used_days
+        remaining = self.earned_days - self.used_days
+        return max(remaining, 0)
 
     def __str__(self):
         return f"{self.user.username} - {self.leave_type.name} Balance"

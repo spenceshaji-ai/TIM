@@ -43,6 +43,18 @@ class LeaveApplicationForm(forms.ModelForm):
         self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
 
+        if self.user:
+        
+
+            balances = LeaveBalance.objects.filter(
+                user=self.user,
+                year=date.today().year
+            ).values_list("leave_type", flat=True)
+
+            self.fields["leave_type"].queryset = self.fields["leave_type"].queryset.filter(
+                id__in=balances
+            )
+
     def clean(self):
         cleaned_data = super().clean()
 
@@ -70,7 +82,7 @@ class LeaveApplicationForm(forms.ModelForm):
             if exists:
                 raise ValidationError("You already applied leave for this date.")
 
-        if day_type == "Half":
+        if day_type == "HALF":
 
             if not half_session:
                 raise ValidationError("Select Morning or Noon for half day.")

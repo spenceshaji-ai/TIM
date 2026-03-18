@@ -7,6 +7,7 @@ Management Apply Leave
 {% block form_body %}
 
 <!-- Leave Balance Table -->
+
 <table class="table table-bordered mb-4">
 <thead>
 <tr>
@@ -45,7 +46,35 @@ Management Apply Leave
 </tbody>
 </table>
 
+<!-- Hidden Leave Type Remaining -->
+<select id="leaveTypeData" style="display:none;">
+    {% for balance in leave_balances %}
+        <option 
+            value="{{ balance.leave_type.id }}" 
+            data-remaining="{{ balance.remaining_days }}">
+        </option>
+    {% endfor %}
 
+</select>
+{% if lop_warning %}
+<div class="alert alert-danger">
+    {{ lop_warning }}
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" name="confirm" class="btn btn-danger">
+        Yes, Continue with LOP
+    </button>
+     <a href="" class="btn btn-secondary ms-2">
+        Cancel
+    </a>
+</form>
+
+<hr>
+{% else %}
 <form method="post">
 {% csrf_token %}
 
@@ -103,7 +132,7 @@ Apply Leave
 </button>
 
 </form>
-
+{% endif %}
 
 <script>
 
@@ -156,7 +185,36 @@ function calculateDays(){
 duration.addEventListener("change", calculateDays)
 start.addEventListener("change", calculateDays)
 end.addEventListener("change", calculateDays)
+document.querySelector("form").addEventListener("submit", function(e){
 
+    let leaveType = document.getElementById("id_leave_type").value;
+    let days = parseFloat(document.getElementById("totalDays").value) || 0;
+
+    let options = document.querySelectorAll("#leaveTypeData option");
+
+    let remaining = 0;
+
+    options.forEach(opt => {
+        if(parseInt(opt.value) === parseInt(leaveType)){
+            remaining = parseFloat(opt.dataset.remaining) || 0;
+        }
+    });
+
+    console.log("LeaveType:", leaveType);
+    console.log("Days:", days);
+    console.log("Remaining:", remaining);
+
+    if(days > remaining){
+
+        let lop = days - remaining;
+
+        let msg = lop + " day(s) will be LOP. Do you want to continue?";
+
+        if(!confirm(msg)){
+            e.preventDefault();
+        }
+    }
+
+});
 </script>
-
 {% endblock %}

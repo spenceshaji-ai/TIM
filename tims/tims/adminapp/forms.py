@@ -342,32 +342,7 @@ def __init__(self, *args, **kwargs):
        # self.fields["faculty"].queryset = User.objects.filter(is_staff=True)
 
 
-class LeaveApplicationForm(forms.ModelForm):
-    class Meta:
-        model = LeaveApplication
-        fields = ["leave_type", "start_date", "end_date", "reason"]
-        widgets = {
-            "start_date": forms.DateInput(attrs={"type": "date"}),
-            "end_date": forms.DateInput(attrs={"type": "date"}),
-            "reason": forms.Textarea(attrs={"rows": 3}),
-        }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        leave_type = cleaned_data.get("leave_type")
-        start_date = cleaned_data.get("start_date")
-        end_date = cleaned_data.get("end_date")
-
-        if leave_type and start_date and end_date:
-            days = (end_date - start_date).days + 1
-            if days > leave_type.max_days:
-                raise forms.ValidationError(
-                    f"Maximum {leave_type.max_days} days allowed for {leave_type.leave_name}"
-                )
-
-        # Optional: only staff as faculty
-       # self.fields["faculty"].queryset = User.objects.filter(is_staff=True)
-        return cleaned_data
 
 class AssignstudentForm(forms.ModelForm):
     class Meta:
@@ -635,6 +610,18 @@ class ManagementLeaveApplicationForm(forms.ModelForm):
         self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
 
+        if self.user:
+        
+
+            balances = LeaveBalance.objects.filter(
+                user=self.user,
+                year=date.today().year
+            ).values_list("leave_type", flat=True)
+
+            self.fields["leave_type"].queryset = self.fields["leave_type"].queryset.filter(
+                id__in=balances
+            )
+
 
     def clean(self):
 
@@ -667,7 +654,7 @@ class ManagementLeaveApplicationForm(forms.ModelForm):
                     "You already applied leave for this date."
                 )
 
-        if day_type == "Half":
+        if day_type == "HALF":
 
             if not half_session:
                 raise ValidationError(
