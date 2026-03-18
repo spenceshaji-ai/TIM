@@ -160,7 +160,7 @@ class DeleteLeaveView(LoginRequiredMixin, View):
         return redirect("faculty:faculty_my_leaves")
     
 class FacultyDashboardView(LoginRequiredMixin, TemplateView):
-    template_name = "faculty/home.html"
+    template_name = "home.html"
 
 from django.views import View
 from django.http import JsonResponse
@@ -622,7 +622,7 @@ class FacultyReportDeleteView(LoginRequiredMixin, View):
 
 class Home1View(View):
     def get(self, request):
-        return render(request, "home.html")  
+        return render(request, "fahome.html")  
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib import messages
@@ -649,4 +649,4 @@ class FacultyMaterialAddView(View):
 
 class Home1View(View):
     def get(self, request):
-        return render(request, "home.html")
+        return render(request, "fahome.html")

@@ -107,7 +107,7 @@ class LoginView(View):
                     return redirect("adminapp:home2")
 
                 elif user.role and user.role.role_name == "Faculty":
-                    return redirect("faculty:home1")
+                    return redirect("faculty:home2")
 
                 elif user.role and user.role.role_name == "Student":
                     return redirect("Student:stdhome")
@@ -159,7 +159,7 @@ class ForcePasswordChangeView(View):
                 return redirect("adminapp:home2")
 
             elif role == "Faculty":
-                return redirect("faculty:home1")
+                return redirect("faculty:home2")
 
             elif role == "Student":
                 return redirect("Student:stdhome")

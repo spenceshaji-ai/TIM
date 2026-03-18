@@ -86,7 +86,7 @@ path(
         FacultyMaterialAddView.as_view(),
         name="material_add"
     ),
-    path('', Home1View.as_view(), name='home1')
+    path('', Home1View.as_view(), name='home2')
     
 ]
 
