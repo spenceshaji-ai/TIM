@@ -295,7 +295,6 @@ class StudentApplyJobView(LoginRequiredMixin, View):
     template_name = "student/studentapplyjob.html"
 
     def get(self, request, job_id):
-
         job = get_object_or_404(Job, id=job_id)
 
         # deadline check
@@ -303,50 +302,33 @@ class StudentApplyJobView(LoginRequiredMixin, View):
             return redirect("job_list")
 
         # duplicate check
-        if JobApplication.objects.filter(
-            job=job,
-            student=request.user
-        ).exists():
+        if JobApplication.objects.filter(job=job, student=request.user).exists():
             return redirect("job_list")
 
         form = ApplicationForm()
 
-        return render(request, self.template_name, {
-            "form": form,
-            "job": job
-        })
-
+        return render(request, self.template_name, {"form": form, "job": job})
 
     def post(self, request, job_id):
-
         job = get_object_or_404(Job, id=job_id)
 
         if job.application_deadline < timezone.now().date():
             return redirect("job_list")
 
-        if JobApplication.objects.filter(
-            job=job,
-            student=request.user
-        ).exists():
+        if JobApplication.objects.filter(job=job, student=request.user).exists():
             return redirect("job_list")
 
         form = ApplicationForm(request.POST, request.FILES)
 
         if form.is_valid():
-
             application = form.save(commit=False)
             application.student = request.user
             application.job = job
             application.status = "Applied"
             application.save()
-
             return redirect("job_list")
 
-        return render(request, self.template_name, {
-            "form": form,
-            "job": job
-        })
-
+        return render(request, self.template_name, {"form": form, "job": job})
 
 
 # ===============================
@@ -360,59 +342,39 @@ class StudentJobListView(LoginRequiredMixin, ListView):
     context_object_name = "jobs"
 
     def get_queryset(self):
-
         user = self.request.user
         today = timezone.now().date()
-
-        applied_jobs = JobApplication.objects.filter(
-            student=user
-        ).values_list("job_id", flat=True)
-
+        applied_jobs = JobApplication.objects.filter(student=user).values_list("job_id", flat=True)
         status = self.request.GET.get("status", "active")
-
         queryset = Job.objects.select_related("job_type")
 
         # 🔥 FILTER LOGIC
         if status == "active":
-            queryset = queryset.filter(
-                application_deadline__gte=today
-            ).exclude(id__in=applied_jobs)
-
+            queryset = queryset.filter(application_deadline__gte=today).exclude(id__in=applied_jobs)
         elif status == "applied":
-            queryset = queryset.filter(
-                id__in=applied_jobs
-            )
-
+            queryset = queryset.filter(id__in=applied_jobs)
         elif status == "expired":
-            queryset = queryset.filter(
-                application_deadline__lt=today
-            )
+            queryset = queryset.filter(application_deadline__lt=today)
 
-        # Job type filter (works with all tabs)
+        # Job type filter
         job_type_id = self.request.GET.get("job_type")
         if job_type_id:
             queryset = queryset.filter(job_type_id=job_type_id)
 
         return queryset.order_by("-posted_date")
 
-
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
-
         context["job_types"] = Jobtype.objects.all()
         context["selected_job_type"] = self.request.GET.get("job_type")
         context["today"] = timezone.now().date()
-
         context["selected_status"] = self.request.GET.get("status", "active")
-
         context["applied_jobs"] = list(
-            JobApplication.objects.filter(
-                student=self.request.user
-            ).values_list("job_id", flat=True)
+            JobApplication.objects.filter(student=self.request.user).values_list("job_id", flat=True)
         )
-
         return context
+
+
 # ===============================
 # Job Detail (AJAX)
 # ===============================
@@ -420,16 +382,9 @@ class StudentJobListView(LoginRequiredMixin, ListView):
 class StudentJobDetailView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
-
         job = get_object_or_404(Job, pk=pk)
-
         is_expired = job.application_deadline < timezone.now().date()
-
-        # 🔥 Check if already applied
-        is_applied = JobApplication.objects.filter(
-            job=job,
-            student=request.user
-        ).exists()
+        is_applied = JobApplication.objects.filter(job=job, student=request.user).exists()
 
         data = {
             "id": job.id,
@@ -440,8 +395,10 @@ class StudentJobDetailView(LoginRequiredMixin, View):
             "job_type": job.job_type.job_type,
             "application_deadline": job.application_deadline.strftime("%Y-%m-%d"),
             "is_expired": is_expired,
-            "is_applied": is_applied,   # ✅ ADD THIS
-            "description": getattr(job, "description", "No description available")
+            "is_applied": is_applied,
+            "description": getattr(job, "description", "No description available"),
+            "qualification": getattr(job, "qualification", "Not specified"),
+            "skills": getattr(job, "skills", "Not specified"),
         }
 
         return JsonResponse(data)
