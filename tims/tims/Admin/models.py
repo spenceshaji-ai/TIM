@@ -11,15 +11,30 @@ class Job(models.Model):
     title = models.CharField(max_length=200)
     company = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
-    job_type = models.ForeignKey(Jobtype, on_delete=models.CASCADE)
+    job_type = models.ForeignKey('Jobtype', on_delete=models.CASCADE)
     salary = models.CharField(max_length=100)
+
+    # NEW FIELDS (optional now)
+    qualification = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Enter qualifications separated by comma (e.g., BTech, MTech)"
+    )
+    skills = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Enter skills separated by comma (e.g., Python, Django)"
+    )
+    description = models.TextField(
+        blank=True,
+        null=True,
+    )
 
     application_deadline = models.DateField()
     posted_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
-
 
 class Interview(models.Model):
     STATUS_CHOICES = [

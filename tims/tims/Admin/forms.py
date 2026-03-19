@@ -21,6 +21,9 @@ class JobForm(forms.ModelForm):
             'location',
             'job_type',
             'salary',
+            'qualification',
+            'skills',
+            'description',
             'application_deadline'   
         ]
 
@@ -49,12 +52,23 @@ class JobForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Enter salary',
             }),
+            'qualification': forms.TextInput(attrs={  # changed from Textarea
+                'class': 'form-control',
+                'placeholder': 'BTech, MTech, MCA',
+            }),
+            'skills': forms.TextInput(attrs={  # changed from Textarea
+                'class': 'form-control',
+                'placeholder': 'Python, Django, SQL',
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter job description'
+            }),
             'application_deadline': forms.DateInput(attrs={
                 'type': 'date',
                 'class': 'form-control',
             }),
         }
-
 
 
 class ScheduleInterviewForm(forms.ModelForm):

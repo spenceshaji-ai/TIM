@@ -1,50 +1,80 @@
 {% extends "forms.html" %}
 
 {% block form_title %}
-Edit Job
+{% if job %}Edit Job{% else %}Create Job{% endif %}
 {% endblock %}
 
 {% block form_action %}
-{% url 'admin_app:job_edit' job.id %}
+{% if job %}
+    {% url 'admin_app:job_edit' job.id %}
+{% else %}
+    {% url 'admin_app:job_create' %}
+{% endif %}
 {% endblock %}
 
 {% block form_body %}
 <div class="row">
+    <!-- Title -->
     <div class="col-md-6">
         {{ form.title.label_tag }}
         {{ form.title }}
     </div>
 
+    <!-- Company -->
     <div class="col-md-6">
         {{ form.company.label_tag }}
         {{ form.company }}
     </div>
 
+    <!-- Location -->
     <div class="col-md-6 mt-3">
         {{ form.location.label_tag }}
         {{ form.location }}
     </div>
 
+    <!-- Job Type -->
     <div class="col-md-6 mt-3">
         {{ form.job_type.label_tag }}
         {{ form.job_type }}
     </div>
 
+    <!-- Salary -->
     <div class="col-md-6 mt-3">
         {{ form.salary.label_tag }}
         {{ form.salary }}
     </div>
 
+    <!-- Application Deadline -->
     <div class="col-md-6 mt-3">
         {{ form.application_deadline.label_tag }}
         {{ form.application_deadline }}
+    </div>
+
+    <!-- Qualification -->
+    <div class="col-md-12 mt-3">
+        {{ form.qualification.label_tag }}
+        {{ form.qualification }}
+        <small class="text-muted">Example: BTech, MTech, MCA</small>
+    </div>
+
+    <!-- Skills -->
+    <div class="col-md-12 mt-3">
+        {{ form.skills.label_tag }}
+        {{ form.skills }}
+        <small class="text-muted">Example: Python, Django, SQL</small>
+    </div>
+
+    <!-- Description -->
+    <div class="col-md-12 mt-3">
+        {{ form.description.label_tag }}
+        {{ form.description }}
     </div>
 </div>
 {% endblock %}
 
 {% block form_button %}
 <button type="submit" class="btn btn-success">
-    Update Job
+    {% if job %}Update Job{% else %}Save Job{% endif %}
 </button>
 
 <a href="{% url 'admin_app:job_list' %}" class="btn btn-secondary ms-2">

@@ -1,71 +1,93 @@
-{% extends "forms.html" %}
+{% include 'pages/header.html' %}
 
-{% block form_title %}
-Job List
-{% endblock %}
+<div class="container mt-4">
+    <h2 class="mb-3">Job List</h2>
 
-{% block form_body %}
+    <a href="{% url 'admin_app:job_create' %}" class="btn btn-primary mb-3">
+        Add Job
+    </a>
 
-<a href="{% url 'admin_app:job_create' %}" class="btn btn-primary mb-3">
-    Add Job
-</a>
+    <table class="table table-bordered table-striped table-hover table-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Company</th>
+                <th>Location</th>
+                <th>Type</th>
+                <th>Salary</th>
+                <th>Deadline</th>
+                <th>Posted</th>
+                <th>Status</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+            <tr>
+                <td>{{ job.id }}</td>
+                <td>{{ job.title }}</td>
+                <td>{{ job.company }}</td>
+                <td>{{ job.location }}</td>
+                <td>{{ job.job_type }}</td>
+                <td>{{ job.salary }}</td>
+                <td>{{ job.application_deadline }}</td>
+                <td>{{ job.posted_date|date:"Y-m-d H:i" }}</td>
+                <td>
+                    {% if job.application_deadline < today %}
+                        <span class="badge bg-danger">Expired</span>
+                    {% else %}
+                        <span class="badge bg-success">Active</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'admin_app:job_edit' job.id %}" class="btn btn-sm btn-success w-100 py-0">
+                        Edit
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url 'admin_app:job_delete' job.id %}" class="btn btn-sm btn-danger w-100 py-0">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="11" class="text-center">No jobs available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Company</th>
-            <th>Location</th>
-            <th>Type</th>
-            <th>Salary</th>
-            <th>Deadline</th>
-            <th>Posted</th>
-            <th>Status</th>
-            <th>Edit</th>
-            <th>Delete</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for job in jobs %}
-        <tr>
-            <td>{{ job.id }}</td>
-            <td>{{ job.title }}</td>
-            <td>{{ job.company }}</td>
-            <td>{{ job.location }}</td>
-            <td>{{ job.job_type }}</td>
-            <td>{{ job.salary }}</td>
+{% include 'pages/footer.html' %}
 
-            <td>{{ job.application_deadline }}</td>
+<style>
+/* Compact table for fitting page */
+.table {
+    font-size: 0.78rem; /* smaller font */
+}
 
-            <td>{{ job.posted_date|date:"Y-m-d H:i" }}</td>
+.table th, .table td {
+    padding: 0.25rem 0.35rem;
+    vertical-align: middle;
+    white-space: normal;
+}
 
-            <td>
-                {% if job.application_deadline < today %}
-                    <span class="badge bg-danger">Expired</span>
-                {% else %}
-                    <span class="badge bg-success">Active</span>
-                {% endif %}
-            </td>
+/* Limit width for long text columns */
+td:nth-child(2),  /* Title */
+td:nth-child(3),  /* Company */
+td:nth-child(4) { /* Location */
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
-            <td>
-                <a href="{% url 'admin_app:job_edit' job.id %}" class="btn btn-sm btn-success w-100">
-                    Edit
-                </a>
-            </td>
-
-            <td>
-                <a href="{% url 'admin_app:job_delete' job.id %}" class="btn btn-sm btn-danger w-100">
-                    Delete
-                </a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="11" class="text-center">No jobs available</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-{% endblock %}
+/* Smaller buttons for Edit/Delete */
+td a.btn {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.25rem;
+}
+</style>
