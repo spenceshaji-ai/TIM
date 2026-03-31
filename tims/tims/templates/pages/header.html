@@ -32,6 +32,62 @@
 
     <!-- Icons css -->
     <link href="{% static 'admin/assets/css/icons.min.css' }" rel="stylesheet" type="text/css" />
+    ...
+    <style>
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+        }
+
+        .custom-modal:target {
+            display: block;
+        }
+
+        .modal-box {
+            background: white;
+            width: 320px;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .modal-actions {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            /* 🔥 pushes left & right */
+            align-items: center;
+        }
+
+        .modal-actions form {
+            margin: 0;
+            /* removes extra spacing */
+        }
+
+        .confirm-btn {
+            background: #dc3545;
+            color: white;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+            padding: 8px 14px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+    </style>
 </head>
 
 <body>
@@ -661,27 +717,30 @@
                         </div>
                     </li>
 
-
-                    <li class="side-nav-title">Logout</li>
                     <li class="side-nav-item">
-                        <a data-bs-toggle="collapse" href="#sidebarlogout" aria-expanded="false"
-                            aria-controls="sidebarlogout" class="side-nav-link">
-                            <i class="uil-envelope"></i>
+                        <a href="#logoutModal" class="side-nav-link">
+                            <i class="uil-sign-out-alt"></i>
                             <span> Logout </span>
-                            <span class="menu-arrow"></span>
                         </a>
-                        <div class="collapse" id="sidebarlogout">
-                            <ul class="side-nav-second-level">
-                                <li><a href="{% url 'users:logout' %}">Loging Out</a></li>
-
-
-                            </ul>
-                        </div>
                     </li>
 
 
 
+                    <div id="logoutModal" class="custom-modal">
+                        <div class="modal-box">
+                            <h3>Confirm Logout</h3>
+                            <p>Are you sure you want to logout?</p>
 
+                            <div class="modal-actions">
+                                <a href="#" class="cancel-btn">Cancel</a>
+
+                                <form method="POST" action="{% url 'users:logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="confirm-btn">Yes, Logout</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
 
 
 

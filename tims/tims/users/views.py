@@ -171,9 +171,6 @@ class LogoutView(View):
         logout(request)
         return redirect("login")
 
-    def get(self, request):
-        return render(request, "logout.html")
-
 
 class UserRegisterView(View):
     template_name = "user_form.html"
