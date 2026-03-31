@@ -317,12 +317,23 @@
                         <a class="nav-link dropdown-toggle arrow-none nav-user px-2" data-bs-toggle="dropdown" href="#"
                             role="button" aria-haspopup="false" aria-expanded="false">
                             <span class="account-user-avatar">
-                                <img src="{% static 'admin/assets/images/users/avatar-1.jpg' %}" alt="user-image"
+                                <img src="{% static 'admin/assets/images/users/images.jpg' %}" alt="user-image"
                                     width="32" class="rounded-circle">
                             </span>
                             <span class="d-lg-flex flex-column gap-1 d-none">
-                                <h5 class="my-0">Dominic Keller</h5>
-                                <h6 class="my-0 fw-normal">Founder</h6>
+                                <h5 class="my-0">
+                                    {{ request.user.name|default:request.user.username }}
+                                </h5>
+
+                                <h6 class="my-0 fw-normal">
+                                    {% if request.user.is_superuser %}
+                                    Super Admin
+                                    {% elif request.user.role %}
+                                    {{ request.user.role.role_name }}
+                                    {% else %}
+                                    No Role
+                                    {% endif %}
+                                </h6>
                             </span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated profile-dropdown">
@@ -461,7 +472,7 @@
                             </ul>
                         </div>
                     </li>
-                      <li class="side-nav-item">
+                    <li class="side-nav-item">
                         <a data-bs-toggle="collapse" href="#sidebarEcommer" aria-expanded="false"
                             aria-controls="sidebarEcommer" class="side-nav-link">
                             <i class="uil-store"></i>
@@ -470,25 +481,26 @@
                         </a>
                         <div class="collapse" id="sidebarEcommer">
                             <ul class="side-nav-second-level">
-                                <li><a href="{% url 'adminapp:salary_structure_list' %}"> Salary Create and View</a></li>
+                                <li><a href="{% url 'adminapp:salary_structure_list' %}"> Salary Create and View</a>
+                                </li>
                                 <li><a href="{% url 'adminapp:monthly_salary_users' %}"> Monthly Salary Users</a></li>
                             </ul>
                         </div>
                     </li>
-                                                {% endif %}
+                    {% endif %}
 
                     <li class="side-nav-item">
                         <a data-bs-toggle="collapse" href="#sidebarEcomme" aria-expanded="false"
                             aria-controls="sidebarEcomme" class="side-nav-link">
                             <i class="uil-store"></i>
-                            
+
                             <span> My Leave</span>
                             <span class="menu-arrow"></span>
                         </a>
                         <div class="collapse" id="sidebarEcomme">
                             <ul class="side-nav-second-level">
-                                <li><a href="{% url 'adminapp:management_apply_leave' %}" > Apply Leave</a></li>
-                                <li><a href="{% url 'adminapp:management_my_leaves' %}" > View Leaves</a></li>
+                                <li><a href="{% url 'adminapp:management_apply_leave' %}"> Apply Leave</a></li>
+                                <li><a href="{% url 'adminapp:management_my_leaves' %}"> View Leaves</a></li>
                             </ul>
                         </div>
                     </li>
@@ -512,8 +524,8 @@
                         </div>
                     </li>
                     <li class="side-nav-item">
-                        <a data-bs-toggle="collapse" href="#sidebarE" aria-expanded="false"
-                            aria-controls="sidebarE" class="side-nav-link">
+                        <a data-bs-toggle="collapse" href="#sidebarE" aria-expanded="false" aria-controls="sidebarE"
+                            class="side-nav-link">
                             <i class="uil-store"></i>
                             <span> Batch </span>
                             <span class="menu-arrow"></span>
@@ -540,12 +552,12 @@
                         </a>
                         <div class="collapse" id="sidebarEmail">
                             <ul class="side-nav-second-level">
-                               <li>
+                                <li>
                                     <a href="{% url 'adminapp:faculty_assignment' %}">Assign faculty</a>
                                 </li>
-                                <li>   
+                                <li>
                                     <a href="{% url 'adminapp:training_session_list' %}">Daily Sessions</a>
-                                </li>    
+                                </li>
                                 <li>
                                     <a href="{% url 'adminapp:faculty_report_list' %}">Faculty Report</a>
                                 </li>
@@ -569,7 +581,8 @@
                                 <li><a href="{% url 'admin_app:jobtype_list' %}">View Job Types</a></li>
                                 <li><a href="{% url 'admin_app:job_create' %}">Create Job Vacancy</a></li>
                                 <li><a href="{% url 'admin_app:job_list' %}">View Job Vacancies</a></li>
-                                <li><a href="{% url 'admin_app:admin_application_list' %}">Student Job Application</a></li>
+                                <li><a href="{% url 'admin_app:admin_application_list' %}">Student Job Application</a>
+                                </li>
                             </ul>
                         </div>
                     </li>
@@ -587,11 +600,11 @@
                                 <li><a href="{% url 'adminapp:assign_student' %}">Assign Student</a></li>
                                 <li><a href="{% url 'adminapp:add' %}">Certificates</a></li>
                                 <li><a href="{% url 'adminapp:mark-completed' %}">Mark Completed</a></li>
-                                
+
                             </ul>
                         </div>
                     </li>
-                    
+
                     <li class="side-nav-title">Enquiry & Payment</li>
                     <li class="side-nav-item">
                         <a data-bs-toggle="collapse" href="#sidebarenqpay" aria-expanded="false"
@@ -605,12 +618,12 @@
                                 <li><a href="{% url 'adminapp:enquiry_add' %}">Enquiry</a></li>
                                 <li><a href="{% url 'adminapp:enquiry_list' %}">Edit Enquiry</a></li>
                                 <li><a href="{% url 'adminapp:payment_create' %}">Payment</a></li>
-                                
-                                
+
+
                             </ul>
                         </div>
                     </li>
-                   
+
                     <li class="side-nav-title">Users</li>
                     <li class="side-nav-item">
                         <a data-bs-toggle="collapse" href="#sidebaruser" aria-expanded="false"
@@ -624,16 +637,16 @@
                                 <li><a href="{% url 'users:user_register' %}">User Register</a></li>
                                 <li><a href="{% url 'users:role_add' %}">Role Add</a></li>
                                 <li><a href="{% url 'adminapp:assignment-report' %}">Assignment Report</a></li>
-                                
-                                
+
+
                             </ul>
                         </div>
                     </li>
-                    
+
                     <li class="side-nav-title">Staff & Faculty</li>
                     <li class="side-nav-item">
-                        <a data-bs-toggle="collapse" href="#sidebarreg" aria-expanded="false"
-                            aria-controls="sidebarreg" class="side-nav-link">
+                        <a data-bs-toggle="collapse" href="#sidebarreg" aria-expanded="false" aria-controls="sidebarreg"
+                            class="side-nav-link">
                             <i class="uil-envelope"></i>
                             <span> Registration </span>
                             <span class="menu-arrow"></span>
@@ -642,13 +655,13 @@
                             <ul class="side-nav-second-level">
                                 <li><a href="{% url 'adminapp:staff_list' %}">Staff</a></li>
                                 <li><a href="{% url 'adminapp:faculty_list' %}">Faculty</a></li>
-                                
-                                
+
+
                             </ul>
                         </div>
                     </li>
 
-                    
+
                     <li class="side-nav-title">Logout</li>
                     <li class="side-nav-item">
                         <a data-bs-toggle="collapse" href="#sidebarlogout" aria-expanded="false"
@@ -660,17 +673,17 @@
                         <div class="collapse" id="sidebarlogout">
                             <ul class="side-nav-second-level">
                                 <li><a href="{% url 'users:logout' %}">Loging Out</a></li>
-                                
-                                
+
+
                             </ul>
                         </div>
                     </li>
 
-                    
 
-                   
 
-                
+
+
+
 
                 </ul>
                 <!--- End Sidemenu -->
