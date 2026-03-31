@@ -23,6 +23,58 @@
 
     <!-- Icons css -->
     <link href="{% static 'admin/assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
+    <style>
+        .custom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .custom-modal:target {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .confirm-btn {
+            background: red;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            display: inline-block;
+            /* makes <a> behave like a button */
+            padding: 8px 12px;
+            background: #ccc;
+            color: #000;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
@@ -489,77 +541,95 @@
         </div>
         <!-- ========== Topbar End ========== -->
 
-<!-- ========== Horizontal Menu Start ========== -->
-<div class="topnav">
-    <div class="container-fluid">
-        <nav class="navbar navbar-expand-lg">
+        <!-- ========== Horizontal Menu Start ========== -->
+        <div class="topnav">
+            <div class="container-fluid">
+                <nav class="navbar navbar-expand-lg">
 
-            <div class="collapse navbar-collapse" id="topnav-menu-content">
+                    <div class="collapse navbar-collapse" id="topnav-menu-content">
 
-                <!-- LEFT MENU -->
-                <ul class="navbar-nav">
+                        <!-- LEFT MENU -->
+                        <ul class="navbar-nav">
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-dashboards"
-                            role="button" data-bs-toggle="dropdown">
-                            <i class="uil-dashboard"></i> Dashboards <div class="arrow-down"></div>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="{% url 'Student:my_certificates' %}" class="dropdown-item">
-                                My Certificates
-                            </a>
-                             <a href="{% url 'Student:progress' %}" class="dropdown-item">My Progress</a>
-                                   
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-dashboards"
+                                    role="button" data-bs-toggle="dropdown">
+                                    <i class="uil-dashboard"></i> Dashboards <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu">
+                                    <a href="{% url 'Student:my_certificates' %}" class="dropdown-item">
+                                        My Certificates
+                                    </a>
+                                    <a href="{% url 'Student:progress' %}" class="dropdown-item">My Progress</a>
+
+                                </div>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-apps" role="button"
+                                    data-bs-toggle="dropdown">
+                                    <i class="uil-apps"></i> My Course <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu">
+                                    <a href="{% url 'Student:student_course_materials' %}" class="dropdown-item">
+                                        Course Materials
+                                    </a>
+                                    <a href="{% url 'Student:course_ratings' %}" class="dropdown-item">
+                                        Course Ratings
+                                    </a>
+                                    <a href="{% url 'Student:student_training_sessions' %}"
+                                        class="dropdown-item">Traning Sessions</a>
+                                </div>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-pages" role="button"
+                                    data-bs-toggle="dropdown">
+                                    <i class="uil-copy-alt"></i> Your Job Portal <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu">
+                                    <a href="{% url 'job_list' %}" class="dropdown-item">
+                                        Available Jobs For Student
+                                    </a>
+                                    <a href="{% url 'track_applications' %}" class="dropdown-item">
+                                        Students Job Tracker
+                                    </a>
+                                </div>
+                            </li>
+
+                        </ul>
+
+                        <!-- RIGHT SIDE LOGOUT -->
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item">
+                                <a href="#logoutModal" class="nav-link">
+                                    <i class="uil-sign-out-alt"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                        <div id="logoutModal" class="custom-modal">
+                            <div class="modal-box">
+                                <h3>Confirm Logout</h3>
+                                <p>Are you sure you want to logout?</p>
+
+                                <div class="modal-actions">
+                                    <a href="#" class="cancel-btn">Cancel</a>
+
+                                    <form method="POST" action="{% url 'users:logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="confirm-btn">
+                                            Yes, Logout
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
-                    </li>
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-apps"
-                            role="button" data-bs-toggle="dropdown">
-                            <i class="uil-apps"></i> My Course <div class="arrow-down"></div>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="{% url 'Student:student_course_materials' %}" class="dropdown-item">
-                                Course Materials
-                            </a>
-                            <a href="{% url 'Student:course_ratings' %}" class="dropdown-item">
-                                Course Ratings
-                            </a>
-                             <a href="{% url 'Student:student_training_sessions' %}" class="dropdown-item">Traning Sessions</a>
-                        </div>
-                    </li>
+                    </div>
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-pages"
-                            role="button" data-bs-toggle="dropdown">
-                            <i class="uil-copy-alt"></i> Your Job Portal <div class="arrow-down"></div>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="{% url 'job_list' %}" class="dropdown-item">
-                                Available Jobs For Student
-                            </a>
-                            <a href="{% url 'track_applications' %}" class="dropdown-item">
-                                Students Job Tracker
-                            </a>
-                        </div>
-                    </li>
-
-                </ul>
-
-                <!-- RIGHT SIDE LOGOUT -->
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a href="{% url 'users:logout' %}" class="nav-link">
-                            <i class="uil-signout"></i> Logout
-                        </a>
-                    </li>
-                </ul>
-
+                </nav>
             </div>
-
-        </nav>
-    </div>
-</div>
-<!-- ========== Horizontal Menu End ========== -->
+        </div>
+        <!-- ========== Horizontal Menu End ========== -->
 
         <div class="content-page">
