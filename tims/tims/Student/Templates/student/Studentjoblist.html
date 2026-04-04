@@ -1,4 +1,6 @@
 {% extends "student/form.html" %}
+
+{% block content %}
 {% include "stdheader.html" %}
 
 {% block form_title %}
@@ -9,73 +11,124 @@ Job Opportunities
 
 <style>
     body { background-color: #f3f6f9; }
-    .main-wrapper { width: 100%; margin: auto; }
-    .filter-bar a { margin-bottom: 6px; }
-    .job-card { border: 1px solid #e0e0e0; border-radius: 12px; transition: 0.2s; background: #fff; }
-    .job-card:hover { border-color: #0d6efd; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
-    .job-card.active { border: 2px solid #0d6efd; background: #f8fbff; }
+
+    .job-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        transition: 0.2s;
+        background: #fff;
+        cursor: pointer;
+    }
+
+    .job-card:hover {
+        border-color: #0d6efd;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .job-card.active {
+        border: 2px solid #0d6efd;
+        background: #f8fbff;
+    }
+
+    .job-card.expired {
+        opacity: 0.6;
+    }
+
     .job-title { font-weight: 600; font-size: 17px; }
     .job-company { color: #555; font-size: 14px; }
     .job-meta { font-size: 13px; color: #777; }
-    .detail-panel { background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; min-height: 600px; }
+
+    .detail-panel {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        min-height: 600px;
+        padding: 20px;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
-    <div class="main-wrapper">
 
-        <!-- Filter Bar -->
-        <div class="filter-bar mb-3 d-flex flex-wrap gap-2">
-            <a href="{% url 'job_list' %}"
-               class="btn btn-outline-secondary btn-sm {% if not selected_job_type %}active{% endif %}">
-                All Job Types
+    <!-- STATUS FILTER BUTTONS -->
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+        <a href="{% url 'job_list' %}?status=active"
+           class="btn btn-sm {% if selected_status == 'active' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            Active Jobs
+        </a>
+
+        <a href="{% url 'job_list' %}?status=applied"
+           class="btn btn-sm {% if selected_status == 'applied' %}btn-success{% else %}btn-outline-success{% endif %}">
+            Applied Jobs
+        </a>
+
+        <a href="{% url 'job_list' %}?status=expired"
+           class="btn btn-sm {% if selected_status == 'expired' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+            Expired Jobs
+        </a>
+    </div>
+
+    <!-- JOB TYPE FILTER -->
+    <div class="filter-bar mb-3 d-flex flex-wrap gap-2">
+        <a href="{% url 'job_list' %}?status={{ selected_status }}"
+           class="btn btn-outline-secondary btn-sm {% if not selected_job_type %}active{% endif %}">
+            All Types
+        </a>
+
+        {% for jt in job_types %}
+            <a href="{% url 'job_list' %}?status={{ selected_status }}&job_type={{ jt.id }}"
+               class="btn btn-outline-primary btn-sm
+               {% if selected_job_type|default:'' == jt.id|stringformat:'s' %}active{% endif %}">
+                {{ jt.job_type }}
             </a>
+        {% endfor %}
+    </div>
 
-            {% for jt in job_types %}
-                <a href="{% url 'job_list' %}?job_type={{ jt.id }}"
-                   class="btn btn-outline-primary btn-sm
-                   {% if selected_job_type|default:'' == jt.id|stringformat:'s' %}active{% endif %}">
-                    {{ jt.job_type }}
-                </a>
+    <!-- MAIN LAYOUT -->
+    <div class="row g-4">
+
+        <!-- LEFT: JOB LIST -->
+        <div class="col-lg-6">
+            {% for job in jobs %}
+            <div class="card mb-3 p-3 job-card {% if job.application_deadline < today %}expired{% endif %}"
+                 data-url="{% url 'student_job_detail' job.id %}">
+                 
+                <div class="job-title">{{ job.title }}</div>
+                <div class="job-company">{{ job.company }}</div>
+
+                <div class="job-meta">
+                    {{ job.location }} • ₹ {{ job.salary }}
+                </div>
+
+                <div class="mt-2">
+                    {% if job.application_deadline >= today %}
+                        <span class="badge bg-success">Open</span>
+                    {% else %}
+                        <span class="badge bg-danger">Expired</span>
+                    {% endif %}
+
+                    <span class="badge bg-light text-dark border">{{ job.job_type.job_type }}</span>
+
+                    {% if job.id in applied_jobs %}
+                        <span class="badge bg-info text-dark">Applied</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+                <div class="alert alert-info">No jobs found.</div>
             {% endfor %}
         </div>
 
-        <!-- Main Layout -->
-        <div class="row g-4">
-            <!-- LEFT SIDE -->
-            <div class="col-lg-6">
-                {% for job in jobs %}
-                <div class="card mb-3 p-3 job-card"
-                     data-url="{% url 'student_job_detail' job.id %}"
-                     style="cursor:pointer;">
-                    <div class="job-title">{{ job.title }}</div>
-                    <div class="job-company">{{ job.company }}</div>
-                    <div class="job-meta">{{ job.location }} • ₹ {{ job.salary }}</div>
-                    <div class="mt-2">
-                        {% if job.application_deadline >= today %}
-                            <span class="badge bg-success">Open</span>
-                        {% else %}
-                            <span class="badge bg-danger">Expired</span>
-                        {% endif %}
-                        <span class="badge bg-light text-dark border">{{ job.job_type.job_type }}</span>
-                    </div>
-                </div>
-                {% empty %}
-                    <div class="alert alert-info">No jobs available.</div>
-                {% endfor %}
-            </div>
-
-            <!-- RIGHT SIDE -->
-            <div class="col-lg-6">
-                <div id="job-detail" class="detail-panel p-4">
-                    <h5 class="text-muted">Select a job to view details</h5>
-                </div>
+        <!-- RIGHT: JOB DETAILS -->
+        <div class="col-lg-6">
+            <div id="job-detail" class="detail-panel">
+                <h5 class="text-muted">Select a job to view details</h5>
             </div>
         </div>
 
     </div>
 </div>
 
-<!-- AJAX Script -->
+<!-- AJAX SCRIPT -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const cards = document.querySelectorAll('.job-card');
@@ -89,23 +142,33 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch(this.dataset.url)
                 .then(response => response.json())
                 .then(data => {
-                    let applyButton = data.is_expired
-                        ? `<button class="btn btn-secondary" disabled>Application Closed</button>`
-                        : `<a href="/Student/student/apply/${data.id}/" class="btn btn-primary">Apply Now</a>`;
+                    let applyButton = '';
+                    if (data.is_expired) {
+                        applyButton = `<button class="btn btn-secondary" disabled>Application Closed</button>`;
+                    } else if (data.is_applied) {
+                        applyButton = `<button class="btn btn-success" disabled>Already Applied</button>`;
+                    } else {
+                        applyButton = `<a href="/Student/student/apply/${data.id}/" class="btn btn-primary">Apply Now</a>`;
+                    }
 
                     detailDiv.innerHTML = `
                         <h3 class="fw-bold">${data.title}</h3>
                         <div class="text-muted mb-2">${data.company}</div>
-                        <p class="mb-3">
-                            ${data.location}<br>
-                            ₹ ${data.salary}<br>
-                            Job Type: ${data.job_type}<br>
-                            Deadline: ${data.application_deadline}
+
+                        <p class="mb-2">
+                            <strong>Location:</strong> ${data.location}<br>
+                            <strong>Salary:</strong> ₹ ${data.salary}<br>
+                            <strong>Job Type:</strong> ${data.job_type}<br>
+                            <strong>Deadline:</strong> ${data.application_deadline}<br>
+                            <strong>Qualification:</strong> ${data.qualification || "Not specified"}<br>
+                            <strong>Skills:</strong> ${data.skills || "Not specified"}
                         </p>
+
                         ${applyButton}
+
                         <hr>
-                        <h5>Job Details</h5>
-                        <p>This position is currently open. Apply before the deadline.</p>
+                        <h5>Job Description</h5>
+                        <p>${data.description || "No description available."}</p>
                     `;
                 });
         });
@@ -114,4 +177,6 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 {% endblock %}
+
 {% include "stdfooter.html" %}
+{% endblock %}

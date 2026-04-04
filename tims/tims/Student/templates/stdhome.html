@@ -1,36 +1,72 @@
- {% load static %}
-{% include 'stdheader.html' %}   
-      
-        <!-- ============================================================== -->
-        <!-- Start Page Content here -->
-        <!-- ============================================================== -->
+{% load static %}
+{% include 'stdheader.html' %}
 
-       
-            <div class="content">
+<div class="content">
+    <div class="container-fluid">
 
-                <!-- Start Content-->
-                <div class="container-fluid">
+        <!-- 🔥 WELCOME MESSAGE -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card p-3">
+                    <h3>Welcome, {{ user.name }} 👋</h3>
+                    <p class="text-muted">Here is your student dashboard</p>
+                </div>
+            </div>
+        </div>
 
-                    <!-- start page title -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="page-title-box">
-                                <div class="page-title-right">
-                                    <ol class="breadcrumb m-0">
-                                        <li class="breadcrumb-item"><a href="javascript: void(0);"></a></li>
-                                        <li class="breadcrumb-item"><a href="javascript: void(0);"></a></li>
-                                        <li class="breadcrumb-item active"></li>
-                                    </ol>
-                                </div>
-                                <h4 class="page-title"></h4>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- end page title -->
+        <!-- 🔥 DASHBOARD CARDS -->
+        <div class="row">
 
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <h5>Total Applications</h5>
+                    <h2>{{ total_applications }}</h2>
+                </div>
+            </div>
 
-                </div> <!-- container -->
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <h5>Applied Jobs</h5>
+                    <h2 class="text-primary">{{ applied_jobs }}</h2>
+                </div>
+            </div>
 
-            </div> <!-- content -->
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <h5>Attendance %</h5>
+                    <h2 class="text-success">{{ attendance_percentage }}%</h2>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <h5>Training Sessions</h5>
+                    <h2 class="text-warning">{{ sessions }}</h2>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 🔥 SECOND ROW -->
+        <div class="row mt-3">
+
+            <div class="col-md-6">
+                <div class="card p-3 text-center">
+                    <h5>Total Classes</h5>
+                    <h2>{{ total_classes }}</h2>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card p-3 text-center">
+                    <h5>Present Days</h5>
+                    <h2>{{ present_classes }}</h2>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
 
 {% include 'stdfooter.html' %}

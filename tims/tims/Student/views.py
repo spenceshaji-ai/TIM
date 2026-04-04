@@ -295,7 +295,6 @@ class StudentApplyJobView(LoginRequiredMixin, View):
     template_name = "student/studentapplyjob.html"
 
     def get(self, request, job_id):
-
         job = get_object_or_404(Job, id=job_id)
 
         # deadline check
@@ -303,50 +302,33 @@ class StudentApplyJobView(LoginRequiredMixin, View):
             return redirect("job_list")
 
         # duplicate check
-        if JobApplication.objects.filter(
-            job=job,
-            student=request.user
-        ).exists():
+        if JobApplication.objects.filter(job=job, student=request.user).exists():
             return redirect("job_list")
 
         form = ApplicationForm()
 
-        return render(request, self.template_name, {
-            "form": form,
-            "job": job
-        })
-
+        return render(request, self.template_name, {"form": form, "job": job})
 
     def post(self, request, job_id):
-
         job = get_object_or_404(Job, id=job_id)
 
         if job.application_deadline < timezone.now().date():
             return redirect("job_list")
 
-        if JobApplication.objects.filter(
-            job=job,
-            student=request.user
-        ).exists():
+        if JobApplication.objects.filter(job=job, student=request.user).exists():
             return redirect("job_list")
 
         form = ApplicationForm(request.POST, request.FILES)
 
         if form.is_valid():
-
             application = form.save(commit=False)
             application.student = request.user
             application.job = job
             application.status = "Applied"
             application.save()
-
             return redirect("job_list")
 
-        return render(request, self.template_name, {
-            "form": form,
-            "job": job
-        })
-
+        return render(request, self.template_name, {"form": form, "job": job})
 
 
 # ===============================
@@ -360,29 +342,36 @@ class StudentJobListView(LoginRequiredMixin, ListView):
     context_object_name = "jobs"
 
     def get_queryset(self):
+        user = self.request.user
+        today = timezone.now().date()
+        applied_jobs = JobApplication.objects.filter(student=user).values_list("job_id", flat=True)
+        status = self.request.GET.get("status", "active")
+        queryset = Job.objects.select_related("job_type")
 
-        queryset = Job.objects.select_related(
-            "job_type"
-        ).order_by("-posted_date")
+        # 🔥 FILTER LOGIC
+        if status == "active":
+            queryset = queryset.filter(application_deadline__gte=today).exclude(id__in=applied_jobs)
+        elif status == "applied":
+            queryset = queryset.filter(id__in=applied_jobs)
+        elif status == "expired":
+            queryset = queryset.filter(application_deadline__lt=today)
 
+        # Job type filter
         job_type_id = self.request.GET.get("job_type")
-
         if job_type_id:
-            queryset = queryset.filter(
-                job_type_id=job_type_id
-            )
+            queryset = queryset.filter(job_type_id=job_type_id)
 
-        return queryset
-
+        return queryset.order_by("-posted_date")
 
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
-
         context["job_types"] = Jobtype.objects.all()
         context["selected_job_type"] = self.request.GET.get("job_type")
         context["today"] = timezone.now().date()
-
+        context["selected_status"] = self.request.GET.get("status", "active")
+        context["applied_jobs"] = list(
+            JobApplication.objects.filter(student=self.request.user).values_list("job_id", flat=True)
+        )
         return context
 
 
@@ -393,10 +382,9 @@ class StudentJobListView(LoginRequiredMixin, ListView):
 class StudentJobDetailView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
-
         job = get_object_or_404(Job, pk=pk)
-
         is_expired = job.application_deadline < timezone.now().date()
+        is_applied = JobApplication.objects.filter(job=job, student=request.user).exists()
 
         data = {
             "id": job.id,
@@ -407,6 +395,10 @@ class StudentJobDetailView(LoginRequiredMixin, View):
             "job_type": job.job_type.job_type,
             "application_deadline": job.application_deadline.strftime("%Y-%m-%d"),
             "is_expired": is_expired,
+            "is_applied": is_applied,
+            "description": getattr(job, "description", "No description available"),
+            "qualification": getattr(job, "qualification", "Not specified"),
+            "skills": getattr(job, "skills", "Not specified"),
         }
 
         return JsonResponse(data)
@@ -442,8 +434,6 @@ class StudentJobDetailView(LoginRequiredMixin, View):
 #             "applications": applications
 #         })
 
-
-
 # ===============================
 # Application Tracking
 # ===============================
@@ -476,6 +466,10 @@ class StudentApplicationTrackingView(LoginRequiredMixin, View):
             "applications": applications,
             "selected_status": status_filter
         })
+
+
+
+       
 
 class StudentProgressView(LoginRequiredMixin, View):
     template_name = "progress.html"
@@ -546,7 +540,39 @@ class StudentTrainingSessionView(LoginRequiredMixin, View):
 
 class HomeView1(View):
     def get(self, request):
-        return render(request, "studenthome.html")         
+        user = request.user
+
+        # Job stats
+        total_applications = JobApplication.objects.filter(student=user).count()
+        applied_jobs = JobApplication.objects.filter(student=user, status="Applied").count()
+
+        # Attendance
+        total_classes = StudentAttendance.objects.filter(student=user).count()
+        present_classes = StudentAttendance.objects.filter(student=user, status="Present").count()
+
+        attendance_percentage = 0
+        if total_classes > 0:
+            attendance_percentage = round((present_classes / total_classes) * 100, 2)
+
+        # Training sessions
+        batch_ids = Assignstudent.objects.filter(student=user).values_list("batch_id", flat=True)
+
+        sessions = TrainingSession.objects.filter(
+            batch_id__in=batch_ids,
+            approval_status="Approved"
+        ).count()
+
+        context = {
+            "user": user,
+            "total_applications": total_applications,
+            "applied_jobs": applied_jobs,
+            "attendance_percentage": attendance_percentage,
+            "total_classes": total_classes,
+            "present_classes": present_classes,
+            "sessions": sessions,
+        }
+
+        return render(request, "stdhome.html", context)      
            
 from django.http import HttpResponse
 from django.template.loader import render_to_string
