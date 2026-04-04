@@ -647,6 +647,38 @@ class FacultyMaterialAddView(View):
             return redirect("faculty:material_add")  # redirect back to add page or list
         return render(request, self.template_name, {"form": form})
 
-class Home1View(View):
+from django.views import View
+from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
+from tims.adminapp.models import LeaveApplication
+from tims.faculty.models import TrainingSession, StudentAttendance
+
+class Home1View(LoginRequiredMixin, View):
+
     def get(self, request):
-        return render(request, "fahome.html")
+        user = request.user
+
+        # 🔹 Leaves
+        total_leaves = LeaveApplication.objects.filter(user=user).count()
+        pending_leaves = LeaveApplication.objects.filter(user=user, status="Pending").count()
+        approved_leaves = LeaveApplication.objects.filter(user=user, status="Approved").count()
+
+        # 🔹 Training Sessions
+        total_sessions = TrainingSession.objects.filter(faculty=user).count()
+
+        # 🔹 Attendance
+        total_attendance = StudentAttendance.objects.filter(faculty=user).count()
+
+        # 🔹 Recent Leaves
+        recent_leaves = LeaveApplication.objects.filter(user=user).order_by("-applied_at")[:5]
+
+        context = {
+            "total_leaves": total_leaves,
+            "pending_leaves": pending_leaves,
+            "approved_leaves": approved_leaves,
+            "total_sessions": total_sessions,
+            "total_attendance": total_attendance,
+            "recent_leaves": recent_leaves,
+        }
+
+        return render(request, "fahome.html", context)
