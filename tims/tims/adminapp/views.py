@@ -1950,3 +1950,50 @@ class AdminFeedbackListView(LoginRequiredMixin, ListView):
 class Home2View(View):
     def get(self, request):
         return render(request, "pages/adminhome.html")    
+
+from django.views import View
+from django.shortcuts import render, redirect
+from django.utils import timezone
+
+# Import from correct apps
+from tims.users.models import User, Role
+from tims.Admin.models import Job
+from tims.adminapp.models import Course, Batch
+
+
+class Home2View(View):
+    def get(self, request):
+
+        # Counts
+        num_students = User.objects.filter(role__role_name="Student").count()
+        num_faculty = User.objects.filter(role__role_name="Faculty").count()
+        num_admin = User.objects.filter(role__role_name="Admin").count()
+
+        # Jobs (ONLY NOT EXPIRED)
+        num_jobs = Job.objects.filter(application_deadline__gte=now()).count()
+
+        # Courses & Batches
+        num_courses = Course.objects.count()
+        num_batches = Batch.objects.filter(end_date__gte=now()).count()
+
+        # ✅ Recent Users (IMPORTANT)
+        recent_users = User.objects.all().order_by('-id')[:5]
+
+        # ✅ Recent Jobs (ONLY ACTIVE)
+        recent_jobs = Job.objects.filter(
+            application_deadline__gte=now()
+        ).order_by('-id')[:5]
+
+        context = {
+            "current_user": request.user,
+            "num_students": num_students,
+            "num_faculty": num_faculty,
+            "num_admin": num_admin,
+            "num_jobs": num_jobs,
+            "num_courses": num_courses,
+            "num_batches": num_batches,
+            "recent_users": recent_users,
+            "recent_jobs": recent_jobs,
+        }
+
+        return render(request, "pages/adminhome.html", context)

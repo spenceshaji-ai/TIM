@@ -1,19 +1,159 @@
 {% load static %}
 {% include 'pages/header.html' %}
 
+<div class="content container mt-4">
 
+    <!-- Welcome Section -->
+    <div class="mb-4">
+        <h2>
+            Welcome,
+            <span class="text-primary">
+                {{ current_user.name|default:current_user.username }}
+            </span>
+        </h2>
+        <p class="text-muted">Here’s your dashboard overview</p>
+    </div>
 
-        <!-- ============================================================== -->
-        <!-- Start Page Content here -->
-        <!-- ============================================================== -->
+    <!-- Dashboard Cards -->
+    <div class="row g-4">
 
-        
-            <div class="content">
+        <!-- Students -->
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="card shadow-sm text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Students</h6>
+                    <h2 class="fw-bold text-primary">{{ num_students }}</h2>
+                </div>
+            </div>
+        </div>
 
-        
-        <!-- container -->
+        <!-- Faculty -->
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="card shadow-sm text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Faculty</h6>
+                    <h2 class="fw-bold text-success">{{ num_faculty }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admins -->
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="card shadow-sm text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Admins</h6>
+                    <h2 class="fw-bold text-warning">{{ num_admin }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Jobs -->
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="card shadow-sm text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Active Jobs</h6>
+                    <h2 class="fw-bold text-danger">{{ num_jobs }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Courses -->
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="card shadow-sm text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Courses</h6>
+                    <h2 class="fw-bold text-info">{{ num_courses }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Batches -->
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="card shadow-sm text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Active Batches</h6>
+                    <h2 class="fw-bold text-secondary">{{ num_batches }}</h2>
+                </div>
+            </div>
+        </div>
 
     </div>
-    <!-- content -->
 
-    {% include 'pages/footer.html' %}
+    <!-- Recent Data Section -->
+    <div class="row mt-5">
+
+        <!-- Recent Users -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Users</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in recent_users %}
+                            <tr>
+                                <td>{{ user.name|default:user.username }}</td>
+                                <td>{{ user.role.role_name }}</td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        {{ user.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No users found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Jobs -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Jobs</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Company</th>
+                                <th>Deadline</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in recent_jobs %}
+                            <tr>
+                                <td>{{ job.title }}</td>
+                                <td>{{ job.company }}</td>
+                                <td>{{ job.application_deadline }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No jobs found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% include 'pages/footer.html' %}
