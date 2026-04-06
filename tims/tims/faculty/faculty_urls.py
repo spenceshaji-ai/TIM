@@ -10,12 +10,7 @@ urlpatterns = [
     path("sessions/create/", TrainingSessionCreateView.as_view(), name="training_create"),
     path("sessions/<int:pk>/update/", TrainingSessionUpdateView.as_view(), name="training_update"),
     path("sessions/<int:pk>/delete/", TrainingSessionDeleteView.as_view(), name="training_delete"),
-
-    path('list', StudentAttendanceListView.as_view(), name='attendance-list'),
-    path('create/', StudentAttendanceCreate.as_view(), name='attendance-create'),
-    path('update/<int:pk>/', StudentAttendanceUpdateView.as_view(), name='attendance-update'),
-    path('delete/<int:pk>/', StudentAttendanceDeleteView.as_view(), name='attendance-delete'),
-    
+    path("attendance/create/", StudentAttendanceCreateView.as_view(), name="attendance-create"),
     path("training-progress/", FacultyTrainingProgressView.as_view(), name="faculty_training_progress"),
 
     path('reports/', FacultyReportListView.as_view(), name='faculty_report_list'),

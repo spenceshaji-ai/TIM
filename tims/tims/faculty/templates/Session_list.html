@@ -22,8 +22,6 @@
                             <th>Batch</th>
                             <th>Topic Covered</th>
                             <th>Hours</th>
-                            <th>Status</th>
-                            <th>Approval</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -35,38 +33,23 @@
                             <td>{{ session.batch }}</td>
                             <td>{{ session.topic_covered }}</td>
                             <td>{{ session.hours_taken }}</td>
-                            <td>{{ session.status }}</td>
 
                             <td>
-                                {% if session.approval_status == "Approved" %}
-                                    <span class="badge bg-success">Approved</span>
-                                {% elif session.approval_status == "Rejected" %}
-                                    <span class="badge bg-danger">Rejected</span>
-                                {% else %}
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                {% endif %}
-                            </td>
+                                <a href="{% url 'faculty:training_update' session.id %}" 
+                                   class="btn btn-sm btn-warning">
+                                    Edit
+                                </a>
 
-                            <td>
-                                {% if session.approval_status == "Pending" %}
-                                    <a href="{% url 'faculty:training_update' session.id %}" 
-                                       class="btn btn-sm btn-warning">
-                                        Edit
-                                    </a>
-
-                                    <form action="{% url 'faculty:training_delete' session.id %}" 
-                                          method="post" 
-                                          style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" 
-                                                class="btn btn-sm btn-danger"
-                                                onclick="return confirm('Are you sure you want to delete this session?');">
-                                            Delete
-                                        </button>
-                                    </form>
-                                {% else %}
-                                    <span class="text-muted">Locked</span>
-                                {% endif %}
+                                <form action="{% url 'faculty:training_delete' session.id %}" 
+                                      method="post" 
+                                      style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" 
+                                            class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Are you sure you want to delete this session?');">
+                                        Delete
+                                    </button>
+                                </form>
                             </td>
 
                         </tr>
@@ -87,5 +70,4 @@
 </div>
 
 {% endblock %}
-
 {% include 'footer.html' %}
