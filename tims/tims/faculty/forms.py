@@ -182,7 +182,7 @@ class FacultyDailyReportForm(forms.ModelForm):
         return cleaned_data
 
 class BatchCompletionRequestForm(forms.ModelForm):
-   class Meta:
+    class Meta:
         model = BatchCompletionRequest
         fields = ["batch", "requested_completion_date", "remarks"]
         widgets = {

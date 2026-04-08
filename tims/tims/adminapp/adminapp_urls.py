@@ -36,7 +36,7 @@ urlpatterns = [
 
     path("faculty-reports/",AdminFacultyReportListView.as_view(),name="faculty_report_list",),
     path("training-sessions/",AdminTrainingSessionListView.as_view(),name="training_session_list",),
-    path("assignment-report/", AssignmentReportView.as_view(), name="assignment-report")
+    path("assignment-report/", AssignmentReportView.as_view(), name="assignment-report"),
     path(
         "completion-requests/",
         AdminBatchCompletionRequestListView.as_view(),

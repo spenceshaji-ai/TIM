@@ -1,5 +1,5 @@
 from django.db import models
-from adminapp.models import Batch
+from adminapp.models import Batch,Course
 from django.conf import settings
 from django.utils import timezone
 # Create your models here.
