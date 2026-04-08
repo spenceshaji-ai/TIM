@@ -11,12 +11,24 @@ class Course(models.Model):
     def __str__(self):
         return self.course_name
 
+import re
+from datetime import timedelta
+
 class Batch(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     batch_name = models.CharField(max_length=100) 
     start_date = models.DateField()
-    end_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True)
     capacity = models.IntegerField()
+
+    def save(self, *args, **kwargs):
+        if self.start_date and self.course.duration:
+            match = re.search(r'\d+', self.course.duration)
+            if match:
+                months = int(match.group())
+                self.end_date = self.start_date + timedelta(days=30 * months)
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.batch_name
