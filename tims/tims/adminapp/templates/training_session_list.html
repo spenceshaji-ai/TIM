@@ -39,20 +39,11 @@
                     </select>
                 </div>
 
-                <!-- Status Filter -->
+                <!-- Date Filter -->
                 <div class="col-md-3">
-                    <label class="form-label">Status</label>
-                    <select name="status" class="form-select">
-                        <option value="">All</option>
-                        <option value="Ongoing"
-                            {% if request.GET.status == "Ongoing" %}selected{% endif %}>
-                            Ongoing
-                        </option>
-                        <option value="Completed"
-                            {% if request.GET.status == "Completed" %}selected{% endif %}>
-                            Completed
-                        </option>
-                    </select>
+                    <label class="form-label">Session Date</label>
+                    <input type="date" name="session_date" class="form-control"
+                           value="{{ request.GET.session_date }}">
                 </div>
 
                 <div class="col-md-3 align-self-end">
@@ -79,7 +70,6 @@
                             <th>Batch</th>
                             <th>Session Date</th>
                             <th>Topic Covered</th>
-                            <th>Status</th>
                         </tr>
                     </thead>
 
@@ -88,22 +78,12 @@
                         <tr>
                             <td>{{ session.faculty.name }}</td>
                             <td>{{ session.batch.batch_name }}</td>
-                            <td>{{ session.session_date }}</td>
+                            <td>{{ session.session_date|date:"d-m-Y" }}</td>
                             <td>{{ session.topic_covered }}</td>
-                            <td>
-                                <span class="badge 
-                                    {% if session.status == 'Completed' %}
-                                        bg-success
-                                    {% else %}
-                                        bg-warning
-                                    {% endif %}">
-                                    {{ session.status }}
-                                </span>
-                            </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center text-muted">
+                            <td colspan="4" class="text-center text-muted">
                                 No sessions found.
                             </td>
                         </tr>

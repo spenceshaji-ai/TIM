@@ -1,0 +1,23 @@
+{% extends "form.html" %}
+
+{% block form_title %}
+    Request Batch Completion
+{% endblock %}
+
+{% block form_action %}
+    {% url 'faculty:completion-request-create' %}
+{% endblock %}
+
+{% block form_body %}
+    {{ form.as_p }}
+{% endblock %}
+
+{% block form_button %}
+    <button type="submit" class="btn btn-success">
+        Submit Request
+    </button>
+
+    <a href="{% url 'faculty:completion-request-list' %}" class="btn btn-secondary ms-2">
+        Cancel
+    </a>
+{% endblock %}

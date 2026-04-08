@@ -1,0 +1,47 @@
+{% extends "form.html" %}
+
+{% block form_title %}
+    {% if action_type == "approve" %}
+        Approve Completion Request
+    {% else %}
+        Reject Completion Request
+    {% endif %}
+{% endblock %}
+
+{% block form_action %}
+    {% if action_type == "approve" %}
+        {% url 'adminapp:completion-request-approve' completion_request.id %}
+    {% else %}
+        {% url 'adminapp:completion-request-reject' completion_request.id %}
+    {% endif %}
+{% endblock %}
+
+{% block form_body %}
+
+    <div class="mb-3">
+        <p><strong>Faculty:</strong> {{ completion_request.faculty.name }}</p>
+        <p><strong>Batch:</strong> {{ completion_request.batch.batch_name }}</p>
+        <p><strong>Course:</strong> {{ completion_request.course.course_name }}</p>
+        <p><strong>Requested Completion Date:</strong> {{ completion_request.requested_completion_date|date:"d-m-Y" }}</p>
+        <p><strong>Faculty Remarks:</strong> {{ completion_request.remarks|default:"-" }}</p>
+    </div>
+
+    {{ form.as_p }}
+
+{% endblock %}
+
+{% block form_button %}
+    {% if action_type == "approve" %}
+        <button type="submit" class="btn btn-success">
+            Approve
+        </button>
+    {% else %}
+        <button type="submit" class="btn btn-danger">
+            Reject
+        </button>
+    {% endif %}
+
+    <a href="{% url 'adminapp:completion-request-list' %}" class="btn btn-secondary ms-2">
+        Cancel
+    </a>
+{% endblock %}

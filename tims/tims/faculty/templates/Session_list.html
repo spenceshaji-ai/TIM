@@ -10,6 +10,41 @@
         </a>
     </div>
 
+    <!-- Filter Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Batch</label>
+                    <select name="batch" class="form-select">
+                        <option value="">All Batches</option>
+                        {% for batch in batches %}
+                        <option value="{{ batch.id }}"
+                            {% if selected_batch == batch.id|stringformat:"s" %}selected{% endif %}>
+                            {{ batch.batch_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Session Date</label>
+                    <input type="date" name="session_date" class="form-control"
+                           value="{{ selected_date }}">
+                </div>
+
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Filter
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Session Table -->
     <div class="card shadow-sm">
         <div class="card-body">
 
@@ -29,8 +64,8 @@
                     <tbody>
                         {% for session in sessions %}
                         <tr>
-                            <td>{{ session.session_date }}</td>
-                            <td>{{ session.batch }}</td>
+                            <td>{{ session.session_date|date:"d-m-Y" }}</td>
+                            <td>{{ session.batch.batch_name }}</td>
                             <td>{{ session.topic_covered }}</td>
                             <td>{{ session.hours_taken }}</td>
 
@@ -60,7 +95,7 @@
 
             {% else %}
                 <div class="text-center py-4">
-                    <p class="text-muted">No training sessions created yet.</p>
+                    <p class="text-muted">No training sessions found.</p>
                 </div>
             {% endif %}
 

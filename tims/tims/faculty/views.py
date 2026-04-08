@@ -3,11 +3,11 @@ from django.contrib import messages
 # Create your views here.
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from django.views import View
-from .models import TrainingSession,StudentAttendance,FacultyDailyReport
+from .models import TrainingSession,StudentAttendance,FacultyDailyReport,BatchCompletionRequest
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from adminapp.models import Batch,FacultyAssignment,Assignstudent,Batch
-from .forms import TrainingSessionForm,AttendanceFilterForm,FacultyDailyReportForm
+from .forms import TrainingSessionForm,AttendanceFilterForm,FacultyDailyReportForm,BatchCompletionRequestForm
 
 
 class TrainingSessionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -58,7 +58,6 @@ class TrainingSessionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
 class TrainingSessionListView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'Session_list.html'
 
-    # Faculty Role Check
     def test_func(self):
         user = self.request.user
         return (
@@ -67,17 +66,36 @@ class TrainingSessionListView(LoginRequiredMixin, UserPassesTestMixin, View):
             user.role.role_name.lower() == "faculty"
         )
 
-    # If Not Authorized
     def handle_no_permission(self):
         messages.error(self.request, "You are not authorized to access this page.")
         return redirect("users:login")
 
     def get(self, request):
+        batch_id = request.GET.get("batch")
+        session_date = request.GET.get("session_date")
+
         sessions = TrainingSession.objects.filter(
             faculty=request.user
-        ).order_by('-session_date')
+        ).select_related("batch").order_by('-session_date')
 
-        return render(request, self.template_name, {'sessions': sessions})
+        if batch_id:
+            sessions = sessions.filter(batch_id=batch_id)
+
+        if session_date:
+            sessions = sessions.filter(session_date=session_date)
+
+        batches = Batch.objects.filter(
+            trainingsession__faculty=request.user
+        ).distinct()
+
+        context = {
+            "sessions": sessions,
+            "batches": batches,
+            "selected_batch": batch_id,
+            "selected_date": session_date,
+        }
+
+        return render(request, self.template_name, context)
 
 
 class TrainingSessionUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -319,21 +337,32 @@ class FacultyTrainingProgressView(LoginRequiredMixin, View):
     template_name = "training_progress.html"
 
     def get(self, request):
-        status_filter = request.GET.get("status")
+        batch_id = request.GET.get("batch")
+        session_date = request.GET.get("session_date")
 
         # Only logged-in faculty sessions
         sessions = TrainingSession.objects.filter(
-            faculty=request.user,
-            approval_status="Approved"
-        ).select_related("batch")
+            faculty=request.user
+        ).select_related("batch").order_by("-session_date")
 
-        # Filter by status if selected
-        if status_filter in ["Ongoing", "Completed"]:
-            sessions = sessions.filter(status=status_filter)
+        # Batch filter
+        if batch_id:
+            sessions = sessions.filter(batch_id=batch_id)
+
+        # Date filter
+        if session_date:
+            sessions = sessions.filter(session_date=session_date)
+
+        # Only batches this faculty has sessions in
+        batches = Batch.objects.filter(
+            trainingsession__faculty=request.user
+        ).distinct()
 
         context = {
             "sessions": sessions,
-            "status_filter": status_filter,
+            "batches": batches,
+            "selected_batch": batch_id,
+            "selected_date": session_date,
         }
 
         return render(request, self.template_name, context)
@@ -423,6 +452,165 @@ class FacultyReportDeleteView(LoginRequiredMixin, View):
         report.delete()
         messages.success(request, "Report deleted successfully.")
         return redirect("faculty:faculty_report_list")
+
+class FacultyBatchCompletionRequestCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = "faculty_completion_request_form.html"
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
+
+    def get(self, request):
+        form = BatchCompletionRequestForm(user=request.user)
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request):
+        form = BatchCompletionRequestForm(request.POST, user=request.user)
+
+        if form.is_valid():
+            batch = form.cleaned_data["batch"]
+            requested_completion_date = form.cleaned_data["requested_completion_date"]
+            remarks = form.cleaned_data.get("remarks", "")
+
+            # 1) Check batch belongs to faculty
+            is_assigned = FacultyAssignment.objects.filter(
+                faculty=request.user,
+                batch=batch
+            ).exists()
+
+            if not is_assigned:
+                messages.error(request, "You are not assigned to this batch.")
+                return render(request, self.template_name, {"form": form})
+
+            # 2) Check training sessions exist
+            has_sessions = TrainingSession.objects.filter(
+                faculty=request.user,
+                batch=batch
+            ).exists()
+
+            if not has_sessions:
+                messages.error(request, "You cannot request completion because no training sessions exist for this batch.")
+                return render(request, self.template_name, {"form": form})
+
+            # 3) Check batch end date reached
+            today = timezone.localdate()
+            if batch.end_date and batch.end_date > today:
+                messages.error(request, f"Completion request can be submitted only after batch end date ({batch.end_date}).")
+                return render(request, self.template_name, {"form": form})
+
+            # 4) Prevent duplicate pending request
+            pending_exists = BatchCompletionRequest.objects.filter(
+                faculty=request.user,
+                batch=batch,
+                course=batch.course,
+                status="Pending"
+            ).exists()
+
+            if pending_exists:
+                messages.error(request, "A pending completion request already exists for this batch.")
+                return render(request, self.template_name, {"form": form})
+
+            # 5) Prevent duplicate approved request
+            approved_exists = BatchCompletionRequest.objects.filter(
+                faculty=request.user,
+                batch=batch,
+                course=batch.course,
+                status="Approved"
+            ).exists()
+
+            if approved_exists:
+                messages.error(request, "This batch has already been approved as completed.")
+                return render(request, self.template_name, {"form": form})
+
+            completion_request = form.save(commit=False)
+            completion_request.faculty = request.user
+            completion_request.course = batch.course
+            completion_request.save()
+
+            messages.success(request, "Completion request submitted successfully.")
+            return redirect("faculty:completion-request-list")
+
+        return render(request, self.template_name, {"form": form})
+
+class FacultyBatchCompletionRequestListView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = "faculty_completion_request_list.html"
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
+
+    def get(self, request):
+        status = request.GET.get("status")
+        batch_id = request.GET.get("batch")
+
+        requests_qs = BatchCompletionRequest.objects.filter(
+            faculty=request.user
+        ).select_related("batch", "course").order_by("-requested_at")
+
+        if status:
+            requests_qs = requests_qs.filter(status=status)
+
+        if batch_id:
+            requests_qs = requests_qs.filter(batch_id=batch_id)
+
+        assigned_batch_ids = FacultyAssignment.objects.filter(
+            faculty=request.user
+        ).values_list("batch_id", flat=True)
+
+        batches = Batch.objects.filter(id__in=assigned_batch_ids)
+
+        context = {
+            "requests_qs": requests_qs,
+            "batches": batches,
+            "selected_status": status,
+            "selected_batch": batch_id,
+        }
+
+        return render(request, self.template_name, context)
+class FacultyBatchCompletionRequestDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
+
+    def post(self, request, pk):
+        completion_request = get_object_or_404(
+            BatchCompletionRequest,
+            pk=pk,
+            faculty=request.user
+        )
+
+        if completion_request.status != "Pending":
+            messages.error(request, "Only pending requests can be deleted.")
+            return redirect("faculty:completion-request-list")
+
+        completion_request.delete()
+        messages.success(request, "Completion request deleted successfully.")
+        return redirect("faculty:completion-request-list")        
 
 class Home1View(View):
     def get(self, request):

@@ -1,10 +1,11 @@
 from django import forms
-from .models import TrainingSession, StudentAttendance,FacultyDailyReport
+from .models import TrainingSession, StudentAttendance,FacultyDailyReport,BatchCompletionRequest
 from adminapp.models import Batch,FacultyAssignment,Assignstudent
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from django.utils import timezone 
 from django.utils.timezone import now
+
 class TrainingSessionForm(forms.ModelForm):
 
     class Meta:
@@ -180,4 +181,51 @@ class FacultyDailyReportForm(forms.ModelForm):
 
         return cleaned_data
 
+class BatchCompletionRequestForm(forms.ModelForm):
+   class Meta:
+        model = BatchCompletionRequest
+        fields = ["batch", "requested_completion_date", "remarks"]
+        widgets = {
+            "batch": forms.Select(attrs={"class": "form-select"}),
+            "requested_completion_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "remarks": forms.Textarea(attrs={"rows": 4, "class": "form-control"}),
+        }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.user = user
+
+        # Show only assigned batches of logged-in faculty
+        assigned_batch_ids = FacultyAssignment.objects.filter(
+            faculty=user
+        ).values_list("batch_id", flat=True)
+
+        self.fields["batch"].queryset = Batch.objects.filter(
+            id__in=assigned_batch_ids
+        ).select_related("course")
+
+        self.fields["batch"].empty_label = "Select Batch"
+
+    def clean_requested_completion_date(self):
+        request_date = self.cleaned_data.get("requested_completion_date")
+        today = timezone.localdate()
+
+        if request_date and request_date > today:
+            raise forms.ValidationError("Future completion date is not allowed.")
+
+        return request_date
+
+    def clean(self):
+        cleaned_data = super().clean()
+        batch = cleaned_data.get("batch")
+        request_date = cleaned_data.get("requested_completion_date")
+
+        if not batch or not self.user:
+            return cleaned_data
+
+        # Auto-fill course from batch
+        cleaned_data["course"] = batch.course
+
+        return cleaned_data
 
