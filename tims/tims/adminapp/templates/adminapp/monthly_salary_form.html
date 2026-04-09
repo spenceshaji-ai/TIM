@@ -48,23 +48,17 @@
 
 <div class="col-md-4">
 <label>HRA (40%)</label>
-<input type="number" id="hra" class="form-control" readonly>
+<input type="number" id="hra" class="form-control"  readonly>
 </div>
 
-<div class="col-md-4">
-<label>Travel Allowance</label>
-<input type="number" id="travel_allowance" class="form-control" value="{{ structure.travel_allowance }}" readonly>
-</div>
+
 
 </div>
 
 
 <div class="row mt-3">
 
-<div class="col-md-4">
-<label>Special Allowance</label>
-<input type="number" id="special_allowance" class="form-control" value="{{ structure.special_allowance }}" readonly>
-</div>
+
 
 <div class="col-md-4">
 <label>Bonus</label>
@@ -122,38 +116,36 @@ Generate Salary
 
 </div>
 
-
 <script>
 
 function calculateSalary(){
 
 let basic = parseFloat(document.getElementById("basic_salary").value) || 0
-let travel = parseFloat(document.getElementById("travel_allowance").value) || 0
-let special = parseFloat(document.getElementById("special_allowance").value) || 0
 let bonus = parseFloat(document.getElementById("bonus").value) || 0
 let incentive = parseFloat(document.getElementById("incentive").value) || 0
 
+// HRA 40%
 let hra = basic * 0.40
+document.getElementById("hra").value = hra.toFixed(2)
 
-document.getElementById("hra").value = hra
+// Gross
+let gross = basic + hra + bonus + incentive
+document.getElementById("gross_salary").value = gross.toFixed(2)
 
-let gross = basic + hra + travel + special + bonus + incentive
-
-document.getElementById("gross_salary").value = gross
-
+// PF
 let pf = basic * 0.12
-document.getElementById("pf").value = pf
+document.getElementById("pf").value = pf.toFixed(2)
 
+// ESI
 let esi = 0
 if(gross <= 21000){
 esi = gross * 0.0075
 }
+document.getElementById("esi").value = esi.toFixed(2)
 
-document.getElementById("esi").value = esi
-
+// Net
 let net = gross - pf - esi
-
-document.getElementById("net_salary").value = net
+document.getElementById("net_salary").value = net.toFixed(2)
 
 }
 

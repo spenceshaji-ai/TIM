@@ -139,8 +139,6 @@ Apply Leave
 const duration = document.getElementById("leaveDuration")
 
 const dayType = document.getElementById("id_day_type")
-const session = document.getElementById("id_half_day_session")
-
 const start = document.getElementById("id_start_date")
 const end = document.getElementById("id_end_date")
 
@@ -151,7 +149,6 @@ function calculateDays(){
     if(duration.value === "FULL"){
 
         dayType.value = "FULL"
-        session.value = ""
 
         if(start.value && end.value){
 
@@ -159,24 +156,17 @@ function calculateDays(){
             let e = new Date(end.value)
 
             let diff = (e - s) / (1000*60*60*24) + 1
-
             totalDays.value = diff
         }
     }
 
     else if(duration.value === "HALF_AM"){
-
         dayType.value = "HALF"
-        session.value = "Morning"
-
         totalDays.value = 0.5
     }
 
     else if(duration.value === "HALF_PM"){
-
         dayType.value = "HALF"
-        session.value = "Noon"
-
         totalDays.value = 0.5
     }
 
@@ -185,36 +175,23 @@ function calculateDays(){
 duration.addEventListener("change", calculateDays)
 start.addEventListener("change", calculateDays)
 end.addEventListener("change", calculateDays)
+
+
 document.querySelector("form").addEventListener("submit", function(e){
 
-    let leaveType = document.getElementById("id_leave_type").value;
-    let days = parseFloat(document.getElementById("totalDays").value) || 0;
+    let days = parseFloat(totalDays.value) || 0
 
-    let options = document.querySelectorAll("#leaveTypeData option");
+    // only warn when more than 1 leave in month
+    if(days > 1){
 
-    let remaining = 0;
-
-    options.forEach(opt => {
-        if(parseInt(opt.value) === parseInt(leaveType)){
-            remaining = parseFloat(opt.dataset.remaining) || 0;
-        }
-    });
-
-    console.log("LeaveType:", leaveType);
-    console.log("Days:", days);
-    console.log("Remaining:", remaining);
-
-    if(days > remaining){
-
-        let lop = days - remaining;
-
-        let msg = lop + " day(s) will be LOP. Do you want to continue?";
+        let msg = "More than 1 leave this month will be counted as LOP. Continue?"
 
         if(!confirm(msg)){
-            e.preventDefault();
+            e.preventDefault()
         }
     }
 
-});
+})
+
 </script>
 {% endblock %}

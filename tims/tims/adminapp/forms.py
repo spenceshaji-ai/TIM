@@ -524,14 +524,12 @@ class SalaryStructureForm(forms.ModelForm):
         model = SalaryStructure
         fields = [
             "basic_salary",
-            "travel_allowance",
-            "special_allowance",
+           
         ]
 
         widgets = {
             "basic_salary": forms.NumberInput(attrs={"class": "form-control"}),
-            "travel_allowance": forms.NumberInput(attrs={"class": "form-control"}),
-            "special_allowance": forms.NumberInput(attrs={"class": "form-control"}),
+            
         }
 
 # ============================================
