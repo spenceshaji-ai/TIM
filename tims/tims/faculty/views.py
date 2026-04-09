@@ -453,20 +453,8 @@ class FacultyReportDeleteView(LoginRequiredMixin, View):
         messages.success(request, "Report deleted successfully.")
         return redirect("faculty:faculty_report_list")
 
-class FacultyBatchCompletionRequestCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
+class FacultyBatchCompletionRequestCreateView(LoginRequiredMixin, View):
     template_name = "faculty_completion_request_form.html"
-
-    def test_func(self):
-        user = self.request.user
-        return (
-            user.is_authenticated and
-            user.role and
-            user.role.role_name.lower() == "faculty"
-        )
-
-    def handle_no_permission(self):
-        messages.error(self.request, "You are not authorized to access this page.")
-        return redirect("users:login")
 
     def get(self, request):
         form = BatchCompletionRequestForm(user=request.user)
@@ -476,63 +464,9 @@ class FacultyBatchCompletionRequestCreateView(LoginRequiredMixin, UserPassesTest
         form = BatchCompletionRequestForm(request.POST, user=request.user)
 
         if form.is_valid():
-            batch = form.cleaned_data["batch"]
-            requested_completion_date = form.cleaned_data["requested_completion_date"]
-            remarks = form.cleaned_data.get("remarks", "")
-
-            # 1) Check batch belongs to faculty
-            is_assigned = FacultyAssignment.objects.filter(
-                faculty=request.user,
-                batch=batch
-            ).exists()
-
-            if not is_assigned:
-                messages.error(request, "You are not assigned to this batch.")
-                return render(request, self.template_name, {"form": form})
-
-            # 2) Check training sessions exist
-            has_sessions = TrainingSession.objects.filter(
-                faculty=request.user,
-                batch=batch
-            ).exists()
-
-            if not has_sessions:
-                messages.error(request, "You cannot request completion because no training sessions exist for this batch.")
-                return render(request, self.template_name, {"form": form})
-
-            # 3) Check batch end date reached
-            today = timezone.localdate()
-            if batch.end_date and batch.end_date > today:
-                messages.error(request, f"Completion request can be submitted only after batch end date ({batch.end_date}).")
-                return render(request, self.template_name, {"form": form})
-
-            # 4) Prevent duplicate pending request
-            pending_exists = BatchCompletionRequest.objects.filter(
-                faculty=request.user,
-                batch=batch,
-                course=batch.course,
-                status="Pending"
-            ).exists()
-
-            if pending_exists:
-                messages.error(request, "A pending completion request already exists for this batch.")
-                return render(request, self.template_name, {"form": form})
-
-            # 5) Prevent duplicate approved request
-            approved_exists = BatchCompletionRequest.objects.filter(
-                faculty=request.user,
-                batch=batch,
-                course=batch.course,
-                status="Approved"
-            ).exists()
-
-            if approved_exists:
-                messages.error(request, "This batch has already been approved as completed.")
-                return render(request, self.template_name, {"form": form})
-
             completion_request = form.save(commit=False)
             completion_request.faculty = request.user
-            completion_request.course = batch.course
+            completion_request.course = completion_request.batch.course
             completion_request.save()
 
             messages.success(request, "Completion request submitted successfully.")
@@ -583,6 +517,7 @@ class FacultyBatchCompletionRequestListView(LoginRequiredMixin, UserPassesTestMi
         }
 
         return render(request, self.template_name, context)
+
 class FacultyBatchCompletionRequestDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):

@@ -187,16 +187,20 @@ class BatchCompletionRequestForm(forms.ModelForm):
         fields = ["batch", "requested_completion_date", "remarks"]
         widgets = {
             "batch": forms.Select(attrs={"class": "form-select"}),
-            "requested_completion_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
-            "remarks": forms.Textarea(attrs={"rows": 4, "class": "form-control"}),
+            "requested_completion_date": forms.DateInput(attrs={
+                "type": "date",
+                "class": "form-control"
+            }),
+            "remarks": forms.Textarea(attrs={
+                "rows": 4,
+                "class": "form-control"
+            }),
         }
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-
         self.user = user
 
-        # Show only assigned batches of logged-in faculty
         assigned_batch_ids = FacultyAssignment.objects.filter(
             faculty=user
         ).values_list("batch_id", flat=True)
@@ -221,11 +225,72 @@ class BatchCompletionRequestForm(forms.ModelForm):
         batch = cleaned_data.get("batch")
         request_date = cleaned_data.get("requested_completion_date")
 
-        if not batch or not self.user:
+        if not batch or not request_date or not self.user:
             return cleaned_data
 
-        # Auto-fill course from batch
-        cleaned_data["course"] = batch.course
+        # 1) Batch must belong to faculty
+        is_assigned = FacultyAssignment.objects.filter(
+            faculty=self.user,
+            batch=batch
+        ).exists()
+
+        if not is_assigned:
+            self.add_error("batch", "You are not assigned to this batch.")
+            return cleaned_data
+
+        # 2) Training sessions must exist
+        has_sessions = TrainingSession.objects.filter(
+            faculty=self.user,
+            batch=batch
+        ).exists()
+
+        if not has_sessions:
+            self.add_error(
+                "batch",
+                "No training sessions have been added for this batch, so completion request cannot be submitted."
+            )
+
+        # 3) Batch end date must be reached
+        today = timezone.localdate()
+        if batch.end_date and batch.end_date > today:
+            self.add_error(
+                "batch",
+                f"Completion request can only be submitted on or after the batch end date ({batch.end_date})."
+            )
+
+        # 4) Requested completion date must be on or after batch end date
+        if batch.end_date and request_date < batch.end_date:
+            self.add_error(
+                "requested_completion_date",
+                f"Completion date must be on or after batch end date ({batch.end_date})."
+            )
+
+        # 5) Prevent duplicate pending request
+        pending_exists = BatchCompletionRequest.objects.filter(
+            faculty=self.user,
+            batch=batch,
+            course=batch.course,
+            status="Pending"
+        ).exists()
+
+        if pending_exists:
+            self.add_error(
+                "batch",
+                "A pending completion request already exists for this batch."
+            )
+
+        # 6) Prevent duplicate approved request
+        approved_exists = BatchCompletionRequest.objects.filter(
+            faculty=self.user,
+            batch=batch,
+            course=batch.course,
+            status="Approved"
+        ).exists()
+
+        if approved_exists:
+            self.add_error(
+                "batch",
+                "This batch has already been approved as completed."
+            )
 
         return cleaned_data
-
