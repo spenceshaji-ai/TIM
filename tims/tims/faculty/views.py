@@ -16,7 +16,6 @@ from django.utils.timezone import now
 from django.contrib import messages
 from tims.adminapp.models import LeaveApplication, LeaveBalance, LeaveType
 from datetime import date
-
 class ApplyLeaveView(LoginRequiredMixin, View):
 
     template_name = "faculty/apply_leave.html"
@@ -39,88 +38,73 @@ class ApplyLeaveView(LoginRequiredMixin, View):
             "today": date.today(),
         })
 
-    
+
     def post(self, request):
 
-    # ✅ If user already confirmed LOP
-        if "confirm" in request.POST:
+        form = LeaveApplicationForm(
+            request.POST,
+            user=request.user
+        )
 
-            form = LeaveApplicationForm(request.POST, user=request.user)
-            form.instance.user = request.user
-
-            if form.is_valid():
-                leave = form.save(commit=False)
-                leave.user = request.user
-
-            # keep your existing logic
-                if leave.day_type == "HALF":
-                    leave.total_days = 0.5
-                else:
-                    leave.total_days = (leave.end_date - leave.start_date).days + 1
-
-                leave.save()
-
-                messages.success(request, "Leave submitted with LOP.")
-                return redirect("faculty:faculty_my_leaves")
-
-    # ✅ Normal submit
-        form = LeaveApplicationForm(request.POST, user=request.user)
         form.instance.user = request.user
 
         if form.is_valid():
 
             leave = form.save(commit=False)
+            leave.user = request.user
 
-        # keep your existing logic
+            # ✅ SAME calculation
             if leave.day_type == "HALF":
                 leave.total_days = 0.5
             else:
                 leave.total_days = (leave.end_date - leave.start_date).days + 1
 
-        # 🔥 CHECK MONTHLY LIMIT
-            allocation = LeaveAllocation.objects.filter(
-                user=request.user,
-                leave_type=leave.leave_type,
-                year=date.today().year
-            ).first()
+            # ✅ USE MODEL LOGIC (IMPORTANT)
+            leave.clean()
 
-            if allocation:
-                monthly_allowed = allocation.monthly_accrual()
-                requested = leave.total_days
+            # =========================
+            # ✅ CONFIRM CLICKED
+            # =========================
+            if "confirm" in request.POST:
+                leave.save()
+                messages.success(request, "Leave applied with LOP.")
+                return redirect("faculty:faculty_my_leaves")
 
+            # =========================
+            # ✅ SHOW WARNING
+            # =========================
+            if leave.lop_days > 0:
 
-                if requested > monthly_allowed:
-                    lop = requested - monthly_allowed
-                    leave.lop_days = lop
-                
+                leave_balances = LeaveBalance.objects.filter(
+                    user=request.user,
+                    year=date.today().year
+                ).select_related("leave_type")
 
-                    leave_balances = LeaveBalance.objects.filter(
-                        user=request.user,
-                        year=date.today().year
-                    ).select_related("leave_type")
+                total_remaining = sum(b.remaining_days for b in leave_balances)
 
-                # 🚨 SHOW WARNING (STOP SAVE)
-                    return render(request, self.template_name, {
-                        "form": form,
-                        "leave_balances": leave_balances,
-                        "lop_warning": f"{lop} day(s) will be LOP. Do you want to continue?",
-                        "today": date.today(),
-                    })
-                else:
-                    leave.lop_days = 0
+                return render(request, self.template_name, {
+                    "form": form,
+                    "leave_balances": leave_balances,
+                    "total_remaining": total_remaining,
+                    "show_lop_warning": True,
+                    "total_days": leave.total_days,
+                    "lop_days": leave.lop_days,
+                    "normal_days": leave.total_days - leave.lop_days,
+                    "today": date.today(),
+                })
 
-        # ✅ SAVE normally
-            leave.user = request.user
+            # =========================
+            # ✅ NORMAL SAVE
+            # =========================
             leave.save()
-
-            messages.success(request, "Leave request submitted successfully.")
+            messages.success(request, "Leave applied successfully.")
             return redirect("faculty:faculty_my_leaves")
 
-    # ❌ form invalid
+        # ❌ INVALID FORM
         leave_balances = LeaveBalance.objects.filter(
             user=request.user,
             year=date.today().year
-        ).select_related("leave_type")
+        )
 
         total_remaining = sum(b.remaining_days for b in leave_balances)
 

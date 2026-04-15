@@ -633,14 +633,6 @@ class HRLeaveAssignView(View):
         return render(request, self.template_name, context)
 
         return render(request, self.template_name, context)
-from django.views.generic import ListView, View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from datetime import date
-
-from tims.adminapp.models import LeaveApplication, LeaveBalance
-
 
 class ManagementApplyLeaveView(LoginRequiredMixin, View):
 
@@ -655,96 +647,6 @@ class ManagementApplyLeaveView(LoginRequiredMixin, View):
             year=date.today().year
         ).select_related("leave_type")
 
-        total_remaining = sum(b.remaining_days for b in leave_balances)
-
-        return render(request, self.template_name, {
-        "form": form,
-        "leave_balances": leave_balances,
-        "total_remaining": total_remaining,
-        "today": date.today(),
-        })
-
-
-    def post(self, request):
-
-        # ✅ If user already confirmed LOP
-        if "confirm" in request.POST:
-
-            form = ManagementLeaveApplicationForm(
-                request.POST,
-                user=request.user
-            )
-            form.instance.user = request.user
-
-            if form.is_valid():
-                leave = form.save(commit=False)
-                leave.user = request.user
-                if leave.day_type == "HALF":
-                    leave.total_days = 0.5
-                else:
-                    leave.total_days = (leave.end_date - leave.start_date).days + 1
-                leave.save()
-
-                messages.success(request, "Leave submitted with LOP.")
-                return redirect("adminapp:management_my_leaves")
-
-        # ✅ Normal submit
-        form = ManagementLeaveApplicationForm(
-            request.POST,
-            user=request.user
-        )
-        form.instance.user = request.user
-
-        if form.is_valid():
-
-            leave = form.save(commit=False)
-            if leave.day_type == "HALF":
-                leave.total_days = 0.5
-            else:
-                leave.total_days = (leave.end_date - leave.start_date).days + 1
-            allocation = LeaveAllocation.objects.filter(
-                user=request.user,
-                leave_type=leave.leave_type,
-                year=date.today().year
-            ).first()
-
-            if allocation:
-                monthly_allowed = allocation.monthly_accrual()
-                requested = leave.total_days
-
-                if requested > monthly_allowed:
-                    lop = requested - monthly_allowed
-                    leave.lop_days = lop
-                
-
-
-                 # 🚨 SHOW WARNING (NO SAVE YET)
-                    leave_balances = LeaveBalance.objects.filter(
-                        user=request.user,
-                        year=date.today().year
-                    ).select_related("leave_type")
-
-                    return render(request, self.template_name, {
-                        "form": form,
-                        "leave_balances": leave_balances,
-                        "lop_warning": f"{lop} day(s) will be LOP. Do you want to continue?",
-                        "today": date.today(),
-                    })
-                else:
-                    leave.lop_days = 0
-            # ✅ SAVE normally
-            leave.user = request.user
-            leave.save()
-
-            messages.success(request, "Leave request submitted successfully.")
-            return redirect("adminapp:management_my_leaves")
-
-        # ❌ Form invalid
-        leave_balances = LeaveBalance.objects.filter(
-            user=request.user,
-            year=date.today().year
-        ).select_related("leave_type")
-
         return render(request, self.template_name, {
             "form": form,
             "leave_balances": leave_balances,
@@ -752,6 +654,75 @@ class ManagementApplyLeaveView(LoginRequiredMixin, View):
         })
 
 
+    def post(self, request):
+
+        form = ManagementLeaveApplicationForm(
+            request.POST,
+            user=request.user
+        )
+
+        form.instance.user = request.user
+
+        if form.is_valid():
+
+            leave = form.save(commit=False)
+            leave.user = request.user
+
+            # ✅ calculate days
+            if leave.day_type == "HALF":
+                leave.total_days = 0.5
+            else:
+                leave.total_days = (leave.end_date - leave.start_date).days + 1
+
+            # ✅ calculate LOP using model logic
+            leave.clean()
+
+            # =========================
+            # ✅ CONFIRM BUTTON CLICKED
+            # =========================
+            if "confirm" in request.POST:
+                leave.save()
+                messages.success(request, "Leave applied with LOP.")
+                return redirect("adminapp:management_my_leaves")
+
+            # =========================
+            # ✅ SHOW WARNING (NO SAVE YET)
+            # =========================
+            if leave.lop_days > 0:
+
+                leave_balances = LeaveBalance.objects.filter(
+                    user=request.user,
+                    year=date.today().year
+                ).select_related("leave_type")
+
+                return render(request, self.template_name, {
+                    "form": form,
+                    "leave_balances": leave_balances,
+                    "show_lop_warning": True,
+                    "total_days": leave.total_days,
+                    "lop_days": leave.lop_days,
+                    "normal_days": leave.total_days - leave.lop_days,
+                    "today": date.today(),
+                })
+
+            # =========================
+            # ✅ NORMAL SAVE
+            # =========================
+            leave.save()
+            messages.success(request, "Leave applied successfully.")
+            return redirect("adminapp:management_my_leaves")
+
+        # ❌ form invalid
+        leave_balances = LeaveBalance.objects.filter(
+            user=request.user,
+            year=date.today().year
+        )
+
+        return render(request, self.template_name, {
+            "form": form,
+            "leave_balances": leave_balances,
+            "today": date.today(),
+        })
 class ManagementMyLeavesView(LoginRequiredMixin, ListView):
 
     model = LeaveApplication

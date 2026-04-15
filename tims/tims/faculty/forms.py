@@ -14,8 +14,9 @@ class LeaveApplicationForm(forms.ModelForm):
         ("Noon", "Noon"),
     ]
 
+    # ✅ IMPORTANT FIX (same as admin)
     half_day_session = forms.ChoiceField(
-        choices=[("", "Select Session")] + HALF_SESSION_CHOICES,
+        choices=[("", "Select")] + HALF_SESSION_CHOICES,
         required=False,
         widget=forms.Select(attrs={"class": "form-control"})
     )
@@ -27,7 +28,6 @@ class LeaveApplicationForm(forms.ModelForm):
             "start_date",
             "end_date",
             "day_type",
-            "half_day_session",
             "reason",
         ]
 
@@ -44,8 +44,6 @@ class LeaveApplicationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.user:
-        
-
             balances = LeaveBalance.objects.filter(
                 user=self.user,
                 year=date.today().year
@@ -56,6 +54,7 @@ class LeaveApplicationForm(forms.ModelForm):
             )
 
     def clean(self):
+
         cleaned_data = super().clean()
 
         start = cleaned_data.get("start_date")
@@ -66,6 +65,7 @@ class LeaveApplicationForm(forms.ModelForm):
         today = date.today()
         current_time = now().time()
 
+        # ✅ BASIC VALIDATIONS
         if start and start < today:
             raise ValidationError("Past dates are not allowed.")
 
@@ -82,6 +82,7 @@ class LeaveApplicationForm(forms.ModelForm):
             if exists:
                 raise ValidationError("You already applied leave for this date.")
 
+        # ✅ HALF DAY LOGIC
         if day_type == "HALF":
 
             if not half_session:
@@ -99,6 +100,37 @@ class LeaveApplicationForm(forms.ModelForm):
                     raise ValidationError(
                         "Half day leave cannot be applied after 12:30 PM."
                     )
+
+        # ✅ NEW JOINER RULE (NO BLOCKING — SAME AS ADMIN)
+        if self.user and start:
+
+            joining_date = self.user.date_joined.date()
+
+            if (today - joining_date).days < 365:
+
+                month_leaves = LeaveApplication.objects.filter(
+                    user=self.user,
+                    start_date__year=start.year,
+                    start_date__month=start.month,
+                    status__in=["Pending", "Approved"]
+                )
+
+                total_taken = 0
+
+                for leave in month_leaves:
+                    if leave.day_type == "HALF":
+                        total_taken += 0.5
+                    else:
+                        total_taken += (
+                            (leave.end_date - leave.start_date).days + 1
+                        )
+
+                current_days = 0.5 if day_type == "HALF" else (
+                    (end - start).days + 1
+                )
+
+                # ❗ DO NOT raise error (LOP handled in view)
+                pass
 
         return cleaned_data
 

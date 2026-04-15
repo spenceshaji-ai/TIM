@@ -562,7 +562,6 @@ from datetime import date, datetime
 from django.utils.timezone import now
 
 
-
 class ManagementLeaveApplicationForm(forms.ModelForm):
 
     HALF_SESSION_CHOICES = [
@@ -571,7 +570,7 @@ class ManagementLeaveApplicationForm(forms.ModelForm):
     ]
 
     half_day_session = forms.ChoiceField(
-        choices=HALF_SESSION_CHOICES,
+        choices=[("", "Select")] + HALF_SESSION_CHOICES,
         required=False,
         widget=forms.Select(attrs={"class": "form-control"})
     )
@@ -600,8 +599,6 @@ class ManagementLeaveApplicationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.user:
-        
-
             balances = LeaveBalance.objects.filter(
                 user=self.user,
                 year=date.today().year
@@ -664,5 +661,37 @@ class ManagementLeaveApplicationForm(forms.ModelForm):
                         "Half day leave cannot be applied after 12:30 PM."
                     )
 
+
+        # ✅ NEW JOINER RULE (ONLY ADDITION)
+        if self.user and start:
+
+            joining_date = self.user.date_joined.date()
+
+            # only for first 1 year
+            if (today - joining_date).days < 365:
+
+                month_leaves = LeaveApplication.objects.filter(
+                    user=self.user,
+                    start_date__year=start.year,
+                    start_date__month=start.month,
+                    status__in=["Pending", "Approved"]
+                )
+
+                total_taken = 0
+
+                for leave in month_leaves:
+                    if leave.day_type == "HALF":
+                        total_taken += 0.5
+                    else:
+                        total_taken += (
+                            (leave.end_date - leave.start_date).days + 1
+                        )
+
+                # current leave days
+                current_days = 0.5 if day_type == "HALF" else (
+                    (end - start).days + 1
+                )
+
+                pass
+
         return cleaned_data
-    
