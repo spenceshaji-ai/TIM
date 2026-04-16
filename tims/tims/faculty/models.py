@@ -98,3 +98,38 @@ class FacultyCourseMaterial(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.course} ({self.batch})"
+
+class BatchCompletionRequest(models.Model):
+    STATUS_CHOICES = (
+        ("Pending", "Pending"),
+        ("Approved", "Approved"),
+        ("Rejected", "Rejected"),
+    )
+
+    faculty = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="batch_completion_requests"
+    )
+    batch = models.ForeignKey(
+        Batch,
+        on_delete=models.CASCADE,
+        related_name="completion_requests"
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="completion_requests"
+    )
+
+    requested_completion_date = models.DateField()
+    remarks = models.TextField(blank=True, null=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    admin_remarks = models.TextField(blank=True, null=True)
+
+    requested_at = models.DateTimeField(auto_now_add=True)
+    approved_at = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.batch.batch_name} - {self.faculty} - {self.status}"
