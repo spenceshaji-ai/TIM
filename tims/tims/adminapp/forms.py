@@ -39,10 +39,8 @@ class CourseForm(forms.ModelForm):
                 "class": "form-control",
                 "placeholder": "e.g. 3 Months"
             }),
-            "syllabus": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 4,
-                "placeholder": "Enter syllabus details"
+            "syllabus": forms.ClearableFileInput(attrs={
+                "class": "form-control"
             }),
             "fee": forms.NumberInput(attrs={
                 "class": "form-control",
@@ -53,10 +51,8 @@ class CourseForm(forms.ModelForm):
     def clean_course_name(self):
         course_name = self.cleaned_data.get("course_name")
 
-        # Case-insensitive duplicate check
         qs = Course.objects.filter(course_name__iexact=course_name)
 
-        # Exclude current instance when updating
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
 
