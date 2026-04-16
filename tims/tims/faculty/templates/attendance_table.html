@@ -55,20 +55,18 @@
             </thead>
 
             <tbody>
-                {% for admission in students %}
+                {% for row in students %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
 
-                    <!-- ✅ Student Name -->
                     <td>
-                        {{ admission.student.name|default:admission.student.get_full_name }}
+                        {{ row.student.name|default:row.student.get_full_name }}
                     </td>
 
-                    <!-- ✅ Checkbox -->
                     <td class="text-center">
                         <input type="checkbox"
-                               name="student_{{ admission.student.id }}"
-                               {% if admission.student.id in existing_attendance %}checked{% endif %}>
+                               name="student_{{ row.student.id }}"
+                               {% if row.student.id in existing_attendance %}checked{% endif %}>
                     </td>
                 </tr>
                 {% endfor %}

@@ -195,8 +195,41 @@ from django.views import View
 from tims.faculty.models import TrainingSession,StudentAttendance,FacultyDailyReport,BatchCompletionRequest
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from tims.adminapp.models import Batch,FacultyAssignment,Assignstudent,Batch
+from tims.adminapp.models import Batch, FacultyAssignment, Admission
 from tims.faculty.forms import TrainingSessionForm,AttendanceFilterForm,FacultyDailyReportForm, BatchCompletionRequestForm
+
+
+def resolve_admission_students(admissions):
+    admission_list = list(admissions)
+    admission_phones = {
+        admission.phone
+        for admission in admission_list
+        if admission.phone
+    }
+
+    students_by_phone = {
+        user.phone_number: user
+        for user in User.objects.filter(phone_number__in=admission_phones)
+        if user.phone_number
+    }
+    students_by_username = {
+        user.username: user
+        for user in User.objects.filter(username__in=admission_phones)
+    }
+
+    resolved_rows = []
+    for admission in admission_list:
+        student = (
+            students_by_phone.get(admission.phone)
+            or students_by_username.get(admission.phone)
+        )
+        if student:
+            resolved_rows.append({
+                "admission": admission,
+                "student": student,
+            })
+
+    return resolved_rows
 
 
 class TrainingSessionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -382,6 +415,12 @@ class StudentAttendanceCreateView(LoginRequiredMixin, UserPassesTestMixin, View)
         messages.error(self.request, "You are not authorized.")
         return redirect("users:login")
 
+    def get_admission_rows(self, batch):
+        admissions = Admission.objects.filter(
+            batch=batch
+        ).select_related("enquiry", "batch", "course")
+        return resolve_admission_students(admissions)
+
     def get(self, request):
         form = AttendanceFilterForm(request.GET or None, user=request.user)
 
@@ -393,14 +432,14 @@ class StudentAttendanceCreateView(LoginRequiredMixin, UserPassesTestMixin, View)
             date = form.cleaned_data['date']
 
             # 🔐 Security check
-            if batch not in Batch.objects.filter(faculty=request.user):
+            if not Batch.objects.filter(
+                facultyassignment__faculty=request.user,
+                id=batch.id
+            ).exists():
                 messages.error(request, "Invalid batch selection")
                 return redirect("faculty:attendance-create")
 
-            students = User.objects.filter(
-                batch=batch,
-                role__role_name__iexact="student"
-            )
+            students = self.get_admission_rows(batch)
 
             existing_attendance = StudentAttendance.objects.filter(
                 batch=batch,
@@ -421,16 +460,17 @@ class StudentAttendanceCreateView(LoginRequiredMixin, UserPassesTestMixin, View)
             date = form.cleaned_data['date']
 
             # 🔐 Security check
-            if batch not in Batch.objects.filter(faculty=request.user):
+            if not Batch.objects.filter(
+                facultyassignment__faculty=request.user,
+                id=batch.id
+            ).exists():
                 messages.error(request, "Invalid batch selection")
                 return redirect("faculty:attendance-create")
 
-            students = User.objects.filter(
-                batch=batch,
-                role__role_name__iexact="student"
-            )
+            admission_rows = self.get_admission_rows(batch)
 
-            for student in students:
+            for row in admission_rows:
+                student = row["student"]
                 present = request.POST.get(f"student_{student.id}") == "on"
 
                 StudentAttendance.objects.update_or_create(
@@ -467,11 +507,10 @@ class FacultyStudentListView(LoginRequiredMixin, View):
         selected_batch = request.GET.get("batch")
         selected_course = request.GET.get("course")
 
-        # ✅ Use Admission instead of Assignstudent
         student_admissions = Admission.objects.filter(
             batch_id__in=assigned_batch_ids,
             course_id__in=assigned_course_ids
-        ).select_related("student", "batch", "course")
+        ).select_related("enquiry", "batch", "course")
 
         # ✅ Apply filters
         if selected_batch:
@@ -481,9 +520,9 @@ class FacultyStudentListView(LoginRequiredMixin, View):
             student_admissions = student_admissions.filter(course_id=selected_course)
 
         students = []
-
-        for admission in student_admissions:
-            student = admission.student
+        for row in resolve_admission_students(student_admissions):
+            admission = row["admission"]
+            student = row["student"]
             batch = admission.batch
 
             # ✅ Total classes

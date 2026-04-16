@@ -1779,7 +1779,7 @@ class AdminTrainingSessionListView(View):
         batches = Batch.objects.all()
 
         # Get only faculty users
-        faculties = User.objects.filter(role__role_name="Faculty")
+        faculties = User.objects.filter(role__role_name__iexact="Faculty")
 
         context = {
             "sessions": sessions,
@@ -1791,6 +1791,38 @@ class AdminTrainingSessionListView(View):
         }
 
         return render(request, self.template_name, context)
+
+def resolve_admission_students(admissions):
+    admission_list = list(admissions)
+    admission_phones = {
+        admission.phone
+        for admission in admission_list
+        if admission.phone
+    }
+
+    students_by_phone = {
+        user.phone_number: user
+        for user in User.objects.filter(phone_number__in=admission_phones)
+        if user.phone_number
+    }
+    students_by_username = {
+        user.username: user
+        for user in User.objects.filter(username__in=admission_phones)
+    }
+
+    resolved_rows = []
+    for admission in admission_list:
+        student = (
+            students_by_phone.get(admission.phone)
+            or students_by_username.get(admission.phone)
+        )
+        if student:
+            resolved_rows.append({
+                "admission": admission,
+                "student": student,
+            })
+
+    return resolved_rows
 
 class AssignmentReportView(View):
     template_name = "assignment_report.html"
@@ -1806,30 +1838,33 @@ class AssignmentReportView(View):
         # ================= STUDENT FILTER =================
         if role_filter == "student":
 
-            assigned_students = Assignstudent.objects.select_related(
-                "student", "batch", "course"
+            student_admissions = Admission.objects.select_related(
+                "enquiry", "batch", "course"
             )
 
             if course_id:
-                assigned_students = assigned_students.filter(
+                student_admissions = student_admissions.filter(
                     course_id=course_id
                 )
 
             if batch_id:
-                assigned_students = assigned_students.filter(
+                student_admissions = student_admissions.filter(
                     batch_id=batch_id
                 )
 
-            for assign in assigned_students:
-                user = assign.student
+            for row in resolve_admission_students(student_admissions):
+                user = row["student"]
+                admission = row["admission"]
 
                 total = StudentAttendance.objects.filter(
-                    student=user
+                    student=user,
+                    batch=admission.batch,
                 ).count()
 
                 present = StudentAttendance.objects.filter(
                     student=user,
-                    status="Present"
+                    batch=admission.batch,
+                    is_present=True,
                 ).count()
 
                 attendance_percentage = 0
@@ -1863,10 +1898,8 @@ class AssignmentReportView(View):
             for assign in assigned_faculty:
                 user = assign.faculty
 
-                # ---- Training session count (APPROVED ONLY) ----
                 session_qs = TrainingSession.objects.filter(
-                    faculty=user,
-                    approval_status="Approved"
+                    faculty=user
                 )
 
                 # filter by selected batch
@@ -1923,7 +1956,7 @@ class AdminBatchCompletionRequestListView(View):
             requests_qs = requests_qs.filter(status=status)
 
         batches = Batch.objects.all().order_by("batch_name")
-        faculties = User.objects.filter(role__role_name="Faculty").order_by("name")
+        faculties = User.objects.filter(role__role_name__iexact="Faculty").order_by("name")
 
         context = {
             "requests_qs": requests_qs,
