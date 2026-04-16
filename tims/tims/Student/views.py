@@ -524,18 +524,23 @@ class StudentTrainingSessionView(LoginRequiredMixin, View):
 
         batch_ids = student_assignments.values_list("batch_id", flat=True)
 
-        # Only approved sessions
+        # Date filter
+        session_date = request.GET.get("session_date")
+
         sessions = TrainingSession.objects.filter(
-            batch_id__in=batch_ids,
-            approval_status="Approved"
+            batch_id__in=batch_ids
         ).select_related("batch", "faculty").order_by("-session_date")
+
+        if session_date:
+            sessions = sessions.filter(session_date=session_date)
 
         context = {
             "sessions": sessions,
-            "student_assignments": student_assignments
+            "student_assignments": student_assignments,
+            "selected_date": session_date,
         }
 
-        return render(request, self.template_name, context)
+        return render(request, self.template_name, context) 
 
 
 class HomeView1(View):
