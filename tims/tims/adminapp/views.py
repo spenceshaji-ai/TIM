@@ -800,7 +800,7 @@ from tims.adminapp.forms import EnquiryForm,FollowUpForm
 from tims.adminapp.models import Admission
 from tims.adminapp.forms import AdmissionForm
 from tims.adminapp.models import Course,Batch,FacultyAssignment,Assignstudent
-from tims.faculty.models import TrainingSession,FacultyDailyReport,StudentAttendance
+from tims.faculty.models import TrainingSession,FacultyDailyReport,StudentAttendance,BatchCompletionRequest
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from tims.adminapp.forms import CourseForm,BatchForm,FacultyAssignmentForm,AssignstudentForm,CertificateForm

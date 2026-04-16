@@ -219,7 +219,7 @@ urlpatterns = [
     path("assignment-report/", AssignmentReportView.as_view(), name="assignment-report"),
     path("completion-requests/", AdminBatchCompletionRequestListView.as_view(), name="completion-request-list"),
     path("completion-request/approve/<int:pk>/",AdminBatchCompletionApproveView.as_view(),name="completion-request-approve"),
-    path("completion-request/reject/<int:pk>/",AdminBatchCompletionRejectView.as_vie
+    path("completion-request/reject/<int:pk>/",AdminBatchCompletionRejectView.as_view(), name="completion-request-reject"),
 
 # from tims.adminapp.views import LeaveHistoryDetailView, LeaveRequestsView, LeaveUserListView, UpdateLeaveStatusView, LeaveRequestsView,UpdateLeaveStatusView,FollowUpCreateView, FollowUpListView
 # from .views import *
