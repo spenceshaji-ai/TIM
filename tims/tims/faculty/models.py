@@ -5,19 +5,12 @@ from django.utils import timezone
 # Create your models here.
 
 class TrainingSession(models.Model):
-    STATUS_CHOICES = (
-        ('Ongoing', 'Ongoing'),
-        ('Completed', 'Completed'),
-    )
-
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
     faculty = models.ForeignKey("users.User", on_delete=models.CASCADE)
     session_date = models.DateField()
     topic_covered = models.TextField()
     hours_taken = models.DecimalField(max_digits=4, decimal_places=1)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
-    approval_status = models.CharField(max_length=20,default='Pending')
 
     class Meta:
         constraints = [
@@ -25,9 +18,10 @@ class TrainingSession(models.Model):
                 fields=['batch', 'session_date'],
                 name='unique_batch_session_date'
             )
-        ]    
+        ]
+
     def __str__(self):
-        return f"{self.batch} - {self.session_date}"    
+        return f"{self.batch} - {self.session_date}"     
 
 
 class StudentAttendance(models.Model):
