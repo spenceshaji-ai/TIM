@@ -37,16 +37,8 @@ urlpatterns = [
     path("faculty-reports/",AdminFacultyReportListView.as_view(),name="faculty_report_list",),
     path("training-sessions/",AdminTrainingSessionListView.as_view(),name="training_session_list",),
     path("assignment-report/", AssignmentReportView.as_view(), name="assignment-report"),
-    path(
-        "completion-requests/",
-        AdminBatchCompletionRequestListView.as_view(),
-        name="completion-request-list"
-    ),
-    path(
-        "completion-request/approve/<int:pk>/",
-        AdminBatchCompletionApproveView.as_view(),
-        name="completion-request-approve"
-    ),
+    path("completion-requests/", AdminBatchCompletionRequestListView.as_view(), name="completion-request-list"),
+    path("completion-request/approve/<int:pk>/",AdminBatchCompletionApproveView.as_view(),name="completion-request-approve"),
     path("completion-request/reject/<int:pk>/",AdminBatchCompletionRejectView.as_view(), name="completion-request-reject"),
 ] 
   
