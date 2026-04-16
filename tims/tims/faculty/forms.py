@@ -149,7 +149,6 @@ class TrainingSessionForm(forms.ModelForm):
             'session_date',
             'topic_covered',
             'hours_taken',
-            'status',
         ]
         widgets = {
             'batch': forms.Select(attrs={'class': 'form-control'}),
@@ -157,7 +156,7 @@ class TrainingSessionForm(forms.ModelForm):
                 attrs={
                     'class': 'form-control',
                     'type': 'date',
-                    'max': timezone.now().date()   # 👈 prevents future in picker
+                    'max': timezone.now().date()
                 }
             ),
             'topic_covered': forms.Textarea(attrs={
@@ -170,25 +169,22 @@ class TrainingSessionForm(forms.ModelForm):
                 'step': '0.5',
                 'min': '0'
             }),
-            'status': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['batch'].empty_label = "Select Batch"
 
-    # 🔹 Prevent future date
+    # Prevent future date
     def clean_session_date(self):
         session_date = self.cleaned_data.get("session_date")
 
         if session_date and session_date > timezone.now().date():
-            raise forms.ValidationError(
-                "Future dates are not allowed."
-            )
+            raise forms.ValidationError("Future dates are not allowed.")
 
         return session_date
 
-    # 🔹 Prevent duplicate session
+    # Prevent duplicate session
     def clean(self):
         cleaned_data = super().clean()
         batch = cleaned_data.get("batch")
@@ -200,7 +196,7 @@ class TrainingSessionForm(forms.ModelForm):
                 session_date=session_date
             )
 
-            # If update view exists, exclude current object
+            # Exclude current object during update
             if self.instance.pk:
                 qs = qs.exclude(pk=self.instance.pk)
 
@@ -210,83 +206,41 @@ class TrainingSessionForm(forms.ModelForm):
                 )
 
         return cleaned_data
-class StudentAttendanceForm(forms.ModelForm):
 
-    class Meta:
-        model = StudentAttendance
-        fields = [
-            'batch',
-            'student',
-            'attendance_date',
-            'status',
-        ]
+class AttendanceFilterForm(forms.Form):
+    batch = forms.ModelChoiceField(
+        queryset=Batch.objects.none(),
+        required=True,
+        empty_label="Select Batch"
+    )
 
-        widgets = {
-            'batch': forms.Select(attrs={'class': 'form-control'}),
-            'student': forms.Select(attrs={'class': 'form-control'}),
-            'attendance_date': forms.DateInput(
-                attrs={
-                    'class': 'form-control',
-                    'type': 'date',
-                    'max': timezone.now().date()   # UI restriction
-                }
-            ),
-            'status': forms.Select(attrs={'class': 'form-control'}),
-        }
+    date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
         if user:
-            assigned_batches = FacultyAssignment.objects.filter(
-                faculty=user
-            ).values_list('batch', flat=True)
-
-            # Show only faculty batches
+            # ✅ Show only batches assigned to faculty
             self.fields['batch'].queryset = Batch.objects.filter(
-                id__in=assigned_batches
+                facultyassignment__faculty=user
             )
 
-            # Show students only from faculty batches
-            self.fields['student'].queryset = User.objects.filter(
-                assignstudent__batch__in=assigned_batches,
-                role__role_name__iexact='Student'
-            ).distinct()
+        # ✅ Disable future dates in UI
+        today = timezone.now().date()
+        self.fields['date'].widget.attrs['max'] = today
 
-        self.fields['batch'].empty_label = "Select Batch"
-        self.fields['student'].empty_label = "Select Student"
+    # ✅ Backend validation (important)
+    def clean_date(self):
+        date = self.cleaned_data['date']
+        today = timezone.now().date()
 
-    # 🔒 Prevent future date (Backend validation)
-    def clean_attendance_date(self):
-        attendance_date = self.cleaned_data.get("attendance_date")
+        if date > today:
+            raise forms.ValidationError("Future date is not allowed.")
 
-        if attendance_date and attendance_date > timezone.now().date():
-            raise forms.ValidationError("Future dates are not allowed.")
-
-        return attendance_date
-
-    # 🔒 Prevent duplicate attendance
-    def clean(self):
-        cleaned_data = super().clean()
-        student = cleaned_data.get('student')
-        attendance_date = cleaned_data.get('attendance_date')
-
-        if student and attendance_date:
-            qs = StudentAttendance.objects.filter(
-                student=student,
-                attendance_date=attendance_date
-            )
-
-            if self.instance.pk:
-                qs = qs.exclude(pk=self.instance.pk)
-
-            if qs.exists():
-                raise forms.ValidationError(
-                    "Attendance for this student on this date already exists."
-                )
-
-        return cleaned_data
+        return date
 
 class FacultyDailyReportForm(forms.ModelForm):
 
