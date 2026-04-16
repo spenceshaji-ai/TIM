@@ -527,21 +527,32 @@ class FacultyTrainingProgressView(LoginRequiredMixin, View):
     template_name = "training_progress.html"
 
     def get(self, request):
-        status_filter = request.GET.get("status")
+        batch_id = request.GET.get("batch")
+        session_date = request.GET.get("session_date")
 
         # Only logged-in faculty sessions
         sessions = TrainingSession.objects.filter(
-            faculty=request.user,
-            approval_status="Approved"
-        ).select_related("batch")
+            faculty=request.user
+        ).select_related("batch").order_by("-session_date")
 
-        # Filter by status if selected
-        if status_filter in ["Ongoing", "Completed"]:
-            sessions = sessions.filter(status=status_filter)
+        # Batch filter
+        if batch_id:
+            sessions = sessions.filter(batch_id=batch_id)
+
+        # Date filter
+        if session_date:
+            sessions = sessions.filter(session_date=session_date)
+
+        # Only batches this faculty has sessions in
+        batches = Batch.objects.filter(
+            trainingsession__faculty=request.user
+        ).distinct()
 
         context = {
             "sessions": sessions,
-            "status_filter": status_filter,
+            "batches": batches,
+            "selected_batch": batch_id,
+            "selected_date": session_date,
         }
 
         return render(request, self.template_name, context)
