@@ -192,11 +192,11 @@ from django.contrib import messages
 # Create your views here.
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from django.views import View
-from tims.faculty.models import TrainingSession,StudentAttendance,FacultyDailyReport
+from tims.faculty.models import TrainingSession,StudentAttendance,FacultyDailyReport,BatchCompletionRequest
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from tims.adminapp.models import Batch,FacultyAssignment,Assignstudent,Batch
-from tims.faculty.forms import TrainingSessionForm,StudentAttendanceForm,FacultyDailyReportForm
+from tims.faculty.forms import TrainingSessionForm,AttendanceFilterForm,FacultyDailyReportForm, BatchCompletionRequestForm
 
 
 class TrainingSessionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):

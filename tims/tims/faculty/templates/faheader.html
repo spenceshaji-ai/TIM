@@ -279,9 +279,9 @@
                     </li>
 
                     <li class="side-nav-item">
-                        <a href="{% url 'faculty:faculty_training_progress' %}" class="side-nav-link">
+                        <a href="{% url 'faculty:attendance-create"' %}" class="side-nav-link">
                             <i class="uil-comments-alt"></i>
-                            <span> Training progress </span>
+                            <span> Student Attendance </span>
                         </a>
                     </li>
 
@@ -308,15 +308,15 @@
                             class="side-nav-link">
                             <i class="uil uil-tachometer-fast"></i>
                             <span class="badge bg-danger text-white float-end"></span>
-                            <span> Student Attendence </span>
+                            <span> Batch Completion </span>
                         </a>
                         <div class="collapse" id="sidebarCr">
                             <ul class="side-nav-second-level">
                                 <li>
-                                    <a href="{% url 'faculty:attendance-create' %}">Mark Attendence </a>
+                                    <a href="{% url 'faculty:completion-request-create' %}"> Completion Requets</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'faculty:attendance-list' %}">Edit Attendence</a>
+                                    <a href="{% url 'faculty:completion-request-list' %}">View Requests</a>
                                 </li>
                             </ul>
                         </div>

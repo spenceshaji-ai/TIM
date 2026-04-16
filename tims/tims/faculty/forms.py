@@ -134,7 +134,7 @@ class LeaveApplicationForm(forms.ModelForm):
 
         return cleaned_data
 
-from tims.faculty.models import TrainingSession, StudentAttendance,FacultyDailyReport
+from tims.faculty.models import TrainingSession, StudentAttendance,FacultyDailyReport,BatchCompletionRequest
 from tims.adminapp.models import Batch,FacultyAssignment,Assignstudent
 from django.contrib.auth import get_user_model
 User = get_user_model()

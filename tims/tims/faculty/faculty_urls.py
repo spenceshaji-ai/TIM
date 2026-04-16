@@ -10,18 +10,18 @@ from tims.faculty.views import (
     TrainingSessionListView,
     TrainingSessionUpdateView,
     TrainingSessionDeleteView,
-    StudentAttendanceListView,
-    StudentAttendanceCreate,
-    StudentAttendanceUpdateView,
-    StudentAttendanceDeleteView,
-    FacultyTrainingProgressView,
     Home1View,
     FacultyReportCreateView,
     FacultyReportListView,
     FacultyReportUpdateView,
     FacultyReportDeleteView,
     FacultyStudentListView,
-    FacultyTrainingProgressView
+    FacultyTrainingProgressView,
+    FacultyBatchCompletionRequestCreateView,
+    FacultyBatchCompletionRequestListView,
+    FacultyBatchCompletionRequestDeleteView,
+    StudentAttendanceCreateView,
+
 )
 
 
