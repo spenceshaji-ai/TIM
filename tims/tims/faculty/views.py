@@ -202,7 +202,7 @@ from tims.faculty.forms import TrainingSessionForm,StudentAttendanceForm,Faculty
 class TrainingSessionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'create_session.html'
 
-    # 🔐 Faculty Role Check
+    # Faculty Role Check
     def test_func(self):
         user = self.request.user
         return (
@@ -211,7 +211,7 @@ class TrainingSessionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
             user.role.role_name.lower() == "faculty"
         )
 
-    # 🚫 If Not Authorized
+    # If Not Authorized
     def handle_no_permission(self):
         messages.error(self.request, "You are not authorized to access this page.")
         return redirect("users:login")
@@ -243,10 +243,10 @@ class TrainingSessionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         return render(request, self.template_name, {'form': form})
 
+
 class TrainingSessionListView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'Session_list.html'
 
-    # 🔐 Faculty Role Check
     def test_func(self):
         user = self.request.user
         return (
@@ -255,20 +255,59 @@ class TrainingSessionListView(LoginRequiredMixin, UserPassesTestMixin, View):
             user.role.role_name.lower() == "faculty"
         )
 
-    # 🚫 If Not Authorized
     def handle_no_permission(self):
         messages.error(self.request, "You are not authorized to access this page.")
         return redirect("users:login")
 
     def get(self, request):
+        batch_id = request.GET.get("batch")
+        session_date = request.GET.get("session_date")
+
         sessions = TrainingSession.objects.filter(
             faculty=request.user
-        ).order_by('-session_date')
+        ).select_related("batch").order_by('-session_date')
 
-        return render(request, self.template_name, {'sessions': sessions})
+        if batch_id:
+            sessions = sessions.filter(batch_id=batch_id)
 
-class TrainingSessionUpdateView(LoginRequiredMixin, View):
+        if session_date:
+            sessions = sessions.filter(session_date=session_date)
+
+        batches = Batch.objects.filter(
+            trainingsession__faculty=request.user
+        ).distinct()
+
+        context = {
+            "sessions": sessions,
+            "batches": batches,
+            "selected_batch": batch_id,
+            "selected_date": session_date,
+        }
+
+        return render(request, self.template_name, context)
+
+
+class TrainingSessionUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'create_session.html'
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
+
+    def get_assigned_batches(self, user):
+        return Batch.objects.filter(
+            id__in=FacultyAssignment.objects.filter(
+                faculty=user
+            ).values_list('batch', flat=True)
+        )
 
     def get(self, request, pk):
         session = get_object_or_404(
@@ -277,11 +316,9 @@ class TrainingSessionUpdateView(LoginRequiredMixin, View):
             faculty=request.user
         )
 
-        # 🚫 Block if Approved or Rejected
-        if session.approval_status in ["Approved", "Rejected"]:
-            return redirect('faculty:training_list')
-
         form = TrainingSessionForm(instance=session)
+        form.fields['batch'].queryset = self.get_assigned_batches(request.user)
+
         return render(request, self.template_name, {'form': form})
 
     def post(self, request, pk):
@@ -290,22 +327,35 @@ class TrainingSessionUpdateView(LoginRequiredMixin, View):
             pk=pk,
             faculty=request.user
         )
-
-        # 🚫 Block if Approved or Rejected
-        if session.approval_status in ["Approved", "Rejected"]:
-            return redirect('faculty:training_list')
 
         form = TrainingSessionForm(request.POST, instance=session)
+        form.fields['batch'].queryset = self.get_assigned_batches(request.user)
 
         if form.is_valid():
-            updated_session = form.save(commit=False)
-            updated_session.faculty = request.user
-            updated_session.save()
-            return redirect('faculty:training_list')
+            try:
+                updated_session = form.save(commit=False)
+                updated_session.faculty = request.user
+                updated_session.save()
+                return redirect('faculty:training_list')
+            except IntegrityError:
+                form.add_error(None, "Duplicate session for this batch on this date.")
 
         return render(request, self.template_name, {'form': form})
-                
-class TrainingSessionDeleteView(LoginRequiredMixin, View):
+
+
+class TrainingSessionDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
 
     def post(self, request, pk):
         session = get_object_or_404(
@@ -313,113 +363,91 @@ class TrainingSessionDeleteView(LoginRequiredMixin, View):
             pk=pk,
             faculty=request.user
         )
-
-        # 🚫 Block if Approved or Rejected
-        if session.approval_status in ["Approved", "Rejected"]:
-            return redirect('faculty:training_list')
 
         session.delete()
         return redirect('faculty:training_list')
 
 
-class StudentAttendanceCreate(LoginRequiredMixin, UserPassesTestMixin, View):
-    template_name = 'create_attendance.html'
+class StudentAttendanceCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = "attendance_table.html"
 
     def test_func(self):
-        user = self.request.user
         return (
-            user.is_authenticated and
-            user.role and
-            user.role.role_name.lower() == "faculty"
+            self.request.user.is_authenticated and
+            self.request.user.role and
+            self.request.user.role.role_name.lower() == "faculty"
         )
 
     def handle_no_permission(self):
-        messages.error(self.request, "You are not authorized to access this page.")
+        messages.error(self.request, "You are not authorized.")
         return redirect("users:login")
 
     def get(self, request):
-        form = StudentAttendanceForm(user=request.user)
-        return render(request, self.template_name, {'form': form})
+        form = AttendanceFilterForm(request.GET or None, user=request.user)
 
-    def post(self, request):
-        form = StudentAttendanceForm(request.POST, user=request.user)
+        students = None
+        existing_attendance = []
 
         if form.is_valid():
-            attendance = form.save(commit=False)
-            attendance.faculty = request.user   # 🔐 secure
-            attendance.save()
+            batch = form.cleaned_data['batch']
+            date = form.cleaned_data['date']
 
-            messages.success(request, "Attendance created successfully.")
-            return redirect('faculty:attendance-list')
+            # 🔐 Security check
+            if batch not in Batch.objects.filter(faculty=request.user):
+                messages.error(request, "Invalid batch selection")
+                return redirect("faculty:attendance-create")
 
-        return render(request, self.template_name, {'form': form})
+            students = User.objects.filter(
+                batch=batch,
+                role__role_name__iexact="student"
+            )
 
-class StudentAttendanceListView(LoginRequiredMixin, View):
-    template_name = "attendance_list.html"
-
-    def get(self, request):
-        attendances = StudentAttendance.objects.filter(
-            faculty=request.user   # 🔐 only logged-in faculty
-        ).select_related('student', 'batch').order_by('-attendance_date')
+            existing_attendance = StudentAttendance.objects.filter(
+                batch=batch,
+                attendance_date=date
+            ).values_list('student_id', flat=True)
 
         return render(request, self.template_name, {
-            'attendances': attendances
+            "form": form,
+            "students": students,
+            "existing_attendance": existing_attendance
         })
 
-class StudentAttendanceUpdateView(LoginRequiredMixin, View):
-    template_name = "create_attendance.html"
-
-    def get(self, request, pk):
-        attendance = get_object_or_404(
-            StudentAttendance,
-            pk=pk,
-            faculty=request.user   # 🔐 restrict ownership
-        )
-
-        form = StudentAttendanceForm(
-            instance=attendance,
-            user=request.user
-        )
-
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request, pk):
-        attendance = get_object_or_404(
-            StudentAttendance,
-            pk=pk,
-            faculty=request.user
-        )
-
-        form = StudentAttendanceForm(
-            request.POST,
-            instance=attendance,
-            user=request.user
-        )
+    def post(self, request):
+        form = AttendanceFilterForm(request.POST, user=request.user)
 
         if form.is_valid():
-            updated = form.save(commit=False)
-            updated.faculty = request.user  # 🔐 safety
-            updated.save()
+            batch = form.cleaned_data['batch']
+            date = form.cleaned_data['date']
 
-            messages.success(request, "Attendance updated successfully.")
-            return redirect('faculty:attendance-list')
+            # 🔐 Security check
+            if batch not in Batch.objects.filter(faculty=request.user):
+                messages.error(request, "Invalid batch selection")
+                return redirect("faculty:attendance-create")
 
-        return render(request, self.template_name, {'form': form})
+            students = User.objects.filter(
+                batch=batch,
+                role__role_name__iexact="student"
+            )
 
-class StudentAttendanceDeleteView(LoginRequiredMixin, View):
+            for student in students:
+                present = request.POST.get(f"student_{student.id}") == "on"
 
-    def post(self, request, pk):
-        attendance = get_object_or_404(
-            StudentAttendance,
-            pk=pk,
-            faculty=request.user   # 🔐 restrict ownership
-        )
+                StudentAttendance.objects.update_or_create(
+                    student=student,
+                    attendance_date=date,
+                    defaults={
+                        "batch": batch,
+                        "faculty": request.user,
+                        "is_present": present
+                    }
+                )
 
-        attendance.delete()
-        messages.success(request, "Attendance deleted successfully.")
-        return redirect('faculty:attendance-list')
+            messages.success(request, "Attendance saved successfully")
+            return redirect("faculty:attendance-create")
 
-
+        return render(request, self.template_name, {"form": form})
+         
          
 class FacultyStudentListView(LoginRequiredMixin, View):
     template_name = "student_list.html"
