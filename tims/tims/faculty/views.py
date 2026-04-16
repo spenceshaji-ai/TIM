@@ -705,3 +705,97 @@ class Home1View(LoginRequiredMixin, View):
         }
 
         return render(request, "fahome.html", context)
+
+class FacultyBatchCompletionRequestCreateView(LoginRequiredMixin, View):
+    template_name = "faculty_completion_request_form.html"
+
+    def get(self, request):
+        form = BatchCompletionRequestForm(user=request.user)
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request):
+        form = BatchCompletionRequestForm(request.POST, user=request.user)
+
+        if form.is_valid():
+            completion_request = form.save(commit=False)
+            completion_request.faculty = request.user
+            completion_request.course = completion_request.batch.course
+            completion_request.save()
+
+            messages.success(request, "Completion request submitted successfully.")
+            return redirect("faculty:completion-request-list")
+
+        return render(request, self.template_name, {"form": form})
+
+class FacultyBatchCompletionRequestListView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = "faculty_completion_request_list.html"
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
+
+    def get(self, request):
+        status = request.GET.get("status")
+        batch_id = request.GET.get("batch")
+
+        requests_qs = BatchCompletionRequest.objects.filter(
+            faculty=request.user
+        ).select_related("batch", "course").order_by("-requested_at")
+
+        if status:
+            requests_qs = requests_qs.filter(status=status)
+
+        if batch_id:
+            requests_qs = requests_qs.filter(batch_id=batch_id)
+
+        assigned_batch_ids = FacultyAssignment.objects.filter(
+            faculty=request.user
+        ).values_list("batch_id", flat=True)
+
+        batches = Batch.objects.filter(id__in=assigned_batch_ids)
+
+        context = {
+            "requests_qs": requests_qs,
+            "batches": batches,
+            "selected_status": status,
+            "selected_batch": batch_id,
+        }
+
+        return render(request, self.template_name, context)
+
+class FacultyBatchCompletionRequestDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
+
+    def post(self, request, pk):
+        completion_request = get_object_or_404(
+            BatchCompletionRequest,
+            pk=pk,
+            faculty=request.user
+        )
+
+        if completion_request.status != "Pending":
+            messages.error(request, "Only pending requests can be deleted.")
+            return redirect("faculty:completion-request-list")
+
+        completion_request.delete()
+        messages.success(request, "Completion request deleted successfully.")
+        return redirect("faculty:completion-request-list")        
