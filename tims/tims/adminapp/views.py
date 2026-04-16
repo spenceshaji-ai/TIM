@@ -1411,28 +1411,6 @@ from tims.adminapp.models import LeaveApplication
 
 
 
-class TrainingSessionApprovalListView(View):
-    template_name = "training_approval_list.html"
-
-    def get(self, request):
-        sessions = TrainingSession.objects.all().order_by('-created_at')
-        return render(request, self.template_name, {
-            'sessions': sessions
-        })
-
-class TrainingSessionApproveView(View):
-    def post(self, request, pk):
-        session = get_object_or_404(TrainingSession, pk=pk)
-        session.approval_status = 'Approved'
-        session.save()
-        return redirect('adminapp:admin_training_approval_list')
-
-class TrainingSessionRejectView(View):
-    def post(self, request, pk):
-        session = get_object_or_404(TrainingSession, pk=pk)
-        session.approval_status = 'Rejected'
-        session.save()
-        return redirect('adminapp:admin_training_approval_list')
 
 
 class AssignStudentView(View):
@@ -1781,12 +1759,12 @@ class AdminTrainingSessionListView(View):
 
         sessions = TrainingSession.objects.select_related(
             "faculty", "batch"
-        ).all()
+        ).all().order_by("-session_date")
 
         # Filters
         batch_id = request.GET.get("batch")
         faculty_id = request.GET.get("faculty")
-        status = request.GET.get("status")
+        session_date = request.GET.get("session_date")
 
         if batch_id:
             sessions = sessions.filter(batch_id=batch_id)
@@ -1794,13 +1772,13 @@ class AdminTrainingSessionListView(View):
         if faculty_id:
             sessions = sessions.filter(faculty_id=faculty_id)
 
-        if status:
-            sessions = sessions.filter(status=status)
+        if session_date:
+            sessions = sessions.filter(session_date=session_date)
 
         # Get all batches
         batches = Batch.objects.all()
 
-        # Get only faculty users (role = Faculty)
+        # Get only faculty users
         faculties = User.objects.filter(role__role_name="Faculty")
 
         context = {
@@ -1809,7 +1787,7 @@ class AdminTrainingSessionListView(View):
             "faculties": faculties,
             "selected_batch": batch_id,
             "selected_faculty": faculty_id,
-            "selected_status": status,
+            "selected_date": session_date,
         }
 
         return render(request, self.template_name, context)
@@ -1922,6 +1900,140 @@ class AssignmentReportView(View):
         }
 
         return render(request, self.template_name, context)
+
+class AdminBatchCompletionRequestListView(View):
+    template_name = "admin_completion_request_list.html"
+
+    def get(self, request):
+        batch_id = request.GET.get("batch")
+        faculty_id = request.GET.get("faculty")
+        status = request.GET.get("status")
+
+        requests_qs = BatchCompletionRequest.objects.select_related(
+            "faculty", "batch", "course"
+        ).order_by("-requested_at")
+
+        if batch_id:
+            requests_qs = requests_qs.filter(batch_id=batch_id)
+
+        if faculty_id:
+            requests_qs = requests_qs.filter(faculty_id=faculty_id)
+
+        if status:
+            requests_qs = requests_qs.filter(status=status)
+
+        batches = Batch.objects.all().order_by("batch_name")
+        faculties = User.objects.filter(role__role_name="Faculty").order_by("name")
+
+        context = {
+            "requests_qs": requests_qs,
+            "batches": batches,
+            "faculties": faculties,
+            "selected_batch": batch_id,
+            "selected_faculty": faculty_id,
+            "selected_status": status,
+        }
+
+        return render(request, self.template_name, context)      
+class AdminBatchCompletionApproveView(View):
+    template_name = "admin_completion_request_action.html"
+
+    def get(self, request, pk):
+        completion_request = get_object_or_404(
+            BatchCompletionRequest.objects.select_related("faculty", "batch", "course"),
+            pk=pk
+        )
+
+        if completion_request.status != "Pending":
+            messages.error(request, "Only pending requests can be approved.")
+            return redirect("adminapp:completion-request-list")
+
+        form = AdminBatchCompletionActionForm(instance=completion_request)
+
+        context = {
+            "form": form,
+            "completion_request": completion_request,
+            "action_type": "approve",
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, pk):
+        completion_request = get_object_or_404(
+            BatchCompletionRequest.objects.select_related("faculty", "batch", "course"),
+            pk=pk
+        )
+
+        if completion_request.status != "Pending":
+            messages.error(request, "Only pending requests can be approved.")
+            return redirect("adminapp:completion-request-list")
+
+        form = AdminBatchCompletionActionForm(request.POST, instance=completion_request)
+
+        if form.is_valid():
+            completion_request = form.save(commit=False)
+            completion_request.status = "Approved"
+            completion_request.approved_at = timezone.now()
+            completion_request.save()
+
+            messages.success(request, "Completion request approved successfully.")
+            return redirect("adminapp:completion-request-list")
+
+        context = {
+            "form": form,
+            "completion_request": completion_request,
+            "action_type": "approve",
+        }
+        return render(request, self.template_name, context) 
+
+class AdminBatchCompletionRejectView(View):
+    template_name = "admin_completion_request_action.html"
+
+    def get(self, request, pk):
+        completion_request = get_object_or_404(
+            BatchCompletionRequest.objects.select_related("faculty", "batch", "course"),
+            pk=pk
+        )
+
+        if completion_request.status != "Pending":
+            messages.error(request, "Only pending requests can be rejected.")
+            return redirect("adminapp:completion-request-list")
+
+        form = AdminBatchCompletionActionForm(instance=completion_request)
+
+        context = {
+            "form": form,
+            "completion_request": completion_request,
+            "action_type": "reject",
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, pk):
+        completion_request = get_object_or_404(
+            BatchCompletionRequest.objects.select_related("faculty", "batch", "course"),
+            pk=pk
+        )
+
+        if completion_request.status != "Pending":
+            messages.error(request, "Only pending requests can be rejected.")
+            return redirect("adminapp:completion-request-list")
+
+        form = AdminBatchCompletionActionForm(request.POST, instance=completion_request)
+
+        if form.is_valid():
+            completion_request = form.save(commit=False)
+            completion_request.status = "Rejected"
+            completion_request.approved_at = None
+            completion_request.save()
+
+            messages.success(request, "Completion request rejected successfully.")
+            return redirect("adminapp:completion-request-list")
+
+        context = {
+            "form": form,
+            "completion_request": completion_request,
+            "action_type": "reject",
+        }
+        return render(request, self.template_name, context)        
     
 
 from django.template.loader import get_template
