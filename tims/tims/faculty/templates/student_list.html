@@ -5,7 +5,7 @@
 
     <h3 class="fw-bold mb-4">My Students</h3>
 
-    <!-- Filter Section -->
+    <!-- ================= FILTER ================= -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <form method="get" class="row g-3">
@@ -14,11 +14,13 @@
                 <div class="col-md-4">
                     <label class="form-label">Batch</label>
                     <select name="batch" class="form-select">
-                        <option value="">Select Batch</option>
-                        {% for assign in assignments %}
-                            <option value="{{ assign.batch.id }}"
-                                {% if selected_batch == assign.batch.id|stringformat:"s" %}selected{% endif %}>
-                                {{ assign.batch.batch_name }}
+                        <option value="">All Batches</option>
+
+                        {% regroup assignments by batch as batch_list %}
+                        {% for group in batch_list %}
+                            <option value="{{ group.grouper.id }}"
+                                {% if selected_batch == group.grouper.id|stringformat:"s" %}selected{% endif %}>
+                                {{ group.grouper.batch_name }}
                             </option>
                         {% endfor %}
                     </select>
@@ -28,11 +30,13 @@
                 <div class="col-md-4">
                     <label class="form-label">Course</label>
                     <select name="course" class="form-select">
-                        <option value="">Select Course</option>
-                        {% for assign in assignments %}
-                            <option value="{{ assign.course.id }}"
-                                {% if selected_course == assign.course.id|stringformat:"s" %}selected{% endif %}>
-                                {{ assign.course.course_name }}
+                        <option value="">All Courses</option>
+
+                        {% regroup assignments by course as course_list %}
+                        {% for group in course_list %}
+                            <option value="{{ group.grouper.id }}"
+                                {% if selected_course == group.grouper.id|stringformat:"s" %}selected{% endif %}>
+                                {{ group.grouper.course_name }}
                             </option>
                         {% endfor %}
                     </select>
@@ -48,14 +52,14 @@
         </div>
     </div>
 
-    <!-- Student Table -->
+    <!-- ================= STUDENT TABLE ================= -->
     <div class="card shadow-sm">
         <div class="card-body">
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
 
-                    <thead class="table-dark">
+                    <thead class="table-dark text-center">
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
@@ -66,21 +70,28 @@
 
                     <tbody>
                         {% for student in students %}
-                        <tr>
+                        <tr class="text-center">
                             <td>{{ student.name }}</td>
                             <td>{{ student.email }}</td>
-                            <td>{{ student.phone }}</td>
+                            <td>{{ student.phone|default:"-" }}</td>
+
                             <td>
-                                <span class="badge 
-                                    {% if student.attendance >= 75 %}
-                                        bg-success
-                                    {% elif student.attendance >= 50 %}
-                                        bg-warning
-                                    {% else %}
-                                        bg-danger
-                                    {% endif %}">
-                                    {{ student.attendance }}%
-                                </span>
+                                {% if student.attendance %}
+                                    <span class="badge 
+                                        {% if student.attendance >= 75 %}
+                                            bg-success
+                                        {% elif student.attendance >= 50 %}
+                                            bg-warning text-dark
+                                        {% else %}
+                                            bg-danger
+                                        {% endif %}">
+                                        {{ student.attendance }}%
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        0%
+                                    </span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% empty %}

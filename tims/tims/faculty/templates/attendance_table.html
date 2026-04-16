@@ -55,18 +55,20 @@
             </thead>
 
             <tbody>
-                {% for student in students %}
+                {% for admission in students %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
 
+                    <!-- ✅ Student Name -->
                     <td>
-                        {{ student.name|default:student.get_full_name }}
+                        {{ admission.student.name|default:admission.student.get_full_name }}
                     </td>
 
+                    <!-- ✅ Checkbox -->
                     <td class="text-center">
                         <input type="checkbox"
-                               name="student_{{ student.id }}"
-                               {% if student.id in existing_attendance %}checked{% endif %}>
+                               name="student_{{ admission.student.id }}"
+                               {% if admission.student.id in existing_attendance %}checked{% endif %}>
                     </td>
                 </tr>
                 {% endfor %}
@@ -89,12 +91,12 @@
 <!-- ================= JS ================= -->
 <script>
 function markAll() {
-    document.querySelectorAll("input[type='checkbox']")
+    document.querySelectorAll("tbody input[type='checkbox']")
         .forEach(cb => cb.checked = true);
 }
 
 function unmarkAll() {
-    document.querySelectorAll("input[type='checkbox']")
+    document.querySelectorAll("tbody input[type='checkbox']")
         .forEach(cb => cb.checked = false);
 }
 </script>

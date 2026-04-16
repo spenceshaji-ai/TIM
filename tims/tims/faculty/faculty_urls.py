@@ -16,7 +16,6 @@ from tims.faculty.views import (
     FacultyReportUpdateView,
     FacultyReportDeleteView,
     FacultyStudentListView,
-    FacultyTrainingProgressView,
     FacultyBatchCompletionRequestCreateView,
     FacultyBatchCompletionRequestListView,
     FacultyBatchCompletionRequestDeleteView,

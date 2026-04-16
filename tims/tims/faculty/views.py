@@ -456,7 +456,7 @@ class FacultyStudentListView(LoginRequiredMixin, View):
 
         faculty = request.user
 
-        # Assigned batches & courses
+        # ✅ Assigned batches & courses
         assignments = FacultyAssignment.objects.filter(
             faculty=faculty
         ).select_related("course", "batch")
@@ -467,37 +467,36 @@ class FacultyStudentListView(LoginRequiredMixin, View):
         selected_batch = request.GET.get("batch")
         selected_course = request.GET.get("course")
 
-        # Base queryset → all students assigned to this faculty
-        student_assignments = Assignstudent.objects.filter(
+        # ✅ Use Admission instead of Assignstudent
+        student_admissions = Admission.objects.filter(
             batch_id__in=assigned_batch_ids,
             course_id__in=assigned_course_ids
-        ).select_related("student")
+        ).select_related("student", "batch", "course")
 
-        # Apply filters only if selected
+        # ✅ Apply filters
         if selected_batch:
-            student_assignments = student_assignments.filter(
-                batch_id=selected_batch
-            )
+            student_admissions = student_admissions.filter(batch_id=selected_batch)
 
         if selected_course:
-            student_assignments = student_assignments.filter(
-                course_id=selected_course
-            )
+            student_admissions = student_admissions.filter(course_id=selected_course)
 
         students = []
 
-        for assign in student_assignments:
-            student = assign.student
+        for admission in student_admissions:
+            student = admission.student
+            batch = admission.batch
 
+            # ✅ Total classes
             total_classes = StudentAttendance.objects.filter(
                 student=student,
-                batch_id=assign.batch_id
+                batch=batch
             ).count()
 
+            # ✅ Present classes
             present_classes = StudentAttendance.objects.filter(
                 student=student,
-                batch_id=assign.batch_id,
-                status="Present"
+                batch=batch,
+                is_present=True   # ✅ FIXED
             ).count()
 
             attendance_percentage = 0
@@ -509,8 +508,10 @@ class FacultyStudentListView(LoginRequiredMixin, View):
             students.append({
                 "name": student.name,
                 "email": student.email,
-                "phone": student.phone_number,
+                "phone": getattr(student, "phone_number", ""),  # safe
                 "attendance": attendance_percentage,
+                "batch": batch.batch_name,
+                "course": admission.course.course_name,
             })
 
         context = {
@@ -518,41 +519,6 @@ class FacultyStudentListView(LoginRequiredMixin, View):
             "students": students,
             "selected_batch": selected_batch,
             "selected_course": selected_course,
-        }
-
-        return render(request, self.template_name, context)
-
-        
-class FacultyTrainingProgressView(LoginRequiredMixin, View):
-    template_name = "training_progress.html"
-
-    def get(self, request):
-        batch_id = request.GET.get("batch")
-        session_date = request.GET.get("session_date")
-
-        # Only logged-in faculty sessions
-        sessions = TrainingSession.objects.filter(
-            faculty=request.user
-        ).select_related("batch").order_by("-session_date")
-
-        # Batch filter
-        if batch_id:
-            sessions = sessions.filter(batch_id=batch_id)
-
-        # Date filter
-        if session_date:
-            sessions = sessions.filter(session_date=session_date)
-
-        # Only batches this faculty has sessions in
-        batches = Batch.objects.filter(
-            trainingsession__faculty=request.user
-        ).distinct()
-
-        context = {
-            "sessions": sessions,
-            "batches": batches,
-            "selected_batch": batch_id,
-            "selected_date": session_date,
         }
 
         return render(request, self.template_name, context)

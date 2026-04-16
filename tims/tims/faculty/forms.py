@@ -211,11 +211,15 @@ class AttendanceFilterForm(forms.Form):
     batch = forms.ModelChoiceField(
         queryset=Batch.objects.none(),
         required=True,
-        empty_label="Select Batch"
+        empty_label="Select Batch",
+        widget=forms.Select(attrs={"class": "form-select"})
     )
 
     date = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date'})
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control'
+        })
     )
 
     def __init__(self, *args, **kwargs):
@@ -223,19 +227,21 @@ class AttendanceFilterForm(forms.Form):
         super().__init__(*args, **kwargs)
 
         if user:
-            # ✅ Show only batches assigned to faculty
+            # ✅ Only assigned batches
             self.fields['batch'].queryset = Batch.objects.filter(
                 facultyassignment__faculty=user
-            )
+            ).distinct()
 
-        # ✅ Disable future dates in UI
-        today = timezone.now().date()
+        # ✅ Restrict future dates
+        today = timezone.localdate()
         self.fields['date'].widget.attrs['max'] = today
 
-    # ✅ Backend validation (important)
+        # (Optional) restrict very old dates
+        # self.fields['date'].widget.attrs['min'] = "2023-01-01"
+
     def clean_date(self):
         date = self.cleaned_data['date']
-        today = timezone.now().date()
+        today = timezone.localdate()
 
         if date > today:
             raise forms.ValidationError("Future date is not allowed.")
