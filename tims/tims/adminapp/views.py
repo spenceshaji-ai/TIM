@@ -4,6 +4,7 @@ from django.views import View
 from django.utils.timezone import now
 from django.db.models import OuterRef, Subquery
 import secrets
+from django.db.models import Sum
 
 from tims.adminapp.models import Course, Batch, Enquiry, FollowUp, Admission,Payment
 from .forms import CourseForm, BatchForm, EnquiryForm, FollowUpForm, AdmissionForm,PaymentForm
@@ -19,7 +20,10 @@ from django.db.models import Sum
 from tims.users.models import Role,User
 from django.contrib import messages
 
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 
 # List
 class CourseListView(View):
@@ -253,11 +257,18 @@ class FollowUpCreateView(View):
         form = FollowUpForm(request.POST)
 
         if form.is_valid():
-            followup = form.save(commit=False)
-            followup.enquiry = enquiry
-            followup.created_by = request.user
+            followup_date = form.cleaned_data.get("followup_date")
 
-            followup.save()
+            followup, created = FollowUp.objects.update_or_create(
+                enquiry=enquiry,
+                followup_date=followup_date,
+                defaults={
+                    "status": request.POST.get("status"),
+                    "today_remark": form.cleaned_data.get("today_remark"),
+                    "created_by": request.user,
+                    "next_followup_date": form.cleaned_data.get("next_followup_date"),
+                }
+            )
             # 👇 Update enquiry's next follow-up date
             enquiry.next_followup_date = followup.next_followup_date
             enquiry.save()
@@ -437,9 +448,8 @@ class CreateStudentAccountView(View):
 
 # -----------------------------
 # Payment Create View
-# -----------------------------
-
-
+# ----------------------------
+@method_decorator(never_cache, name='dispatch')
 class PaymentCreateView(View):
 
 
@@ -474,8 +484,6 @@ class PaymentCreateView(View):
             }
         )
 
-    
-
     def post(self, request):
         form = PaymentForm(request.POST)
 
@@ -503,6 +511,15 @@ class PaymentCreateView(View):
                     f"Amount exceeds pending fee. Remaining: {remaining}"
                 )
                 return render(request, "payment/payment_form.html", {"form": form})
+            exists = Payment.objects.filter(
+                admission=admission,
+                amount=new_amount,
+                payment_date=date.today()
+            ).exists()
+
+            if exists:
+                messages.warning(request, "This payment already exists!")
+                return redirect("adminapp:payment_list")
 
             payment.save()
             return redirect("adminapp:payment_list")
@@ -514,27 +531,32 @@ class PaymentCreateView(View):
 # -----------------------------
 # Payment List View
 # -----------------------------
+from django.db.models import Sum
+from django.views import View
+from django.shortcuts import render
+from .models import Admission
+
+
 class PaymentListView(View):
 
     def get(self, request):
-        payments = Payment.objects.select_related("admission").all()
-        # 🔥 Add calculations for each payment row
-        for p in payments:
+        admissions = Admission.objects.select_related("course").all()
 
-            total_fee = p.admission.course.fee   # Total course fee
+        for a in admissions:
+            total_fee = a.course.fee
 
-            paid = p.admission.payments.aggregate(
+            paid = a.payments.aggregate(
                 total=Sum("amount")
-            )["total"] or 0   # Total paid so far
+            )["total"] or 0
 
-            p.total_fee = total_fee
-            p.paid_amount = paid
-            p.pending_fee = total_fee - paid
+            a.total_fee = total_fee
+            a.paid_amount = paid
+            a.pending_fee = total_fee - paid
 
         return render(
             request,
             "payment/payment_list.html",
-            {"payments": payments}
+            {"admissions": admissions}
         )
 
 class PaymentUpdateView(View):

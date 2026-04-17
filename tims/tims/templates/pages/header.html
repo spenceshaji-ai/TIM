@@ -30,6 +30,66 @@
 
     <!-- Icons css -->
     <link href="{% static 'admin/assets/css/icons.min.css' }" rel="stylesheet" type="text/css" />
+    <style>
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+        }
+
+        .custom-modal:target {
+            display: flex;
+            /* use flex to center modal */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-box {
+            background: white;
+            width: 320px;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        /* ✅ Button container */
+        .modal-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            /* center the buttons */
+            gap: 15px;
+            /* spacing between buttons */
+            align-items: center;
+        }
+
+        /* ✅ Cancel button */
+        .cancel-btn {
+            display: inline-block;
+            /* makes <a> behave like a button */
+            background: #6c757d;
+            color: white;
+            padding: 8px 14px;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* ✅ Confirm (Logout) button */
+        .confirm-btn {
+            background: #dc3545;
+            color: white;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
@@ -1185,19 +1245,29 @@
                     </li>
 
                     <li class="side-nav-item">
-                        <a data-bs-toggle="collapse" href="#sidebarMultiLevel" aria-expanded="false"
-                            aria-controls="sidebarMultiLevel" class="side-nav-link">
-                            <i class="uil-folder-plus"></i>
-                            <span> Log out </span>
-                            <span class="menu-arrow"></span>
+                        <a href="#logoutModal" class="side-nav-link">
+                            <i class="uil-sign-out-alt"></i>
+                            <span> Logout </span>
                         </a>
-                        <div class="collapse" id="sidebarMultiLevel">
-                            <ul class="side-nav-second-level">
-                                <li class="side-nav-item">
-                                <li>
-                                    <a href="{% url 'users:logout' %}"> Logout</a>
-                                </li>
                     </li>
+
+
+
+                    <div id="logoutModal" class="custom-modal">
+                        <div class="modal-box">
+                            <h3>Confirm Logout</h3>
+                            <p>Are you sure you want to logout?</p>
+
+                            <div class="modal-actions">
+                                <a href="#" class="cancel-btn">Cancel</a>
+
+                                <form method="POST" action="{% url 'users:logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="confirm-btn">Yes, Logout</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </ul>
             </div>
             </li>

@@ -3,7 +3,7 @@ from django.utils import timezone
 from .models import Enquiry,FollowUp,Admission,Course,Batch,Payment, FacultyAssignment,Assignstudent
 from django.contrib.auth import get_user_model
 
-
+from datetime import date
 
 User = get_user_model()
 
@@ -69,7 +69,15 @@ class EnquiryForm(forms.ModelForm):
         # ✅ Optional: Add placeholder
         self.fields["course"].empty_label = "Select Course"
          # ⭐ FORCE DATE INPUT TYPE
-        self.fields["next_followup_date"].widget.input_type = "date"
+         # 🔥 FORCE DATE + DISABLE PAST DATES
+        self.fields["next_followup_date"].widget = forms.DateInput(
+            attrs={
+                "type": "date",
+                "class": "form-control",
+                "min": date.today().isoformat()
+            }
+        )
+
     class Meta:
         model = Enquiry
 
@@ -117,12 +125,15 @@ class EnquiryForm(forms.ModelForm):
             "status": forms.Select(attrs={
                 "class": "form-control"
             }),
-            # ✅ Next Follow-up Date
-            "next_followup_date": forms.DateInput(attrs={
-                "class": "form-control",
-                "type": "date"   # 👈 IMPORTANT for calendar picker
-            }),
+           
         }
+        def clean_next_followup_date(self):
+            followup_date = self.cleaned_data.get("next_followup_date")
+
+            if followup_date and followup_date < date.today():
+               raise forms.ValidationError("Past dates are not allowed!")
+
+            return followup_date
 
 
 
