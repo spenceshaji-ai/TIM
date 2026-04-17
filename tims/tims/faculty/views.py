@@ -3,6 +3,8 @@ from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.utils.timezone import now
 from tims.adminapp.models import LeaveAllocation, LeaveApplication, LeaveBalance, LeaveType
 from tims.faculty.forms import LeaveApplicationForm
@@ -721,10 +723,31 @@ class FacultyBatchCompletionRequestCreateView(LoginRequiredMixin, View):
     def post(self, request):
         form = BatchCompletionRequestForm(request.POST, user=request.user)
 
+        batch_id = request.POST.get("batch")
+        if batch_id:
+            selected_batch = Batch.objects.filter(
+                id=batch_id,
+                facultyassignment__faculty=request.user
+            ).distinct().first()
+
+            if selected_batch and selected_batch.end_date and selected_batch.end_date > timezone.localdate():
+                form.add_error(
+                    "requested_completion_date",
+                    f"Completion request can only be submitted on or after the batch end date ({selected_batch.end_date})."
+                )
+                return render(request, self.template_name, {"form": form})
+
         if form.is_valid():
             completion_request = form.save(commit=False)
             completion_request.faculty = request.user
             completion_request.course = completion_request.batch.course
+            try:
+                completion_request.full_clean()
+            except ValidationError as exc:
+                for field, errors in exc.message_dict.items():
+                    for error in errors:
+                        form.add_error(field if field != "__all__" else None, error)
+                return render(request, self.template_name, {"form": form})
             completion_request.save()
 
             messages.success(request, "Completion request submitted successfully.")

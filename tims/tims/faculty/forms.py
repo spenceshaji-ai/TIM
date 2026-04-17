@@ -383,16 +383,18 @@ class BatchCompletionRequestForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
+        today = timezone.localdate()
 
         assigned_batch_ids = FacultyAssignment.objects.filter(
             faculty=user
         ).values_list("batch_id", flat=True)
 
         self.fields["batch"].queryset = Batch.objects.filter(
-            id__in=assigned_batch_ids
+            id__in=assigned_batch_ids,
+            end_date__lte=today
         ).select_related("course")
 
-        self.fields["batch"].empty_label = "Select Batch"
+        self.fields["batch"].empty_label = "Select Eligible Batch"
 
     def clean_requested_completion_date(self):
         request_date = self.cleaned_data.get("requested_completion_date")
@@ -437,7 +439,7 @@ class BatchCompletionRequestForm(forms.ModelForm):
         today = timezone.localdate()
         if batch.end_date and batch.end_date > today:
             self.add_error(
-                "batch",
+                "requested_completion_date",
                 f"Completion request can only be submitted on or after the batch end date ({batch.end_date})."
             )
 

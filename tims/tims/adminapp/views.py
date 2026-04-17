@@ -825,7 +825,7 @@ class CourseCreateView(View):
         return render(request, self.template_name, {"form": form})
 
     def post(self, request):
-        form = CourseForm(request.POST)
+        form = CourseForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('adminapp:course_list')
@@ -845,7 +845,7 @@ class CourseEditView(View):
 
     def post(self, request, id):
         course = get_object_or_404(Course, id=id)
-        form = CourseForm(request.POST, instance=course)
+        form = CourseForm(request.POST, request.FILES, instance=course)
         if form.is_valid():
             form.save()
             return redirect('adminapp:course_list')

@@ -1,4 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from tims.adminapp.models import Batch
 from django.conf import settings
 from django.utils import timezone
@@ -131,5 +133,30 @@ class BatchCompletionRequest(models.Model):
     requested_at = models.DateTimeField(auto_now_add=True)
     approved_at = models.DateTimeField(blank=True, null=True)
 
+    def clean(self):
+        super().clean()
+
+        batch = None
+        if self.batch_id:
+            batch = self.batch
+
+        batch_end_date = getattr(batch, "end_date", None)
+        today = timezone.localdate()
+
+        if batch_end_date and batch_end_date > today:
+            raise ValidationError({
+                "requested_completion_date": (
+                    f"Completion request can only be submitted on or after the batch end date ({batch_end_date})."
+                )
+            })
+
+        if self.requested_completion_date and batch_end_date and self.requested_completion_date < batch_end_date:
+            raise ValidationError({
+                "requested_completion_date": (
+                    f"Completion date must be on or after batch end date ({batch_end_date})."
+                )
+            })
+
     def __str__(self):
-        return f"{self.batch.batch_name} - {self.faculty} - {self.status}"
+        batch_name = getattr(batch := (self.batch if self.batch_id else None), "batch_name", "No Batch")
+        return f"{batch_name} - {self.faculty} - {self.status}"
