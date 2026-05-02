@@ -1,0 +1,142 @@
+{% extends "form.html" %}
+
+{% block form_title %}
+    Request Batch Completion
+{% endblock %}
+
+{% block form_action %}
+    {% url 'faculty:completion-request-create' %}
+{% endblock %}
+
+{% block form_body %}
+
+    <p>
+        <label for="{{ form.batch.id_for_label }}">Batch:</label>
+        {{ form.batch }}
+        {% if form.batch.errors %}
+            <div class="text-danger">{{ form.batch.errors }}</div>
+        {% endif %}
+    </p>
+
+    <p>
+        <label for="{{ form.requested_completion_date.id_for_label }}">Requested Completion Date:</label>
+        {{ form.requested_completion_date }}
+        <div id="date-field-error" class="text-danger small mt-1"></div>
+        <div id="date-field-warning" class="text-warning small mt-1"></div>
+        {% if form.requested_completion_date.errors %}
+            <div class="text-danger">{{ form.requested_completion_date.errors }}</div>
+        {% endif %}
+    </p>
+
+    <p>
+        <label for="{{ form.remarks.id_for_label }}">Remarks:</label>
+        {{ form.remarks }}
+        {% if form.remarks.errors %}
+            <div class="text-danger">{{ form.remarks.errors }}</div>
+        {% endif %}
+    </p>
+
+{% endblock %}
+
+{% block form_button %}
+    <button type="submit" class="btn btn-success" id="completion-request-submit">
+        Submit Request
+    </button>
+
+    <a href="{% url 'faculty:completion-request-list' %}" class="btn btn-secondary ms-2">
+        Cancel
+    </a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const batchField = document.getElementById("id_batch");
+    const dateField = document.getElementById("id_requested_completion_date");
+    const errorField = document.getElementById("date-field-error");
+    const warningField = document.getElementById("date-field-warning");
+    const submitButton = document.getElementById("completion-request-submit");
+
+    // Batch end dates from backend
+    const batchEndDates = {
+        {% for batch in form.fields.batch.queryset %}
+            "{{ batch.id }}": "{{ batch.end_date|date:'Y-m-d' }}",
+        {% endfor %}
+    };
+
+    // Today's date
+    const today = new Date().toISOString().split("T")[0];
+
+    function showDateError(message) {
+        errorField.textContent = message;
+        dateField.classList.add("is-invalid");
+        submitButton.disabled = true;
+    }
+
+    function clearDateError() {
+        errorField.textContent = "";
+        dateField.classList.remove("is-invalid");
+    }
+
+    function validateSelectedDate() {
+        const selectedBatch = batchField.value;
+        const endDate = batchEndDates[selectedBatch];
+        const selectedDate = dateField.value;
+
+        clearDateError();
+
+        if (!selectedDate) {
+            if (!warningField.textContent) {
+                submitButton.disabled = false;
+            }
+            return;
+        }
+
+        if (endDate && selectedDate < endDate) {
+            showDateError(`Completion date must be on or after batch end date (${endDate}).`);
+            return;
+        }
+
+        if (selectedDate > today) {
+            showDateError("Future completion date is not allowed.");
+            return;
+        }
+
+        if (!warningField.textContent) {
+            submitButton.disabled = false;
+        }
+    }
+
+    function updateDateLimits() {
+        const selectedBatch = batchField.value;
+        const endDate = batchEndDates[selectedBatch];
+        clearDateError();
+
+        if (endDate) {
+            dateField.min = endDate;
+            dateField.max = today;
+
+            if (endDate > today) {
+                warningField.textContent = `Completion request can only be submitted on or after the batch end date (${endDate}).`;
+                submitButton.disabled = true;
+            } else {
+                warningField.textContent = "";
+                submitButton.disabled = false;
+            }
+
+            validateSelectedDate();
+        } else {
+            dateField.min = "";
+            dateField.max = today;
+            warningField.textContent = "";
+            submitButton.disabled = false;
+        }
+    }
+
+    batchField.addEventListener("change", updateDateLimits);
+    dateField.addEventListener("change", validateSelectedDate);
+    dateField.addEventListener("input", validateSelectedDate);
+    updateDateLimits();
+});
+</script>
+{% endblock %}

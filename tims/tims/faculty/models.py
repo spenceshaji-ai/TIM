@@ -1,23 +1,18 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from tims.adminapp.models import Batch
 from django.conf import settings
 from django.utils import timezone
 # Create your models here.
 
 class TrainingSession(models.Model):
-    STATUS_CHOICES = (
-        ('Ongoing', 'Ongoing'),
-        ('Completed', 'Completed'),
-    )
-
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
     faculty = models.ForeignKey("users.User", on_delete=models.CASCADE)
     session_date = models.DateField()
     topic_covered = models.TextField()
     hours_taken = models.DecimalField(max_digits=4, decimal_places=1)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
-    approval_status = models.CharField(max_length=20,default='Pending')
 
     class Meta:
         constraints = [
@@ -25,27 +20,28 @@ class TrainingSession(models.Model):
                 fields=['batch', 'session_date'],
                 name='unique_batch_session_date'
             )
-        ]    
-    def __str__(self):
-        return f"{self.batch} - {self.session_date}"    
-
-
-class StudentAttendance(models.Model):
-    ATTENDANCE_STATUS = (('Present', 'Present'), ('Absent', 'Absent'))
-
-    student = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name='attendance_as_student')
-    faculty = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name='attendance_as_faculty')
-    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
-    attendance_date = models.DateField()
-    status = models.CharField(max_length=10, choices=ATTENDANCE_STATUS, default='Present')
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['student', 'attendance_date'], name='unique_student_attendance_per_day')
         ]
 
     def __str__(self):
-        return f"{self.student} - {self.attendance_date} - {self.status}"
+        return f"{self.batch} - {self.session_date}"     
+
+
+class StudentAttendance(models.Model):
+    student = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name='attendance_as_student')
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+    faculty = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name='attendance_as_faculty')
+
+    attendance_date = models.DateField()
+    is_present = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'attendance_date')
+
+    def __str__(self):
+        return f"{self.student} - {self.attendance_date}"        
+
 
 class FacultyDailyReport(models.Model):
     faculty = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name="daily_reports")
@@ -104,3 +100,63 @@ class FacultyCourseMaterial(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.course} ({self.batch})"
+
+class BatchCompletionRequest(models.Model):
+    STATUS_CHOICES = (
+        ("Pending", "Pending"),
+        ("Approved", "Approved"),
+        ("Rejected", "Rejected"),
+    )
+
+    faculty = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="batch_completion_requests"
+    )
+    batch = models.ForeignKey(
+        Batch,
+        on_delete=models.CASCADE,
+        related_name="completion_requests"
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="completion_requests"
+    )
+
+    requested_completion_date = models.DateField()
+    remarks = models.TextField(blank=True, null=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    admin_remarks = models.TextField(blank=True, null=True)
+
+    requested_at = models.DateTimeField(auto_now_add=True)
+    approved_at = models.DateTimeField(blank=True, null=True)
+
+    def clean(self):
+        super().clean()
+
+        batch = None
+        if self.batch_id:
+            batch = self.batch
+
+        batch_end_date = getattr(batch, "end_date", None)
+        today = timezone.localdate()
+
+        if batch_end_date and batch_end_date > today:
+            raise ValidationError({
+                "requested_completion_date": (
+                    f"Completion request can only be submitted on or after the batch end date ({batch_end_date})."
+                )
+            })
+
+        if self.requested_completion_date and batch_end_date and self.requested_completion_date < batch_end_date:
+            raise ValidationError({
+                "requested_completion_date": (
+                    f"Completion date must be on or after batch end date ({batch_end_date})."
+                )
+            })
+
+    def __str__(self):
+        batch_name = getattr(batch := (self.batch if self.batch_id else None), "batch_name", "No Batch")
+        return f"{batch_name} - {self.faculty} - {self.status}"

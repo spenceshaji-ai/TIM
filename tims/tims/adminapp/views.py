@@ -635,14 +635,6 @@ class HRLeaveAssignView(View):
         return render(request, self.template_name, context)
 
         return render(request, self.template_name, context)
-from django.views.generic import ListView, View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from datetime import date
-
-from tims.adminapp.models import LeaveApplication, LeaveBalance
-
 
 class ManagementApplyLeaveView(LoginRequiredMixin, View):
 
@@ -657,96 +649,6 @@ class ManagementApplyLeaveView(LoginRequiredMixin, View):
             year=date.today().year
         ).select_related("leave_type")
 
-        total_remaining = sum(b.remaining_days for b in leave_balances)
-
-        return render(request, self.template_name, {
-        "form": form,
-        "leave_balances": leave_balances,
-        "total_remaining": total_remaining,
-        "today": date.today(),
-        })
-
-
-    def post(self, request):
-
-        # ✅ If user already confirmed LOP
-        if "confirm" in request.POST:
-
-            form = ManagementLeaveApplicationForm(
-                request.POST,
-                user=request.user
-            )
-            form.instance.user = request.user
-
-            if form.is_valid():
-                leave = form.save(commit=False)
-                leave.user = request.user
-                if leave.day_type == "HALF":
-                    leave.total_days = 0.5
-                else:
-                    leave.total_days = (leave.end_date - leave.start_date).days + 1
-                leave.save()
-
-                messages.success(request, "Leave submitted with LOP.")
-                return redirect("adminapp:management_my_leaves")
-
-        # ✅ Normal submit
-        form = ManagementLeaveApplicationForm(
-            request.POST,
-            user=request.user
-        )
-        form.instance.user = request.user
-
-        if form.is_valid():
-
-            leave = form.save(commit=False)
-            if leave.day_type == "HALF":
-                leave.total_days = 0.5
-            else:
-                leave.total_days = (leave.end_date - leave.start_date).days + 1
-            allocation = LeaveAllocation.objects.filter(
-                user=request.user,
-                leave_type=leave.leave_type,
-                year=date.today().year
-            ).first()
-
-            if allocation:
-                monthly_allowed = allocation.monthly_accrual()
-                requested = leave.total_days
-
-                if requested > monthly_allowed:
-                    lop = requested - monthly_allowed
-                    leave.lop_days = lop
-                
-
-
-                 # 🚨 SHOW WARNING (NO SAVE YET)
-                    leave_balances = LeaveBalance.objects.filter(
-                        user=request.user,
-                        year=date.today().year
-                    ).select_related("leave_type")
-
-                    return render(request, self.template_name, {
-                        "form": form,
-                        "leave_balances": leave_balances,
-                        "lop_warning": f"{lop} day(s) will be LOP. Do you want to continue?",
-                        "today": date.today(),
-                    })
-                else:
-                    leave.lop_days = 0
-            # ✅ SAVE normally
-            leave.user = request.user
-            leave.save()
-
-            messages.success(request, "Leave request submitted successfully.")
-            return redirect("adminapp:management_my_leaves")
-
-        # ❌ Form invalid
-        leave_balances = LeaveBalance.objects.filter(
-            user=request.user,
-            year=date.today().year
-        ).select_related("leave_type")
-
         return render(request, self.template_name, {
             "form": form,
             "leave_balances": leave_balances,
@@ -754,6 +656,75 @@ class ManagementApplyLeaveView(LoginRequiredMixin, View):
         })
 
 
+    def post(self, request):
+
+        form = ManagementLeaveApplicationForm(
+            request.POST,
+            user=request.user
+        )
+
+        form.instance.user = request.user
+
+        if form.is_valid():
+
+            leave = form.save(commit=False)
+            leave.user = request.user
+
+            # ✅ calculate days
+            if leave.day_type == "HALF":
+                leave.total_days = 0.5
+            else:
+                leave.total_days = (leave.end_date - leave.start_date).days + 1
+
+            # ✅ calculate LOP using model logic
+            leave.clean()
+
+            # =========================
+            # ✅ CONFIRM BUTTON CLICKED
+            # =========================
+            if "confirm" in request.POST:
+                leave.save()
+                messages.success(request, "Leave applied with LOP.")
+                return redirect("adminapp:management_my_leaves")
+
+            # =========================
+            # ✅ SHOW WARNING (NO SAVE YET)
+            # =========================
+            if leave.lop_days > 0:
+
+                leave_balances = LeaveBalance.objects.filter(
+                    user=request.user,
+                    year=date.today().year
+                ).select_related("leave_type")
+
+                return render(request, self.template_name, {
+                    "form": form,
+                    "leave_balances": leave_balances,
+                    "show_lop_warning": True,
+                    "total_days": leave.total_days,
+                    "lop_days": leave.lop_days,
+                    "normal_days": leave.total_days - leave.lop_days,
+                    "today": date.today(),
+                })
+
+            # =========================
+            # ✅ NORMAL SAVE
+            # =========================
+            leave.save()
+            messages.success(request, "Leave applied successfully.")
+            return redirect("adminapp:management_my_leaves")
+
+        # ❌ form invalid
+        leave_balances = LeaveBalance.objects.filter(
+            user=request.user,
+            year=date.today().year
+        )
+
+        return render(request, self.template_name, {
+            "form": form,
+            "leave_balances": leave_balances,
+            "today": date.today(),
+        })
 class ManagementMyLeavesView(LoginRequiredMixin, ListView):
 
     model = LeaveApplication
@@ -831,7 +802,7 @@ from tims.adminapp.forms import EnquiryForm,FollowUpForm
 from tims.adminapp.models import Admission
 from tims.adminapp.forms import AdmissionForm
 from tims.adminapp.models import Course,Batch,FacultyAssignment,Assignstudent
-from tims.faculty.models import TrainingSession,FacultyDailyReport,StudentAttendance
+from tims.faculty.models import TrainingSession,FacultyDailyReport,StudentAttendance,BatchCompletionRequest
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from tims.adminapp.forms import CourseForm,BatchForm,FacultyAssignmentForm,AssignstudentForm,CertificateForm
@@ -856,7 +827,7 @@ class CourseCreateView(View):
         return render(request, self.template_name, {"form": form})
 
     def post(self, request):
-        form = CourseForm(request.POST)
+        form = CourseForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('adminapp:course_list')
@@ -876,7 +847,7 @@ class CourseEditView(View):
 
     def post(self, request, id):
         course = get_object_or_404(Course, id=id)
-        form = CourseForm(request.POST, instance=course)
+        form = CourseForm(request.POST, request.FILES, instance=course)
         if form.is_valid():
             form.save()
             return redirect('adminapp:course_list')
@@ -1452,28 +1423,6 @@ from tims.adminapp.models import LeaveApplication
 
 
 
-class TrainingSessionApprovalListView(View):
-    template_name = "training_approval_list.html"
-
-    def get(self, request):
-        sessions = TrainingSession.objects.all().order_by('-created_at')
-        return render(request, self.template_name, {
-            'sessions': sessions
-        })
-
-class TrainingSessionApproveView(View):
-    def post(self, request, pk):
-        session = get_object_or_404(TrainingSession, pk=pk)
-        session.approval_status = 'Approved'
-        session.save()
-        return redirect('adminapp:admin_training_approval_list')
-
-class TrainingSessionRejectView(View):
-    def post(self, request, pk):
-        session = get_object_or_404(TrainingSession, pk=pk)
-        session.approval_status = 'Rejected'
-        session.save()
-        return redirect('adminapp:admin_training_approval_list')
 
 
 class AssignStudentView(View):
@@ -1822,12 +1771,12 @@ class AdminTrainingSessionListView(View):
 
         sessions = TrainingSession.objects.select_related(
             "faculty", "batch"
-        ).all()
+        ).all().order_by("-session_date")
 
         # Filters
         batch_id = request.GET.get("batch")
         faculty_id = request.GET.get("faculty")
-        status = request.GET.get("status")
+        session_date = request.GET.get("session_date")
 
         if batch_id:
             sessions = sessions.filter(batch_id=batch_id)
@@ -1835,14 +1784,14 @@ class AdminTrainingSessionListView(View):
         if faculty_id:
             sessions = sessions.filter(faculty_id=faculty_id)
 
-        if status:
-            sessions = sessions.filter(status=status)
+        if session_date:
+            sessions = sessions.filter(session_date=session_date)
 
         # Get all batches
         batches = Batch.objects.all()
 
-        # Get only faculty users (role = Faculty)
-        faculties = User.objects.filter(role__role_name="Faculty")
+        # Get only faculty users
+        faculties = User.objects.filter(role__role_name__iexact="Faculty")
 
         context = {
             "sessions": sessions,
@@ -1850,10 +1799,42 @@ class AdminTrainingSessionListView(View):
             "faculties": faculties,
             "selected_batch": batch_id,
             "selected_faculty": faculty_id,
-            "selected_status": status,
+            "selected_date": session_date,
         }
 
         return render(request, self.template_name, context)
+
+def resolve_admission_students(admissions):
+    admission_list = list(admissions)
+    admission_phones = {
+        admission.phone
+        for admission in admission_list
+        if admission.phone
+    }
+
+    students_by_phone = {
+        user.phone_number: user
+        for user in User.objects.filter(phone_number__in=admission_phones)
+        if user.phone_number
+    }
+    students_by_username = {
+        user.username: user
+        for user in User.objects.filter(username__in=admission_phones)
+    }
+
+    resolved_rows = []
+    for admission in admission_list:
+        student = (
+            students_by_phone.get(admission.phone)
+            or students_by_username.get(admission.phone)
+        )
+        if student:
+            resolved_rows.append({
+                "admission": admission,
+                "student": student,
+            })
+
+    return resolved_rows
 
 class AssignmentReportView(View):
     template_name = "assignment_report.html"
@@ -1869,30 +1850,33 @@ class AssignmentReportView(View):
         # ================= STUDENT FILTER =================
         if role_filter == "student":
 
-            assigned_students = Assignstudent.objects.select_related(
-                "student", "batch", "course"
+            student_admissions = Admission.objects.select_related(
+                "enquiry", "batch", "course"
             )
 
             if course_id:
-                assigned_students = assigned_students.filter(
+                student_admissions = student_admissions.filter(
                     course_id=course_id
                 )
 
             if batch_id:
-                assigned_students = assigned_students.filter(
+                student_admissions = student_admissions.filter(
                     batch_id=batch_id
                 )
 
-            for assign in assigned_students:
-                user = assign.student
+            for row in resolve_admission_students(student_admissions):
+                user = row["student"]
+                admission = row["admission"]
 
                 total = StudentAttendance.objects.filter(
-                    student=user
+                    student=user,
+                    batch=admission.batch,
                 ).count()
 
                 present = StudentAttendance.objects.filter(
                     student=user,
-                    status="Present"
+                    batch=admission.batch,
+                    is_present=True,
                 ).count()
 
                 attendance_percentage = 0
@@ -1926,10 +1910,8 @@ class AssignmentReportView(View):
             for assign in assigned_faculty:
                 user = assign.faculty
 
-                # ---- Training session count (APPROVED ONLY) ----
                 session_qs = TrainingSession.objects.filter(
-                    faculty=user,
-                    approval_status="Approved"
+                    faculty=user
                 )
 
                 # filter by selected batch
@@ -1963,6 +1945,140 @@ class AssignmentReportView(View):
         }
 
         return render(request, self.template_name, context)
+
+class AdminBatchCompletionRequestListView(View):
+    template_name = "admin_completion_request_list.html"
+
+    def get(self, request):
+        batch_id = request.GET.get("batch")
+        faculty_id = request.GET.get("faculty")
+        status = request.GET.get("status")
+
+        requests_qs = BatchCompletionRequest.objects.select_related(
+            "faculty", "batch", "course"
+        ).order_by("-requested_at")
+
+        if batch_id:
+            requests_qs = requests_qs.filter(batch_id=batch_id)
+
+        if faculty_id:
+            requests_qs = requests_qs.filter(faculty_id=faculty_id)
+
+        if status:
+            requests_qs = requests_qs.filter(status=status)
+
+        batches = Batch.objects.all().order_by("batch_name")
+        faculties = User.objects.filter(role__role_name__iexact="Faculty").order_by("name")
+
+        context = {
+            "requests_qs": requests_qs,
+            "batches": batches,
+            "faculties": faculties,
+            "selected_batch": batch_id,
+            "selected_faculty": faculty_id,
+            "selected_status": status,
+        }
+
+        return render(request, self.template_name, context)      
+class AdminBatchCompletionApproveView(View):
+    template_name = "admin_completion_request_action.html"
+
+    def get(self, request, pk):
+        completion_request = get_object_or_404(
+            BatchCompletionRequest.objects.select_related("faculty", "batch", "course"),
+            pk=pk
+        )
+
+        if completion_request.status != "Pending":
+            messages.error(request, "Only pending requests can be approved.")
+            return redirect("adminapp:completion-request-list")
+
+        form = AdminBatchCompletionActionForm(instance=completion_request)
+
+        context = {
+            "form": form,
+            "completion_request": completion_request,
+            "action_type": "approve",
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, pk):
+        completion_request = get_object_or_404(
+            BatchCompletionRequest.objects.select_related("faculty", "batch", "course"),
+            pk=pk
+        )
+
+        if completion_request.status != "Pending":
+            messages.error(request, "Only pending requests can be approved.")
+            return redirect("adminapp:completion-request-list")
+
+        form = AdminBatchCompletionActionForm(request.POST, instance=completion_request)
+
+        if form.is_valid():
+            completion_request = form.save(commit=False)
+            completion_request.status = "Approved"
+            completion_request.approved_at = timezone.now()
+            completion_request.save()
+
+            messages.success(request, "Completion request approved successfully.")
+            return redirect("adminapp:completion-request-list")
+
+        context = {
+            "form": form,
+            "completion_request": completion_request,
+            "action_type": "approve",
+        }
+        return render(request, self.template_name, context) 
+
+class AdminBatchCompletionRejectView(View):
+    template_name = "admin_completion_request_action.html"
+
+    def get(self, request, pk):
+        completion_request = get_object_or_404(
+            BatchCompletionRequest.objects.select_related("faculty", "batch", "course"),
+            pk=pk
+        )
+
+        if completion_request.status != "Pending":
+            messages.error(request, "Only pending requests can be rejected.")
+            return redirect("adminapp:completion-request-list")
+
+        form = AdminBatchCompletionActionForm(instance=completion_request)
+
+        context = {
+            "form": form,
+            "completion_request": completion_request,
+            "action_type": "reject",
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, pk):
+        completion_request = get_object_or_404(
+            BatchCompletionRequest.objects.select_related("faculty", "batch", "course"),
+            pk=pk
+        )
+
+        if completion_request.status != "Pending":
+            messages.error(request, "Only pending requests can be rejected.")
+            return redirect("adminapp:completion-request-list")
+
+        form = AdminBatchCompletionActionForm(request.POST, instance=completion_request)
+
+        if form.is_valid():
+            completion_request = form.save(commit=False)
+            completion_request.status = "Rejected"
+            completion_request.approved_at = None
+            completion_request.save()
+
+            messages.success(request, "Completion request rejected successfully.")
+            return redirect("adminapp:completion-request-list")
+
+        context = {
+            "form": form,
+            "completion_request": completion_request,
+            "action_type": "reject",
+        }
+        return render(request, self.template_name, context)        
     
 
 from django.template.loader import get_template

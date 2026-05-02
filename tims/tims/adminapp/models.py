@@ -111,6 +111,43 @@ class LeaveApplication(models.Model):
                 if self.user.profile.gender != "Female":
                     raise ValidationError("Maternity leave allowed only for female employees.")
 
+         # 🔥 CALCULATE TOTAL DAYS
+        current_days = self.calculate_days()
+
+        joining_date = self.user.date_joined.date()
+
+        # 🔥 NEW USER RULE (< 1 year)
+        if (today - joining_date).days < 365:
+
+            month_leaves = LeaveApplication.objects.filter(
+                user=self.user,
+                start_date__year=self.start_date.year,
+                start_date__month=self.start_date.month,
+                status__in=["Pending", "Approved"]
+            ).exclude(pk=self.pk)
+
+            total_taken = sum(l.total_days or 0 for l in month_leaves)
+
+            total = total_taken + current_days
+
+            if total > 1:
+                self.lop_days = total - 1
+            else:
+                self.lop_days = 0
+
+        # 🔥 BALANCE CHECK
+
+        balance = LeaveBalance.objects.filter(
+            user=self.user,
+            leave_type=self.leave_type,
+            year=self.start_date.year
+        ).first()
+
+        if balance:
+            remaining = balance.remaining_days
+            if current_days > remaining:
+                self.lop_days += (current_days - remaining)
+
     def calculate_days(self):
         days = (self.end_date - self.start_date).days + 1
 
@@ -120,7 +157,6 @@ class LeaveApplication(models.Model):
         return days
 
     def save(self, *args, **kwargs):
-        self.clean()
         self.total_days = self.calculate_days()
         super().save(*args, **kwargs)
 
@@ -352,22 +388,33 @@ class Salary(models.Model):
 class Course(models.Model):
     course_name = models.CharField(max_length=200)
     duration = models.CharField(max_length=100)
-    syllabus = models.TextField()
+    syllabus = models.FileField(upload_to='syllabus/', blank=True, null=True)
     fee = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.course_name
 
+import re
+from datetime import timedelta
+
 class Batch(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    batch_name = models.CharField(max_length=100)
+    batch_name = models.CharField(max_length=100) 
     start_date = models.DateField()
-    end_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True)
     capacity = models.IntegerField()
+
+    def save(self, *args, **kwargs):
+        if self.start_date and self.course.duration:
+            match = re.search(r'\d+', self.course.duration)
+            if match:
+                months = int(match.group())
+                self.end_date = self.start_date + timedelta(days=30 * months)
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.batch_name
-
 
 class Enquiry(models.Model):
 

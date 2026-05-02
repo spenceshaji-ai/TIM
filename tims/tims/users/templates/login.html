@@ -81,6 +81,16 @@
         </div>
         {% endif %}
 
+        {% if messages %}
+            {% for message in messages %}
+                {% if "error" in message.tags %}
+                <div class="alert alert-danger text-center">
+                    {{ message }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
         <!-- Login Form -->
         <form method="post">
             {% csrf_token %}

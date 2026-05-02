@@ -3,6 +3,8 @@ from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.utils.timezone import now
 from tims.adminapp.models import LeaveAllocation, LeaveApplication, LeaveBalance, LeaveType
 from tims.faculty.forms import LeaveApplicationForm
@@ -16,7 +18,6 @@ from django.utils.timezone import now
 from django.contrib import messages
 from tims.adminapp.models import LeaveApplication, LeaveBalance, LeaveType
 from datetime import date
-
 class ApplyLeaveView(LoginRequiredMixin, View):
 
     template_name = "faculty/apply_leave.html"
@@ -39,88 +40,73 @@ class ApplyLeaveView(LoginRequiredMixin, View):
             "today": date.today(),
         })
 
-    
+
     def post(self, request):
 
-    # ✅ If user already confirmed LOP
-        if "confirm" in request.POST:
+        form = LeaveApplicationForm(
+            request.POST,
+            user=request.user
+        )
 
-            form = LeaveApplicationForm(request.POST, user=request.user)
-            form.instance.user = request.user
-
-            if form.is_valid():
-                leave = form.save(commit=False)
-                leave.user = request.user
-
-            # keep your existing logic
-                if leave.day_type == "HALF":
-                    leave.total_days = 0.5
-                else:
-                    leave.total_days = (leave.end_date - leave.start_date).days + 1
-
-                leave.save()
-
-                messages.success(request, "Leave submitted with LOP.")
-                return redirect("faculty:faculty_my_leaves")
-
-    # ✅ Normal submit
-        form = LeaveApplicationForm(request.POST, user=request.user)
         form.instance.user = request.user
 
         if form.is_valid():
 
             leave = form.save(commit=False)
+            leave.user = request.user
 
-        # keep your existing logic
+            # ✅ SAME calculation
             if leave.day_type == "HALF":
                 leave.total_days = 0.5
             else:
                 leave.total_days = (leave.end_date - leave.start_date).days + 1
 
-        # 🔥 CHECK MONTHLY LIMIT
-            allocation = LeaveAllocation.objects.filter(
-                user=request.user,
-                leave_type=leave.leave_type,
-                year=date.today().year
-            ).first()
+            # ✅ USE MODEL LOGIC (IMPORTANT)
+            leave.clean()
 
-            if allocation:
-                monthly_allowed = allocation.monthly_accrual()
-                requested = leave.total_days
+            # =========================
+            # ✅ CONFIRM CLICKED
+            # =========================
+            if "confirm" in request.POST:
+                leave.save()
+                messages.success(request, "Leave applied with LOP.")
+                return redirect("faculty:faculty_my_leaves")
 
+            # =========================
+            # ✅ SHOW WARNING
+            # =========================
+            if leave.lop_days > 0:
 
-                if requested > monthly_allowed:
-                    lop = requested - monthly_allowed
-                    leave.lop_days = lop
-                
+                leave_balances = LeaveBalance.objects.filter(
+                    user=request.user,
+                    year=date.today().year
+                ).select_related("leave_type")
 
-                    leave_balances = LeaveBalance.objects.filter(
-                        user=request.user,
-                        year=date.today().year
-                    ).select_related("leave_type")
+                total_remaining = sum(b.remaining_days for b in leave_balances)
 
-                # 🚨 SHOW WARNING (STOP SAVE)
-                    return render(request, self.template_name, {
-                        "form": form,
-                        "leave_balances": leave_balances,
-                        "lop_warning": f"{lop} day(s) will be LOP. Do you want to continue?",
-                        "today": date.today(),
-                    })
-                else:
-                    leave.lop_days = 0
+                return render(request, self.template_name, {
+                    "form": form,
+                    "leave_balances": leave_balances,
+                    "total_remaining": total_remaining,
+                    "show_lop_warning": True,
+                    "total_days": leave.total_days,
+                    "lop_days": leave.lop_days,
+                    "normal_days": leave.total_days - leave.lop_days,
+                    "today": date.today(),
+                })
 
-        # ✅ SAVE normally
-            leave.user = request.user
+            # =========================
+            # ✅ NORMAL SAVE
+            # =========================
             leave.save()
-
-            messages.success(request, "Leave request submitted successfully.")
+            messages.success(request, "Leave applied successfully.")
             return redirect("faculty:faculty_my_leaves")
 
-    # ❌ form invalid
+        # ❌ INVALID FORM
         leave_balances = LeaveBalance.objects.filter(
             user=request.user,
             year=date.today().year
-        ).select_related("leave_type")
+        )
 
         total_remaining = sum(b.remaining_days for b in leave_balances)
 
@@ -208,17 +194,50 @@ from django.contrib import messages
 # Create your views here.
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from django.views import View
-from tims.faculty.models import TrainingSession,StudentAttendance,FacultyDailyReport
+from tims.faculty.models import TrainingSession,StudentAttendance,FacultyDailyReport,BatchCompletionRequest
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from tims.adminapp.models import Batch,FacultyAssignment,Assignstudent,Batch
-from tims.faculty.forms import TrainingSessionForm,StudentAttendanceForm,FacultyDailyReportForm
+from tims.adminapp.models import Batch, FacultyAssignment, Admission
+from tims.faculty.forms import TrainingSessionForm,AttendanceFilterForm,FacultyDailyReportForm, BatchCompletionRequestForm
+
+
+def resolve_admission_students(admissions):
+    admission_list = list(admissions)
+    admission_phones = {
+        admission.phone
+        for admission in admission_list
+        if admission.phone
+    }
+
+    students_by_phone = {
+        user.phone_number: user
+        for user in User.objects.filter(phone_number__in=admission_phones)
+        if user.phone_number
+    }
+    students_by_username = {
+        user.username: user
+        for user in User.objects.filter(username__in=admission_phones)
+    }
+
+    resolved_rows = []
+    for admission in admission_list:
+        student = (
+            students_by_phone.get(admission.phone)
+            or students_by_username.get(admission.phone)
+        )
+        if student:
+            resolved_rows.append({
+                "admission": admission,
+                "student": student,
+            })
+
+    return resolved_rows
 
 
 class TrainingSessionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'create_session.html'
 
-    # 🔐 Faculty Role Check
+    # Faculty Role Check
     def test_func(self):
         user = self.request.user
         return (
@@ -227,7 +246,7 @@ class TrainingSessionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
             user.role.role_name.lower() == "faculty"
         )
 
-    # 🚫 If Not Authorized
+    # If Not Authorized
     def handle_no_permission(self):
         messages.error(self.request, "You are not authorized to access this page.")
         return redirect("users:login")
@@ -259,10 +278,10 @@ class TrainingSessionCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         return render(request, self.template_name, {'form': form})
 
+
 class TrainingSessionListView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'Session_list.html'
 
-    # 🔐 Faculty Role Check
     def test_func(self):
         user = self.request.user
         return (
@@ -271,20 +290,59 @@ class TrainingSessionListView(LoginRequiredMixin, UserPassesTestMixin, View):
             user.role.role_name.lower() == "faculty"
         )
 
-    # 🚫 If Not Authorized
     def handle_no_permission(self):
         messages.error(self.request, "You are not authorized to access this page.")
         return redirect("users:login")
 
     def get(self, request):
+        batch_id = request.GET.get("batch")
+        session_date = request.GET.get("session_date")
+
         sessions = TrainingSession.objects.filter(
             faculty=request.user
-        ).order_by('-session_date')
+        ).select_related("batch").order_by('-session_date')
 
-        return render(request, self.template_name, {'sessions': sessions})
+        if batch_id:
+            sessions = sessions.filter(batch_id=batch_id)
 
-class TrainingSessionUpdateView(LoginRequiredMixin, View):
+        if session_date:
+            sessions = sessions.filter(session_date=session_date)
+
+        batches = Batch.objects.filter(
+            trainingsession__faculty=request.user
+        ).distinct()
+
+        context = {
+            "sessions": sessions,
+            "batches": batches,
+            "selected_batch": batch_id,
+            "selected_date": session_date,
+        }
+
+        return render(request, self.template_name, context)
+
+
+class TrainingSessionUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'create_session.html'
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
+
+    def get_assigned_batches(self, user):
+        return Batch.objects.filter(
+            id__in=FacultyAssignment.objects.filter(
+                faculty=user
+            ).values_list('batch', flat=True)
+        )
 
     def get(self, request, pk):
         session = get_object_or_404(
@@ -293,11 +351,9 @@ class TrainingSessionUpdateView(LoginRequiredMixin, View):
             faculty=request.user
         )
 
-        # 🚫 Block if Approved or Rejected
-        if session.approval_status in ["Approved", "Rejected"]:
-            return redirect('faculty:training_list')
-
         form = TrainingSessionForm(instance=session)
+        form.fields['batch'].queryset = self.get_assigned_batches(request.user)
+
         return render(request, self.template_name, {'form': form})
 
     def post(self, request, pk):
@@ -306,22 +362,35 @@ class TrainingSessionUpdateView(LoginRequiredMixin, View):
             pk=pk,
             faculty=request.user
         )
-
-        # 🚫 Block if Approved or Rejected
-        if session.approval_status in ["Approved", "Rejected"]:
-            return redirect('faculty:training_list')
 
         form = TrainingSessionForm(request.POST, instance=session)
+        form.fields['batch'].queryset = self.get_assigned_batches(request.user)
 
         if form.is_valid():
-            updated_session = form.save(commit=False)
-            updated_session.faculty = request.user
-            updated_session.save()
-            return redirect('faculty:training_list')
+            try:
+                updated_session = form.save(commit=False)
+                updated_session.faculty = request.user
+                updated_session.save()
+                return redirect('faculty:training_list')
+            except IntegrityError:
+                form.add_error(None, "Duplicate session for this batch on this date.")
 
         return render(request, self.template_name, {'form': form})
-                
-class TrainingSessionDeleteView(LoginRequiredMixin, View):
+
+
+class TrainingSessionDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
 
     def post(self, request, pk):
         session = get_object_or_404(
@@ -329,113 +398,98 @@ class TrainingSessionDeleteView(LoginRequiredMixin, View):
             pk=pk,
             faculty=request.user
         )
-
-        # 🚫 Block if Approved or Rejected
-        if session.approval_status in ["Approved", "Rejected"]:
-            return redirect('faculty:training_list')
 
         session.delete()
         return redirect('faculty:training_list')
 
 
-class StudentAttendanceCreate(LoginRequiredMixin, UserPassesTestMixin, View):
-    template_name = 'create_attendance.html'
+class StudentAttendanceCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = "attendance_table.html"
 
     def test_func(self):
-        user = self.request.user
         return (
-            user.is_authenticated and
-            user.role and
-            user.role.role_name.lower() == "faculty"
+            self.request.user.is_authenticated and
+            self.request.user.role and
+            self.request.user.role.role_name.lower() == "faculty"
         )
 
     def handle_no_permission(self):
-        messages.error(self.request, "You are not authorized to access this page.")
+        messages.error(self.request, "You are not authorized.")
         return redirect("users:login")
 
-    def get(self, request):
-        form = StudentAttendanceForm(user=request.user)
-        return render(request, self.template_name, {'form': form})
+    def get_admission_rows(self, batch):
+        admissions = Admission.objects.filter(
+            batch=batch
+        ).select_related("enquiry", "batch", "course")
+        return resolve_admission_students(admissions)
 
-    def post(self, request):
-        form = StudentAttendanceForm(request.POST, user=request.user)
+    def get(self, request):
+        form = AttendanceFilterForm(request.GET or None, user=request.user)
+
+        students = None
+        existing_attendance = []
 
         if form.is_valid():
-            attendance = form.save(commit=False)
-            attendance.faculty = request.user   # 🔐 secure
-            attendance.save()
+            batch = form.cleaned_data['batch']
+            date = form.cleaned_data['date']
 
-            messages.success(request, "Attendance created successfully.")
-            return redirect('faculty:attendance-list')
+            # 🔐 Security check
+            if not Batch.objects.filter(
+                facultyassignment__faculty=request.user,
+                id=batch.id
+            ).exists():
+                messages.error(request, "Invalid batch selection")
+                return redirect("faculty:attendance-create")
 
-        return render(request, self.template_name, {'form': form})
+            students = self.get_admission_rows(batch)
 
-class StudentAttendanceListView(LoginRequiredMixin, View):
-    template_name = "attendance_list.html"
-
-    def get(self, request):
-        attendances = StudentAttendance.objects.filter(
-            faculty=request.user   # 🔐 only logged-in faculty
-        ).select_related('student', 'batch').order_by('-attendance_date')
+            existing_attendance = StudentAttendance.objects.filter(
+                batch=batch,
+                attendance_date=date
+            ).values_list('student_id', flat=True)
 
         return render(request, self.template_name, {
-            'attendances': attendances
+            "form": form,
+            "students": students,
+            "existing_attendance": existing_attendance
         })
 
-class StudentAttendanceUpdateView(LoginRequiredMixin, View):
-    template_name = "create_attendance.html"
-
-    def get(self, request, pk):
-        attendance = get_object_or_404(
-            StudentAttendance,
-            pk=pk,
-            faculty=request.user   # 🔐 restrict ownership
-        )
-
-        form = StudentAttendanceForm(
-            instance=attendance,
-            user=request.user
-        )
-
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request, pk):
-        attendance = get_object_or_404(
-            StudentAttendance,
-            pk=pk,
-            faculty=request.user
-        )
-
-        form = StudentAttendanceForm(
-            request.POST,
-            instance=attendance,
-            user=request.user
-        )
+    def post(self, request):
+        form = AttendanceFilterForm(request.POST, user=request.user)
 
         if form.is_valid():
-            updated = form.save(commit=False)
-            updated.faculty = request.user  # 🔐 safety
-            updated.save()
+            batch = form.cleaned_data['batch']
+            date = form.cleaned_data['date']
 
-            messages.success(request, "Attendance updated successfully.")
-            return redirect('faculty:attendance-list')
+            # 🔐 Security check
+            if not Batch.objects.filter(
+                facultyassignment__faculty=request.user,
+                id=batch.id
+            ).exists():
+                messages.error(request, "Invalid batch selection")
+                return redirect("faculty:attendance-create")
 
-        return render(request, self.template_name, {'form': form})
+            admission_rows = self.get_admission_rows(batch)
 
-class StudentAttendanceDeleteView(LoginRequiredMixin, View):
+            for row in admission_rows:
+                student = row["student"]
+                present = request.POST.get(f"student_{student.id}") == "on"
 
-    def post(self, request, pk):
-        attendance = get_object_or_404(
-            StudentAttendance,
-            pk=pk,
-            faculty=request.user   # 🔐 restrict ownership
-        )
+                StudentAttendance.objects.update_or_create(
+                    student=student,
+                    attendance_date=date,
+                    defaults={
+                        "batch": batch,
+                        "faculty": request.user,
+                        "is_present": present
+                    }
+                )
 
-        attendance.delete()
-        messages.success(request, "Attendance deleted successfully.")
-        return redirect('faculty:attendance-list')
+            messages.success(request, "Attendance saved successfully")
+            return redirect("faculty:attendance-create")
 
-
+        return render(request, self.template_name, {"form": form})
+         
          
 class FacultyStudentListView(LoginRequiredMixin, View):
     template_name = "student_list.html"
@@ -444,7 +498,7 @@ class FacultyStudentListView(LoginRequiredMixin, View):
 
         faculty = request.user
 
-        # Assigned batches & courses
+        # ✅ Assigned batches & courses
         assignments = FacultyAssignment.objects.filter(
             faculty=faculty
         ).select_related("course", "batch")
@@ -455,37 +509,35 @@ class FacultyStudentListView(LoginRequiredMixin, View):
         selected_batch = request.GET.get("batch")
         selected_course = request.GET.get("course")
 
-        # Base queryset → all students assigned to this faculty
-        student_assignments = Assignstudent.objects.filter(
+        student_admissions = Admission.objects.filter(
             batch_id__in=assigned_batch_ids,
             course_id__in=assigned_course_ids
-        ).select_related("student")
+        ).select_related("enquiry", "batch", "course")
 
-        # Apply filters only if selected
+        # ✅ Apply filters
         if selected_batch:
-            student_assignments = student_assignments.filter(
-                batch_id=selected_batch
-            )
+            student_admissions = student_admissions.filter(batch_id=selected_batch)
 
         if selected_course:
-            student_assignments = student_assignments.filter(
-                course_id=selected_course
-            )
+            student_admissions = student_admissions.filter(course_id=selected_course)
 
         students = []
+        for row in resolve_admission_students(student_admissions):
+            admission = row["admission"]
+            student = row["student"]
+            batch = admission.batch
 
-        for assign in student_assignments:
-            student = assign.student
-
+            # ✅ Total classes
             total_classes = StudentAttendance.objects.filter(
                 student=student,
-                batch_id=assign.batch_id
+                batch=batch
             ).count()
 
+            # ✅ Present classes
             present_classes = StudentAttendance.objects.filter(
                 student=student,
-                batch_id=assign.batch_id,
-                status="Present"
+                batch=batch,
+                is_present=True   # ✅ FIXED
             ).count()
 
             attendance_percentage = 0
@@ -497,8 +549,10 @@ class FacultyStudentListView(LoginRequiredMixin, View):
             students.append({
                 "name": student.name,
                 "email": student.email,
-                "phone": student.phone_number,
+                "phone": getattr(student, "phone_number", ""),  # safe
                 "attendance": attendance_percentage,
+                "batch": batch.batch_name,
+                "course": admission.course.course_name,
             })
 
         context = {
@@ -506,30 +560,6 @@ class FacultyStudentListView(LoginRequiredMixin, View):
             "students": students,
             "selected_batch": selected_batch,
             "selected_course": selected_course,
-        }
-
-        return render(request, self.template_name, context)
-
-        
-class FacultyTrainingProgressView(LoginRequiredMixin, View):
-    template_name = "training_progress.html"
-
-    def get(self, request):
-        status_filter = request.GET.get("status")
-
-        # Only logged-in faculty sessions
-        sessions = TrainingSession.objects.filter(
-            faculty=request.user,
-            approval_status="Approved"
-        ).select_related("batch")
-
-        # Filter by status if selected
-        if status_filter in ["Ongoing", "Completed"]:
-            sessions = sessions.filter(status=status_filter)
-
-        context = {
-            "sessions": sessions,
-            "status_filter": status_filter,
         }
 
         return render(request, self.template_name, context)
@@ -682,3 +712,118 @@ class Home1View(LoginRequiredMixin, View):
         }
 
         return render(request, "fahome.html", context)
+
+class FacultyBatchCompletionRequestCreateView(LoginRequiredMixin, View):
+    template_name = "faculty_completion_request_form.html"
+
+    def get(self, request):
+        form = BatchCompletionRequestForm(user=request.user)
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request):
+        form = BatchCompletionRequestForm(request.POST, user=request.user)
+
+        batch_id = request.POST.get("batch")
+        if batch_id:
+            selected_batch = Batch.objects.filter(
+                id=batch_id,
+                facultyassignment__faculty=request.user
+            ).distinct().first()
+
+            if selected_batch and selected_batch.end_date and selected_batch.end_date > timezone.localdate():
+                form.add_error(
+                    "requested_completion_date",
+                    f"Completion request can only be submitted on or after the batch end date ({selected_batch.end_date})."
+                )
+                return render(request, self.template_name, {"form": form})
+
+        if form.is_valid():
+            completion_request = form.save(commit=False)
+            completion_request.faculty = request.user
+            completion_request.course = completion_request.batch.course
+            try:
+                completion_request.full_clean()
+            except ValidationError as exc:
+                for field, errors in exc.message_dict.items():
+                    for error in errors:
+                        form.add_error(field if field != "__all__" else None, error)
+                return render(request, self.template_name, {"form": form})
+            completion_request.save()
+
+            messages.success(request, "Completion request submitted successfully.")
+            return redirect("faculty:completion-request-list")
+
+        return render(request, self.template_name, {"form": form})
+
+class FacultyBatchCompletionRequestListView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = "faculty_completion_request_list.html"
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
+
+    def get(self, request):
+        status = request.GET.get("status")
+        batch_id = request.GET.get("batch")
+
+        requests_qs = BatchCompletionRequest.objects.filter(
+            faculty=request.user
+        ).select_related("batch", "course").order_by("-requested_at")
+
+        if status:
+            requests_qs = requests_qs.filter(status=status)
+
+        if batch_id:
+            requests_qs = requests_qs.filter(batch_id=batch_id)
+
+        assigned_batch_ids = FacultyAssignment.objects.filter(
+            faculty=request.user
+        ).values_list("batch_id", flat=True)
+
+        batches = Batch.objects.filter(id__in=assigned_batch_ids)
+
+        context = {
+            "requests_qs": requests_qs,
+            "batches": batches,
+            "selected_status": status,
+            "selected_batch": batch_id,
+        }
+
+        return render(request, self.template_name, context)
+
+class FacultyBatchCompletionRequestDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated and
+            user.role and
+            user.role.role_name.lower() == "faculty"
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You are not authorized to access this page.")
+        return redirect("users:login")
+
+    def post(self, request, pk):
+        completion_request = get_object_or_404(
+            BatchCompletionRequest,
+            pk=pk,
+            faculty=request.user
+        )
+
+        if completion_request.status != "Pending":
+            messages.error(request, "Only pending requests can be deleted.")
+            return redirect("faculty:completion-request-list")
+
+        completion_request.delete()
+        messages.success(request, "Completion request deleted successfully.")
+        return redirect("faculty:completion-request-list")        

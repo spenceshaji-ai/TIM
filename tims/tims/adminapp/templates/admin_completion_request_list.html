@@ -1,0 +1,146 @@
+{% include "pages/header.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h3 class="fw-bold mb-4">Batch Completion Requests</h3>
+
+    <!-- Filter Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+
+                <!-- Batch Filter -->
+                <div class="col-md-4">
+                    <label class="form-label">Batch</label>
+                    <select name="batch" class="form-select">
+                        <option value="">All</option>
+                        {% for batch in batches %}
+                        <option value="{{ batch.id }}"
+                            {% if selected_batch == batch.id|stringformat:"s" %}selected{% endif %}>
+                            {{ batch.batch_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Faculty Filter -->
+                <div class="col-md-4">
+                    <label class="form-label">Faculty</label>
+                    <select name="faculty" class="form-select">
+                        <option value="">All</option>
+                        {% for faculty in faculties %}
+                        <option value="{{ faculty.id }}"
+                            {% if selected_faculty == faculty.id|stringformat:"s" %}selected{% endif %}>
+                            {{ faculty.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="col-md-4">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All</option>
+                        <option value="Pending" {% if selected_status == "Pending" %}selected{% endif %}>Pending</option>
+                        <option value="Approved" {% if selected_status == "Approved" %}selected{% endif %}>Approved</option>
+                        <option value="Rejected" {% if selected_status == "Rejected" %}selected{% endif %}>Rejected</option>
+                    </select>
+                </div>
+
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary mt-2">
+                        Filter
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Request Table -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            {% if requests_qs %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Faculty</th>
+                            <th>Batch</th>
+                            <th>Course</th>
+                            <th>Requested Completion Date</th>
+                            <th>Faculty Remarks</th>
+                            <th>Status</th>
+                            <th>Admin Remarks</th>
+                            <th>Requested At</th>
+                            <th>Approved At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for req in requests_qs %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ req.faculty.name }}</td>
+                            <td>{{ req.batch.batch_name }}</td>
+                            <td>{{ req.course.course_name }}</td>
+                            <td>{{ req.requested_completion_date|date:"d-m-Y" }}</td>
+                            <td>{{ req.remarks|default:"-" }}</td>
+                            <td>
+                                {% if req.status == "Pending" %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif req.status == "Approved" %}
+                                    <span class="badge bg-success">Approved</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ req.admin_remarks|default:"-" }}</td>
+                            <td>{{ req.requested_at|date:"d-m-Y h:i A" }}</td>
+                            <td>
+                                {% if req.approved_at %}
+                                    {{ req.approved_at|date:"d-m-Y h:i A" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if req.status == "Pending" %}
+                                    <a href="{% url 'adminapp:completion-request-approve' req.id %}"
+                                       class="btn btn-sm btn-success mb-1">
+                                        Approve
+                                    </a>
+
+                                    <a href="{% url 'adminapp:completion-request-reject' req.id %}"
+                                       class="btn btn-sm btn-danger">
+                                        Reject
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">No Action</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+            {% else %}
+                <div class="text-center py-4">
+                    <p class="text-muted">No completion requests found.</p>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+{% include "pages/footer.html" %}

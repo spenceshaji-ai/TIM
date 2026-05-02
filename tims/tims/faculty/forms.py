@@ -14,8 +14,9 @@ class LeaveApplicationForm(forms.ModelForm):
         ("Noon", "Noon"),
     ]
 
+    # ✅ IMPORTANT FIX (same as admin)
     half_day_session = forms.ChoiceField(
-        choices=[("", "Select Session")] + HALF_SESSION_CHOICES,
+        choices=[("", "Select")] + HALF_SESSION_CHOICES,
         required=False,
         widget=forms.Select(attrs={"class": "form-control"})
     )
@@ -27,7 +28,6 @@ class LeaveApplicationForm(forms.ModelForm):
             "start_date",
             "end_date",
             "day_type",
-            "half_day_session",
             "reason",
         ]
 
@@ -44,8 +44,6 @@ class LeaveApplicationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.user:
-        
-
             balances = LeaveBalance.objects.filter(
                 user=self.user,
                 year=date.today().year
@@ -56,6 +54,7 @@ class LeaveApplicationForm(forms.ModelForm):
             )
 
     def clean(self):
+
         cleaned_data = super().clean()
 
         start = cleaned_data.get("start_date")
@@ -66,6 +65,7 @@ class LeaveApplicationForm(forms.ModelForm):
         today = date.today()
         current_time = now().time()
 
+        # ✅ BASIC VALIDATIONS
         if start and start < today:
             raise ValidationError("Past dates are not allowed.")
 
@@ -82,6 +82,7 @@ class LeaveApplicationForm(forms.ModelForm):
             if exists:
                 raise ValidationError("You already applied leave for this date.")
 
+        # ✅ HALF DAY LOGIC
         if day_type == "HALF":
 
             if not half_session:
@@ -100,9 +101,40 @@ class LeaveApplicationForm(forms.ModelForm):
                         "Half day leave cannot be applied after 12:30 PM."
                     )
 
+        # ✅ NEW JOINER RULE (NO BLOCKING — SAME AS ADMIN)
+        if self.user and start:
+
+            joining_date = self.user.date_joined.date()
+
+            if (today - joining_date).days < 365:
+
+                month_leaves = LeaveApplication.objects.filter(
+                    user=self.user,
+                    start_date__year=start.year,
+                    start_date__month=start.month,
+                    status__in=["Pending", "Approved"]
+                )
+
+                total_taken = 0
+
+                for leave in month_leaves:
+                    if leave.day_type == "HALF":
+                        total_taken += 0.5
+                    else:
+                        total_taken += (
+                            (leave.end_date - leave.start_date).days + 1
+                        )
+
+                current_days = 0.5 if day_type == "HALF" else (
+                    (end - start).days + 1
+                )
+
+                # ❗ DO NOT raise error (LOP handled in view)
+                pass
+
         return cleaned_data
 
-from tims.faculty.models import TrainingSession, StudentAttendance,FacultyDailyReport
+from tims.faculty.models import TrainingSession, StudentAttendance,FacultyDailyReport,BatchCompletionRequest
 from tims.adminapp.models import Batch,FacultyAssignment,Assignstudent
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -117,7 +149,6 @@ class TrainingSessionForm(forms.ModelForm):
             'session_date',
             'topic_covered',
             'hours_taken',
-            'status',
         ]
         widgets = {
             'batch': forms.Select(attrs={'class': 'form-control'}),
@@ -125,7 +156,7 @@ class TrainingSessionForm(forms.ModelForm):
                 attrs={
                     'class': 'form-control',
                     'type': 'date',
-                    'max': timezone.now().date()   # 👈 prevents future in picker
+                    'max': timezone.now().date()
                 }
             ),
             'topic_covered': forms.Textarea(attrs={
@@ -138,25 +169,22 @@ class TrainingSessionForm(forms.ModelForm):
                 'step': '0.5',
                 'min': '0'
             }),
-            'status': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['batch'].empty_label = "Select Batch"
 
-    # 🔹 Prevent future date
+    # Prevent future date
     def clean_session_date(self):
         session_date = self.cleaned_data.get("session_date")
 
         if session_date and session_date > timezone.now().date():
-            raise forms.ValidationError(
-                "Future dates are not allowed."
-            )
+            raise forms.ValidationError("Future dates are not allowed.")
 
         return session_date
 
-    # 🔹 Prevent duplicate session
+    # Prevent duplicate session
     def clean(self):
         cleaned_data = super().clean()
         batch = cleaned_data.get("batch")
@@ -168,7 +196,7 @@ class TrainingSessionForm(forms.ModelForm):
                 session_date=session_date
             )
 
-            # If update view exists, exclude current object
+            # Exclude current object during update
             if self.instance.pk:
                 qs = qs.exclude(pk=self.instance.pk)
 
@@ -178,83 +206,47 @@ class TrainingSessionForm(forms.ModelForm):
                 )
 
         return cleaned_data
-class StudentAttendanceForm(forms.ModelForm):
 
-    class Meta:
-        model = StudentAttendance
-        fields = [
-            'batch',
-            'student',
-            'attendance_date',
-            'status',
-        ]
+class AttendanceFilterForm(forms.Form):
+    batch = forms.ModelChoiceField(
+        queryset=Batch.objects.none(),
+        required=True,
+        empty_label="Select Batch",
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
 
-        widgets = {
-            'batch': forms.Select(attrs={'class': 'form-control'}),
-            'student': forms.Select(attrs={'class': 'form-control'}),
-            'attendance_date': forms.DateInput(
-                attrs={
-                    'class': 'form-control',
-                    'type': 'date',
-                    'max': timezone.now().date()   # UI restriction
-                }
-            ),
-            'status': forms.Select(attrs={'class': 'form-control'}),
-        }
+    date = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control'
+        })
+    )
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
         if user:
-            assigned_batches = FacultyAssignment.objects.filter(
-                faculty=user
-            ).values_list('batch', flat=True)
-
-            # Show only faculty batches
+            # ✅ Only assigned batches
             self.fields['batch'].queryset = Batch.objects.filter(
-                id__in=assigned_batches
-            )
-
-            # Show students only from faculty batches
-            self.fields['student'].queryset = User.objects.filter(
-                assignstudent__batch__in=assigned_batches,
-                role__role_name__iexact='Student'
+                facultyassignment__faculty=user
             ).distinct()
 
-        self.fields['batch'].empty_label = "Select Batch"
-        self.fields['student'].empty_label = "Select Student"
+        # ✅ Restrict future dates
+        today = timezone.localdate()
+        self.fields['date'].widget.attrs['max'] = today
 
-    # 🔒 Prevent future date (Backend validation)
-    def clean_attendance_date(self):
-        attendance_date = self.cleaned_data.get("attendance_date")
+        # (Optional) restrict very old dates
+        # self.fields['date'].widget.attrs['min'] = "2023-01-01"
 
-        if attendance_date and attendance_date > timezone.now().date():
-            raise forms.ValidationError("Future dates are not allowed.")
+    def clean_date(self):
+        date = self.cleaned_data['date']
+        today = timezone.localdate()
 
-        return attendance_date
+        if date > today:
+            raise forms.ValidationError("Future date is not allowed.")
 
-    # 🔒 Prevent duplicate attendance
-    def clean(self):
-        cleaned_data = super().clean()
-        student = cleaned_data.get('student')
-        attendance_date = cleaned_data.get('attendance_date')
-
-        if student and attendance_date:
-            qs = StudentAttendance.objects.filter(
-                student=student,
-                attendance_date=attendance_date
-            )
-
-            if self.instance.pk:
-                qs = qs.exclude(pk=self.instance.pk)
-
-            if qs.exists():
-                raise forms.ValidationError(
-                    "Attendance for this student on this date already exists."
-                )
-
-        return cleaned_data
+        return date
 
 class FacultyDailyReportForm(forms.ModelForm):
 
@@ -370,3 +362,120 @@ class FacultyCourseMaterialForm(forms.ModelForm):
             # Set queryset for dropdowns
             self.fields['course'].queryset = Course.objects.filter(id__in=assigned_courses)
             self.fields['batch'].queryset = Batch.objects.filter(id__in=assigned_batches)
+
+
+class BatchCompletionRequestForm(forms.ModelForm):
+    class Meta:
+        model = BatchCompletionRequest
+        fields = ["batch", "requested_completion_date", "remarks"]
+        widgets = {
+            "batch": forms.Select(attrs={"class": "form-select"}),
+            "requested_completion_date": forms.DateInput(attrs={
+                "type": "date",
+                "class": "form-control"
+            }),
+            "remarks": forms.Textarea(attrs={
+                "rows": 4,
+                "class": "form-control"
+            }),
+        }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        today = timezone.localdate()
+
+        assigned_batch_ids = FacultyAssignment.objects.filter(
+            faculty=user
+        ).values_list("batch_id", flat=True)
+
+        self.fields["batch"].queryset = Batch.objects.filter(
+            id__in=assigned_batch_ids,
+            end_date__lte=today
+        ).select_related("course")
+
+        self.fields["batch"].empty_label = "Select Eligible Batch"
+
+    def clean_requested_completion_date(self):
+        request_date = self.cleaned_data.get("requested_completion_date")
+        today = timezone.localdate()
+
+        if request_date and request_date > today:
+            raise forms.ValidationError("Future completion date is not allowed.")
+
+        return request_date
+
+    def clean(self):
+        cleaned_data = super().clean()
+        batch = cleaned_data.get("batch")
+        request_date = cleaned_data.get("requested_completion_date")
+
+        if not batch or not request_date or not self.user:
+            return cleaned_data
+
+        # 1) Batch must belong to faculty
+        is_assigned = FacultyAssignment.objects.filter(
+            faculty=self.user,
+            batch=batch
+        ).exists()
+
+        if not is_assigned:
+            self.add_error("batch", "You are not assigned to this batch.")
+            return cleaned_data
+
+        # 2) Training sessions must exist
+        has_sessions = TrainingSession.objects.filter(
+            faculty=self.user,
+            batch=batch
+        ).exists()
+
+        if not has_sessions:
+            self.add_error(
+                "batch",
+                "No training sessions have been added for this batch, so completion request cannot be submitted."
+            )
+
+        # 3) Batch end date must be reached
+        today = timezone.localdate()
+        if batch.end_date and batch.end_date > today:
+            self.add_error(
+                "requested_completion_date",
+                f"Completion request can only be submitted on or after the batch end date ({batch.end_date})."
+            )
+
+        # 4) Requested completion date must be on or after batch end date
+        if batch.end_date and request_date < batch.end_date:
+            self.add_error(
+                "requested_completion_date",
+                f"Completion date must be on or after batch end date ({batch.end_date})."
+            )
+
+        # 5) Prevent duplicate pending request
+        pending_exists = BatchCompletionRequest.objects.filter(
+            faculty=self.user,
+            batch=batch,
+            course=batch.course,
+            status="Pending"
+        ).exists()
+
+        if pending_exists:
+            self.add_error(
+                "batch",
+                "A pending completion request already exists for this batch."
+            )
+
+        # 6) Prevent duplicate approved request
+        approved_exists = BatchCompletionRequest.objects.filter(
+            faculty=self.user,
+            batch=batch,
+            course=batch.course,
+            status="Approved"
+        ).exists()
+
+        if approved_exists:
+            self.add_error(
+                "batch",
+                "This batch has already been approved as completed."
+            )
+
+        return cleaned_data

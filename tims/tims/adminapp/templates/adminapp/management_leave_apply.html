@@ -6,13 +6,58 @@ Management Apply Leave
 
 {% block form_body %}
 
-<!-- Leave Balance Table -->
+<!-- ✅ SUCCESS MESSAGES -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
 
+
+<!-- ✅ LOP WARNING BOX -->
+{% if show_lop_warning %}
+<div class="alert alert-warning">
+
+    <h5>⚠ Leave Limit Exceeded</h5>
+
+    <p>
+        {{ total_days }} day(s) applied <br>
+        {{ normal_days }} day → Normal Leave <br>
+        {{ lop_days }} day → LOP (Salary Deduction)
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- 🔥 KEEP ALL FORM VALUES -->
+        {% for field in form %}
+            <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
+        {% endfor %}
+
+        <input type="hidden" name="confirm" value="1">
+
+        <button type="submit" class="btn btn-success">
+            Yes, Apply Leave
+        </button>
+
+        <a href="" class="btn btn-secondary">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+{% endif %}
+
+
+<!-- ✅ LEAVE BALANCE TABLE -->
 <table class="table table-bordered mb-4">
 <thead>
 <tr>
 <th>Leave Type</th>
-<th>Total Allocated</th>
+<th>Allocated</th>
 <th>Used</th>
 <th>Remaining</th>
 </tr>
@@ -20,61 +65,26 @@ Management Apply Leave
 
 <tbody>
 {% for balance in leave_balances %}
-
 <tr>
 <td>{{ balance.leave_type.name }}</td>
-
 <td>{{ balance.earned_days }}</td>
-
 <td>{{ balance.used_days }}</td>
-
 <td>
 <span class="badge bg-success">
 {{ balance.remaining_days }}
 </span>
 </td>
-
 </tr>
-
 {% empty %}
-
 <tr>
 <td colspan="4">No leave balances found</td>
 </tr>
-
 {% endfor %}
 </tbody>
 </table>
 
-<!-- Hidden Leave Type Remaining -->
-<select id="leaveTypeData" style="display:none;">
-    {% for balance in leave_balances %}
-        <option 
-            value="{{ balance.leave_type.id }}" 
-            data-remaining="{{ balance.remaining_days }}">
-        </option>
-    {% endfor %}
 
-</select>
-{% if lop_warning %}
-<div class="alert alert-danger">
-    {{ lop_warning }}
-</div>
-
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-
-    <button type="submit" name="confirm" class="btn btn-danger">
-        Yes, Continue with LOP
-    </button>
-     <a href="" class="btn btn-secondary ms-2">
-        Cancel
-    </a>
-</form>
-
-<hr>
-{% else %}
+<!-- ✅ MAIN FORM -->
 <form method="post">
 {% csrf_token %}
 
@@ -93,55 +103,49 @@ Management Apply Leave
 {{ form.end_date }}
 </div>
 
-
-<!-- Leave Duration -->
 <div class="mb-3">
 <label>Leave Duration</label>
-
 <select id="leaveDuration" class="form-control">
 <option value="">Select</option>
 <option value="FULL">Full Day</option>
 <option value="HALF_AM">Half Day A.M</option>
 <option value="HALF_PM">Half Day P.M</option>
 </select>
-
 </div>
 
-
-<!-- Hidden fields -->
+<!-- HIDDEN -->
 <div style="display:none;">
 {{ form.day_type }}
 {{ form.half_day_session }}
 </div>
-
 
 <div class="mb-3">
 <label>No. of Days</label>
 <input type="text" id="totalDays" class="form-control" readonly>
 </div>
 
-
 <div class="mb-3">
 <label>Reason</label>
 {{ form.reason }}
 </div>
-
 
 <button type="submit" class="btn btn-primary">
 Apply Leave
 </button>
 
 </form>
-{% endif %}
+
 
 <script>
-
+// =====================
+// DAY CALCULATION
+// =====================
 const duration = document.getElementById("leaveDuration")
-
 const dayType = document.getElementById("id_day_type")
+const session = document.getElementById("id_half_day_session")
+
 const start = document.getElementById("id_start_date")
 const end = document.getElementById("id_end_date")
-
 const totalDays = document.getElementById("totalDays")
 
 function calculateDays(){
@@ -149,9 +153,9 @@ function calculateDays(){
     if(duration.value === "FULL"){
 
         dayType.value = "FULL"
+        session.value = ""
 
         if(start.value && end.value){
-
             let s = new Date(start.value)
             let e = new Date(end.value)
 
@@ -162,36 +166,20 @@ function calculateDays(){
 
     else if(duration.value === "HALF_AM"){
         dayType.value = "HALF"
+        session.value = "Morning"
         totalDays.value = 0.5
     }
 
     else if(duration.value === "HALF_PM"){
         dayType.value = "HALF"
+        session.value = "Noon"
         totalDays.value = 0.5
     }
-
 }
 
 duration.addEventListener("change", calculateDays)
 start.addEventListener("change", calculateDays)
 end.addEventListener("change", calculateDays)
-
-
-document.querySelector("form").addEventListener("submit", function(e){
-
-    let days = parseFloat(totalDays.value) || 0
-
-    // only warn when more than 1 leave in month
-    if(days > 1){
-
-        let msg = "More than 1 leave this month will be counted as LOP. Continue?"
-
-        if(!confirm(msg)){
-            e.preventDefault()
-        }
-    }
-
-})
-
 </script>
+
 {% endblock %}

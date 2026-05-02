@@ -6,12 +6,61 @@ Apply Leave
 
 {% block form_body %}
 
-<!-- Leave Balance Table -->
+<!-- ✅ SUCCESS MESSAGES -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+
+<!-- ✅ LOP WARNING BOX -->
+{% if show_lop_warning %}
+<div class="alert alert-warning">
+
+    <h5>⚠ Leave Limit Exceeded</h5>
+
+    <p>
+        {{ total_days }} day(s) applied <br>
+        {{ normal_days }} day → Normal Leave <br>
+        {{ lop_days }} day → LOP (Salary Deduction)
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- 🔥 VERY IMPORTANT: KEEP VALUES SAFE -->
+        {% for field in form %}
+            <input type="hidden" name="{{ field.name }}" value="{{ field.value|default:'' }}">
+        {% endfor %}
+
+        <!-- 🔥 FIX HALF DAY -->
+        <input type="hidden" name="half_day_session" value="{{ form.half_day_session.value|default:'' }}">
+
+        <input type="hidden" name="confirm" value="1">
+
+        <button type="submit" class="btn btn-success">
+            Yes, Apply Leave
+        </button>
+
+        <a href="" class="btn btn-secondary">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+{% endif %}
+
+
+<!-- ✅ LEAVE BALANCE TABLE -->
 <table class="table table-bordered mb-4">
 <thead>
 <tr>
 <th>Leave Type</th>
-<th>Total Allocated</th>
+<th>Allocated</th>
 <th>Used</th>
 <th>Remaining</th>
 </tr>
@@ -38,35 +87,7 @@ Apply Leave
 </table>
 
 
-<!-- 🔥 Hidden Leave Data (IMPORTANT) -->
-<select id="leaveTypeData" style="display:none;">
-    {% for balance in leave_balances %}
-        <option 
-            value="{{ balance.leave_type.id }}" 
-            data-remaining="{{ balance.remaining_days }}">
-        </option>
-    {% endfor %}
-</select>
-{% if lop_warning %}
-<div class="alert alert-danger">
-    {{ lop_warning }}
-</div>
-
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-
-    <button type="submit" name="confirm" class="btn btn-danger">
-        Yes, Continue with LOP
-    </button>
-    <a href="" class="btn btn-secondary ms-2">
-        Cancel
-    </a>
-</form>
-
-<hr>
-{% else %}
-
+<!-- ✅ MAIN FORM -->
 <form method="post">
 {% csrf_token %}
 
@@ -85,11 +106,8 @@ Apply Leave
 {{ form.end_date }}
 </div>
 
-
-<!-- Leave Duration -->
 <div class="mb-3">
 <label>Leave Duration</label>
-
 <select id="leaveDuration" class="form-control">
 <option value="">Select</option>
 <option value="FULL">Full Day</option>
@@ -98,19 +116,16 @@ Apply Leave
 </select>
 </div>
 
-
-<!-- Hidden fields -->
+<!-- HIDDEN -->
 <div style="display:none;">
 {{ form.day_type }}
 {{ form.half_day_session }}
 </div>
 
-
 <div class="mb-3">
 <label>No. of Days</label>
 <input type="text" id="totalDays" class="form-control" readonly>
 </div>
-
 
 <div class="mb-3">
 <label>Reason</label>
@@ -123,18 +138,18 @@ Apply Leave
 
 </form>
 
-{% endif %}
 
 <script>
-
+// =====================
+// DAY CALCULATION
+// =====================
 const duration = document.getElementById("leaveDuration")
 const dayType = document.getElementById("id_day_type")
 const session = document.getElementById("id_half_day_session")
 
 const start = document.getElementById("id_start_date")
 const end = document.getElementById("id_end_date")
-
-const totalDaysInput = document.getElementById("totalDays")
+const totalDays = document.getElementById("totalDays")
 
 function calculateDays(){
 
@@ -144,66 +159,30 @@ function calculateDays(){
         session.value = ""
 
         if(start.value && end.value){
-
             let s = new Date(start.value)
             let e = new Date(end.value)
 
             let diff = (e - s) / (1000*60*60*24) + 1
-
-            totalDaysInput.value = diff
+            totalDays.value = diff
         }
     }
 
     else if(duration.value === "HALF_AM"){
-
         dayType.value = "HALF"
         session.value = "Morning"
-
-        totalDaysInput.value = 0.5
+        totalDays.value = 0.5
     }
 
     else if(duration.value === "HALF_PM"){
-
         dayType.value = "HALF"
         session.value = "Noon"
-
-        totalDaysInput.value = 0.5
+        totalDays.value = 0.5
     }
 }
 
 duration.addEventListener("change", calculateDays)
 start.addEventListener("change", calculateDays)
 end.addEventListener("change", calculateDays)
-
-
-/* 🔥 LOP WARNING (NEW) */
-document.querySelector("form").addEventListener("submit", function(e){
-
-    let leaveType = document.getElementById("id_leave_type").value;
-    let days = parseFloat(document.getElementById("totalDays").value) || 0;
-
-    let options = document.querySelectorAll("#leaveTypeData option");
-
-    let remaining = 0;
-
-    options.forEach(opt => {
-        if(parseInt(opt.value) === parseInt(leaveType)){
-            remaining = parseFloat(opt.dataset.remaining) || 0;
-        }
-    });
-
-    if(days > remaining){
-
-        let lop = days - remaining;
-
-        let msg = lop + " day(s) will be LOP. Do you want to continue?";
-
-        if(!confirm(msg)){
-            e.preventDefault();
-        }
-    }
-
-});
 
 </script>
 

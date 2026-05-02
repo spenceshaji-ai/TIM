@@ -205,9 +205,6 @@ urlpatterns = [
     path("faculty-assignments/add/", FacultyAssignmentCreateView.as_view(), name="faculty_assignment"),
     path("faculty-assignments/view/",FacultyCoursesView.as_view(),name="faculty_courses"),
 
-    path('admin/training-approvals/', TrainingSessionApprovalListView.as_view(), name='admin_training_approval_list'),
-    path('admin/training-approve/<int:pk>/', TrainingSessionApproveView.as_view(), name='training_approve'),
-    path('admin/training-reject/<int:pk>/', TrainingSessionRejectView.as_view(), name='training_reject'),
    #path(
        # "faculty-assignments/<int:pk>/delete/",
         #views.faculty_assignment_delete,
@@ -220,7 +217,9 @@ urlpatterns = [
     path("faculty-reports/",AdminFacultyReportListView.as_view(),name="faculty_report_list",),
     path("training-sessions/",AdminTrainingSessionListView.as_view(),name="training_session_list",),
     path("assignment-report/", AssignmentReportView.as_view(), name="assignment-report"),
-
+    path("completion-requests/", AdminBatchCompletionRequestListView.as_view(), name="completion-request-list"),
+    path("completion-request/approve/<int:pk>/",AdminBatchCompletionApproveView.as_view(),name="completion-request-approve"),
+    path("completion-request/reject/<int:pk>/",AdminBatchCompletionRejectView.as_view(), name="completion-request-reject"),
 
 # from tims.adminapp.views import LeaveHistoryDetailView, LeaveRequestsView, LeaveUserListView, UpdateLeaveStatusView, LeaveRequestsView,UpdateLeaveStatusView,FollowUpCreateView, FollowUpListView
 # from .views import *
