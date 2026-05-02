@@ -1,161 +1,284 @@
 {% load static %}
 {% include 'pages/header.html' %}
 
+<style>
+    .dashboard-wrapper {
+        min-height: calc(100vh - 90px);
+        padding: 32px;
+        background:
+            radial-gradient(circle at top left, rgba(13, 110, 253, 0.13), transparent 34%),
+            radial-gradient(circle at bottom right, rgba(25, 135, 84, 0.13), transparent 34%),
+            linear-gradient(135deg, #f8fbff 0%, #eef5ff 50%, #f7fff9 100%);
+        border-radius: 22px;
+    }
+
+    .welcome-section {
+        margin-bottom: 30px;
+    }
+
+    .welcome-section h2 {
+        font-size: 34px;
+        font-weight: 800;
+        color: #102033;
+        margin-bottom: 8px;
+    }
+
+    .welcome-section .user-name {
+        color: #0d6efd;
+    }
+
+    .welcome-section p {
+        font-size: 16px;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .stat-card {
+        border: none;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 12px 32px rgba(16, 32, 51, 0.08);
+        transition: 0.25s ease;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 18px 42px rgba(16, 32, 51, 0.14);
+    }
+
+    .stat-card .card-body {
+        min-height: 130px;
+    }
+
+    .stat-card h6 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+
+    .stat-card h2 {
+        font-size: 36px;
+        font-weight: 900;
+    }
+
+    .data-card {
+        border: none;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 12px 32px rgba(16, 32, 51, 0.08);
+        overflow: hidden;
+    }
+
+    .data-card .card-header {
+        background: transparent;
+        border-bottom: 1px solid rgba(16, 32, 51, 0.08);
+        padding: 18px 22px;
+    }
+
+    .data-card .card-header h5 {
+        font-weight: 800;
+        color: #102033;
+    }
+
+    .data-card .card-body {
+        padding: 20px 22px;
+    }
+
+    .data-card table {
+        margin-bottom: 0;
+    }
+
+    .data-card thead th {
+        color: #6c757d;
+        font-size: 13px;
+        font-weight: 700;
+        border-bottom: 1px solid rgba(16, 32, 51, 0.08);
+    }
+
+    .data-card tbody td {
+        font-size: 14px;
+        vertical-align: middle;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-wrapper {
+            padding: 20px;
+        }
+
+        .welcome-section h2 {
+            font-size: 27px;
+        }
+    }
+</style>
+
 <div class="content container mt-4">
 
-    <!-- Welcome Section -->
-    <div class="mb-4">
-        <h2>
-            Welcome,
-            <span class="text-primary">
-                {{ current_user.name|default:current_user.username }}
-            </span>
+    <div class="dashboard-wrapper">
 
-            {% if current_user.role.role_name == "SuperAdmin" %}
-                <span class="badge bg-danger ms-2">Super Admin</span>
-            {% elif current_user.role.role_name == "Admin" %}
-                <span class="badge bg-warning ms-2">Admin</span>
-            {% endif %}
-        </h2>
-        <p class="text-muted">Here’s your dashboard overview</p>
-    </div>
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h2>
+                Welcome,
+                <span class="user-name">
+                    {{ current_user.name|default:current_user.username }}
+                </span>
 
-    <!-- Dashboard Cards -->
-    <div class="row g-4">
+                {% if current_user.role.role_name == "SuperAdmin" %}
+                    <span class="badge bg-danger ms-2">Super Admin</span>
+                {% elif current_user.role.role_name == "Admin" %}
+                    <span class="badge bg-warning ms-2">Admin</span>
+                {% endif %}
+            </h2>
 
-        <!-- Students -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-            <div class="card shadow-sm text-center h-100">
-                <div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 120px;">
-                    <h6 class="text-muted mb-2">Students</h6>
-                    <h2 class="fw-bold text-primary mb-0">{{ num_students }}</h2>
-                </div>
-            </div>
+            <p>Here’s your dashboard overview</p>
         </div>
 
-        <!-- Faculty -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-            <div class="card shadow-sm text-center h-100">
-                <div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 120px;">
-                    <h6 class="text-muted mb-2">Faculty</h6>
-                    <h2 class="fw-bold text-success mb-0">{{ num_faculty }}</h2>
+        <!-- Dashboard Cards -->
+        <div class="row g-4">
+
+            <!-- Students -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="card stat-card text-center h-100">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <h6>Students</h6>
+                        <h2 class="text-primary mb-0">{{ num_students }}</h2>
+                    </div>
                 </div>
             </div>
+
+            <!-- Faculty -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="card stat-card text-center h-100">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <h6>Faculty</h6>
+                        <h2 class="text-success mb-0">{{ num_faculty }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admins -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="card stat-card text-center h-100">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <h6>Admins</h6>
+                        <h2 class="text-warning mb-0">{{ num_admin }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Jobs -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="card stat-card text-center h-100">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <h6>Active Jobs</h6>
+                        <h2 class="text-danger mb-0">{{ num_jobs }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Courses -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="card stat-card text-center h-100">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <h6>Courses</h6>
+                        <h2 class="text-info mb-0">{{ num_courses }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Batches -->
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="card stat-card text-center h-100">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <h6>Active Batches</h6>
+                        <h2 class="text-secondary mb-0">{{ num_batches }}</h2>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <!-- Admins -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-            <div class="card shadow-sm text-center h-100">
-                <div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 120px;">
-                    <h6 class="text-muted mb-2">Admins</h6>
-                    <h2 class="fw-bold text-warning mb-0">{{ num_admin }}</h2>
+        <!-- Recent Data Section -->
+        <div class="row mt-5 g-4">
+
+            <!-- Recent Users -->
+            <div class="col-md-6">
+                <div class="card data-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Users</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for user in recent_users %}
+                                <tr>
+                                    <td>{{ user.name|default:user.username }}</td>
+                                    <td>{{ user.role.role_name }}</td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            {{ user.status }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No users found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Active Jobs -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-            <div class="card shadow-sm text-center h-100">
-                <div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 120px;">
-                    <h6 class="text-muted mb-2">Active Jobs</h6>
-                    <h2 class="fw-bold text-danger mb-0">{{ num_jobs }}</h2>
+            <!-- Recent Jobs -->
+            <div class="col-md-6">
+                <div class="card data-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Jobs</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Company</th>
+                                    <th>Deadline</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for job in recent_jobs %}
+                                <tr>
+                                    <td>{{ job.title }}</td>
+                                    <td>{{ job.company }}</td>
+                                    <td>{{ job.application_deadline }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No jobs found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Courses -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-            <div class="card shadow-sm text-center h-100">
-                <div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 120px;">
-                    <h6 class="text-muted mb-2">Courses</h6>
-                    <h2 class="fw-bold text-info mb-0">{{ num_courses }}</h2>
-                </div>
-            </div>
-        </div>
-
-        <!-- Active Batches -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-            <div class="card shadow-sm text-center h-100">
-                <div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 120px;">
-                    <h6 class="text-muted mb-2">Active Batches</h6>
-                    <h2 class="fw-bold text-secondary mb-0">{{ num_batches }}</h2>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Recent Data Section -->
-    <div class="row mt-5">
-
-        <!-- Recent Users -->
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h5 class="mb-0">Recent Users</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm align-middle">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in recent_users %}
-                            <tr>
-                                <td>{{ user.name|default:user.username }}</td>
-                                <td>{{ user.role.role_name }}</td>
-                                <td>
-                                    <span class="badge bg-success">
-                                        {{ user.status }}
-                                    </span>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="3" class="text-center">No users found</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Jobs -->
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h5 class="mb-0">Recent Jobs</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm align-middle">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Company</th>
-                                <th>Deadline</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for job in recent_jobs %}
-                            <tr>
-                                <td>{{ job.title }}</td>
-                                <td>{{ job.company }}</td>
-                                <td>{{ job.application_deadline }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="3" class="text-center">No jobs found</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
 
     </div>

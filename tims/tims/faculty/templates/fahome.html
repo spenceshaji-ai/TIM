@@ -1,111 +1,120 @@
 {% load static %}
 {% include 'faheader.html' %}
 
-<!-- ============================================================== -->
-<!-- Start Page Content here -->
-<!-- ============================================================== -->
-
 <div class="content">
-
     <div class="container-fluid">
 
-        <!-- 🔥 WELCOME MESSAGE -->
-        <div class="row mb-3">
-            <div class="col-12">
-                <div class="card p-3">
-                    <h3>
-                        Welcome, 
+        <style>
+            .faculty-welcome-page {
+                min-height: calc(100vh - 120px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 40px 20px;
+                background:
+                    radial-gradient(circle at top left, rgba(13, 110, 253, 0.18), transparent 35%),
+                    radial-gradient(circle at bottom right, rgba(25, 135, 84, 0.18), transparent 35%),
+                    linear-gradient(135deg, #f8fbff 0%, #eef5ff 50%, #f7fff9 100%);
+                border-radius: 22px;
+                position: relative;
+            }
+
+            .faculty-welcome-page::before {
+                content: "";
+                position: absolute;
+                width: 360px;
+                height: 360px;
+                border-radius: 50%;
+                background: rgba(13, 110, 253, 0.08);
+                top: -120px;
+                right: -100px;
+            }
+
+            .faculty-welcome-page::after {
+                content: "";
+                position: absolute;
+                width: 260px;
+                height: 260px;
+                border-radius: 50%;
+                background: rgba(25, 135, 84, 0.08);
+                bottom: -90px;
+                left: -70px;
+            }
+
+            .faculty-welcome-content {
+                position: relative;
+                z-index: 2;
+                max-width: 900px;
+                text-align: center;
+                padding: 60px 20px;
+            }
+
+            .faculty-badge {
+                display: inline-block;
+                padding: 10px 22px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.85);
+                color: #0d6efd;
+                font-weight: 700;
+                margin-bottom: 24px;
+                box-shadow: 0 10px 30px rgba(13, 110, 253, 0.12);
+            }
+
+            .faculty-title {
+                font-size: clamp(38px, 6vw, 72px);
+                font-weight: 800;
+                line-height: 1.1;
+                color: #102033;
+                margin-bottom: 20px;
+            }
+
+            .faculty-name {
+                color: #0d6efd;
+            }
+
+            .faculty-subtitle {
+                font-size: 18px;
+                color: #5d6b7a;
+                max-width: 650px;
+                margin: 0 auto;
+                line-height: 1.7;
+            }
+
+            @media (max-width: 768px) {
+                .faculty-welcome-page {
+                    min-height: calc(100vh - 90px);
+                }
+
+                .faculty-subtitle {
+                    font-size: 16px;
+                }
+            }
+        </style>
+
+        <div class="faculty-welcome-page">
+            <div class="faculty-welcome-content">
+
+                <div class="faculty-badge">
+                    Faculty Workspace
+                </div>
+
+                <h1 class="faculty-title">
+                    Welcome back,<br>
+                    <span class="faculty-name">
                         {% if user.name %}
                             {{ user.name }}
                         {% else %}
                             {{ user.username }}
                         {% endif %}
-                        👋
-                    </h3>
-                    <p class="text-muted">Here is your dashboard</p>
-                </div>
-            </div>
-        </div>
+                    </span>
+                    👋
+                </h1>
 
-        <!-- 🔥 DASHBOARD CARDS -->
-        <div class="row">
+                <p class="faculty-subtitle">
+                    Manage your academic responsibilities, sessions, attendance, and activities 
+                    from one clean and focused workspace.
+                </p>
 
-            <div class="col-md-3">
-                <div class="card p-3 text-center">
-                    <h5>Total Leaves</h5>
-                    <h2>{{ total_leaves }}</h2>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card p-3 text-center">
-                    <h5>Pending Leaves</h5>
-                    <h2 class="text-warning">{{ pending_leaves }}</h2>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card p-3 text-center">
-                    <h5>Approved Leaves</h5>
-                    <h2 class="text-success">{{ approved_leaves }}</h2>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card p-3 text-center">
-                    <h5>Training Sessions</h5>
-                    <h2 class="text-primary">{{ total_sessions }}</h2>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- 🔥 SECOND ROW -->
-        <div class="row mt-3">
-
-            <div class="col-md-6">
-                <div class="card p-3 text-center">
-                    <h5>Total Attendance Records</h5>
-                    <h2>{{ total_attendance }}</h2>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- 🔥 RECENT LEAVES -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card p-3">
-                    <h4>Recent Leave Requests</h4>
-
-                    <table class="table table-bordered mt-3">
-                        <thead>
-                            <tr>
-                                <th>Type</th>
-                                <th>Dates</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for leave in recent_leaves %}
-                            <tr>
-                                <td>{{ leave.leave_type.name }}</td>
-                                <td>{{ leave.start_date }} → {{ leave.end_date }}</td>
-                                <td>
-                                    <span class="badge bg-{% if leave.status == 'Approved' %}success{% elif leave.status == 'Pending' %}warning{% else %}danger{% endif %}">
-                                        {{ leave.status }}
-                                    </span>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="3">No leave data</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-
-                </div>
             </div>
         </div>
 

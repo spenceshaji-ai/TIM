@@ -8,10 +8,6 @@
 
     <div class="d-flex justify-content-between mb-3">
         <h3>Payment List</h3>
-
-        <a href="{% url 'adminapp:payment_create' %}" class="btn btn-primary">
-            Add Payment
-        </a>
     </div>
 
     <table class="table table-bordered table-striped shadow">
@@ -28,33 +24,41 @@
         </thead>
 
         <tbody>
-            {% for p in payments %}
+            {% for a in admissions %}
             <tr>
-                <td>{{ p.admission.student_name }}</td>
-                <td>{{ p.total_fee }}</td>
-                <td>{{ p.amount }}</td>
-                <td>{{ p.pending_fee }}</td>
-                <td>{{ p.payment_date }}</td>
+                <!-- Student -->
+                <td>{{ a.student_name }}</td>
 
+                <!-- Total Fee -->
+                <td>{{ a.total_fee }}</td>
+
+                <!-- Paid Amount -->
+                <td>{{ a.paid_amount }}</td>
+
+                <!-- Pending -->
+                <td>{{ a.pending_fee }}</td>
+
+                <!-- Admission Date -->
+                <td>{{ a.admission_date }}</td>
+
+                <!-- Status -->
                 <td>
-                    {% if p.status == "Paid" %}
+                    {% if a.pending_fee == 0 %}
                         <span class="badge bg-success">Paid</span>
                     {% else %}
                         <span class="badge bg-danger">Pending</span>
                     {% endif %}
                 </td>
 
+                <!-- Actions -->
                 <td>
-                    <a href="{% url 'adminapp:payment_edit' p.id %}"
-                       class="btn btn-warning btn-sm">
-                        Edit
+                    <!-- Add Payment -->
+                    <a href="{% url 'adminapp:payment_create'  %}"
+                       class="btn btn-primary btn-sm">
+                        Add Payment
                     </a>
 
-                    <a href="{% url 'adminapp:payment_delete' p.id %}"
-                       class="btn btn-danger btn-sm"
-                       onclick="return confirm('Are you sure you want to delete this payment?');">
-                        Delete
-                    </a>
+                    
                 </td>
             </tr>
 
