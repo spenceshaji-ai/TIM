@@ -209,14 +209,16 @@ def resolve_admission_students(admissions):
         if admission.phone
     }
 
+    student_users = User.objects.filter(role__role_name__iexact="Student")
+
     students_by_phone = {
         user.phone_number: user
-        for user in User.objects.filter(phone_number__in=admission_phones)
+        for user in student_users.filter(phone_number__in=admission_phones)
         if user.phone_number
     }
     students_by_username = {
         user.username: user
-        for user in User.objects.filter(username__in=admission_phones)
+        for user in student_users.filter(username__in=admission_phones)
     }
 
     resolved_rows = []
