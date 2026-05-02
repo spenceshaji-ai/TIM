@@ -29,7 +29,7 @@
     <link href="{% static 'admin/assets/css/app-creative.min.css' %}" rel="stylesheet" type="text/css" id="app-style" />
 
     <!-- Icons css -->
-    <link href="{% static 'admin/assets/css/icons.min.css' }" rel="stylesheet" type="text/css" />
+    <link href="{% static 'admin/assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
 
     <style>
         .custom-modal {
@@ -89,6 +89,62 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+        }
+
+        .leftside-menu .side-nav {
+            padding: 14px 12px;
+        }
+
+        .leftside-menu .side-nav-title {
+            padding: 10px 12px;
+            letter-spacing: 0.08em;
+            font-size: 11px;
+            font-weight: 700;
+            color: #98a6b8;
+        }
+
+        .leftside-menu .side-nav .side-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 3px 0;
+            padding: 11px 14px;
+            border-radius: 8px;
+            color: #aeb9c7;
+            font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .leftside-menu .side-nav .side-nav-link i {
+            width: 20px;
+            min-width: 20px;
+            margin: 0;
+            font-size: 19px;
+            text-align: center;
+            color: #8fa0b3;
+        }
+
+        .leftside-menu .side-nav .side-nav-link:hover,
+        .leftside-menu .side-nav .side-nav-link.active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .leftside-menu .side-nav .side-nav-link:hover i,
+        .leftside-menu .side-nav .side-nav-link.active i {
+            color: #ffffff;
+        }
+
+        .leftside-menu .side-nav-second-level a {
+            border-radius: 6px;
+            margin: 2px 0 2px 44px;
+            padding: 8px 12px;
+        }
+
+        .leftside-menu .side-nav-second-level a:hover,
+        .leftside-menu .side-nav-second-level a.active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.07);
         }
     </style>
 </head>
@@ -250,105 +306,103 @@
                 </div>
 
                 <!--- Sidemenu -->
+                {% with current_url=request.resolver_match.url_name %}
                 <ul class="side-nav">
 
                     <li class="side-nav-title">Dashboard</li>
                     <li class="side-nav-item">
-                        <a href="{% url 'faculty:faculty_my_leaves' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
+                        <a href="{% url 'faculty:faculty_my_leaves' %}" class="side-nav-link {% if current_url == 'faculty_my_leaves' %}active{% endif %}">
+                            <i class="ri-calendar-check-line"></i>
                             <span>My Leaves </span>
                         </a>
                     </li>
                     <li class="side-nav-item">
-                        <a href="{% url 'faculty:leave_calendar' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
+                        <a href="{% url 'faculty:leave_calendar' %}" class="side-nav-link {% if current_url == 'leave_calendar' %}active{% endif %}">
+                            <i class="ri-calendar-line"></i>
                             <span> Leave Calendar </span>
                         </a>
                     </li>
                     <li class="side-nav-item">
-                        <a href="{% url 'faculty:faculty_apply_leave' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
+                        <a href="{% url 'faculty:faculty_apply_leave' %}" class="side-nav-link {% if current_url == 'faculty_apply_leave' %}active{% endif %}">
+                            <i class="ri-file-add-line"></i>
                             <span>Apply Leave  </span>
                         </a>
                     </li>
                     <li class="side-nav-item">
-                        <a href="{% url 'faculty:faculty_student_list' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
+                        <a href="{% url 'faculty:faculty_student_list' %}" class="side-nav-link {% if current_url == 'faculty_student_list' %}active{% endif %}">
+                            <i class="ri-user-search-line"></i>
                             <span> Student tracking </span>
                         </a>
                     </li>
 
                     <li class="side-nav-item">
-                        <a href="{% url 'faculty:attendance-create' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
+                        <a href="{% url 'faculty:attendance-create' %}" class="side-nav-link {% if current_url == 'attendance-create' %}active{% endif %}">
+                            <i class="ri-clipboard-line"></i>
                             <span> Student Attendance </span>
                         </a>
                     </li>
 
                     <li class="side-nav-item">
                         <a data-bs-toggle="collapse" href="#sidebarCrm" aria-expanded="false" aria-controls="sidebarCrm"
-                            class="side-nav-link">
-                            <i class="uil uil-tachometer-fast"></i>
-                            <span class="badge bg-danger text-white float-end"></span>
+                            class="side-nav-link {% if current_url == 'training_create' or current_url == 'training_list' %}active{% endif %}">
+                            <i class="ri-presentation-line"></i>
                             <span> Training Session </span>
                         </a>
-                        <div class="collapse" id="sidebarCrm">
+                        <div class="collapse {% if current_url == 'training_create' or current_url == 'training_list' %}show{% endif %}" id="sidebarCrm">
                             <ul class="side-nav-second-level">
                                 <li>
-                                    <a href="{% url 'faculty:training_create' %}">Create Sessions</a>
+                                    <a href="{% url 'faculty:training_create' %}" class="{% if current_url == 'training_create' %}active{% endif %}">Create Sessions</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'faculty:training_list' %}">Edit Sessions</a>
+                                    <a href="{% url 'faculty:training_list' %}" class="{% if current_url == 'training_list' %}active{% endif %}">Edit Sessions</a>
                                 </li>
                             </ul>
                         </div>
                     </li>
                     <li class="side-nav-item">
                         <a data-bs-toggle="collapse" href="#sidebarCr" aria-expanded="false" aria-controls="sidebarCr"
-                            class="side-nav-link">
-                            <i class="uil uil-tachometer-fast"></i>
-                            <span class="badge bg-danger text-white float-end"></span>
+                            class="side-nav-link {% if current_url == 'completion-request-create' or current_url == 'completion-request-list' %}active{% endif %}">
+                            <i class="ri-checkbox-circle-line"></i>
                             <span> Batch Completion </span>
                         </a>
-                        <div class="collapse" id="sidebarCr">
+                        <div class="collapse {% if current_url == 'completion-request-create' or current_url == 'completion-request-list' %}show{% endif %}" id="sidebarCr">
                             <ul class="side-nav-second-level">
                                 <li>
-                                    <a href="{% url 'faculty:completion-request-create' %}"> Completion Requets</a>
+                                    <a href="{% url 'faculty:completion-request-create' %}" class="{% if current_url == 'completion-request-create' %}active{% endif %}">Completion Requests</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'faculty:completion-request-list' %}">View Requests</a>
+                                    <a href="{% url 'faculty:completion-request-list' %}" class="{% if current_url == 'completion-request-list' %}active{% endif %}">View Requests</a>
                                 </li>
                             </ul>
                         </div>
                     </li>
                     <li class="side-nav-item">
                         <a data-bs-toggle="collapse" href="#sidebarC" aria-expanded="false" aria-controls="sidebarC"
-                            class="side-nav-link">
-                            <i class="uil uil-tachometer-fast"></i>
-                            <span class="badge bg-danger text-white float-end"></span>
+                            class="side-nav-link {% if current_url == 'faculty_report_create' or current_url == 'faculty_report_list' %}active{% endif %}">
+                            <i class="ri-file-chart-line"></i>
                             <span> Daily Report </span>
                         </a>
-                        <div class="collapse" id="sidebarC">
+                        <div class="collapse {% if current_url == 'faculty_report_create' or current_url == 'faculty_report_list' %}show{% endif %}" id="sidebarC">
                             <ul class="side-nav-second-level">
                                 <li>
-                                    <a href="{% url 'faculty:faculty_report_create' %}">Create Reports </a>
+                                    <a href="{% url 'faculty:faculty_report_create' %}" class="{% if current_url == 'faculty_report_create' %}active{% endif %}">Create Reports </a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'faculty:faculty_report_list' %}">Edit Reports</a>
+                                    <a href="{% url 'faculty:faculty_report_list' %}" class="{% if current_url == 'faculty_report_list' %}active{% endif %}">Edit Reports</a>
                                 </li>
                             </ul>
                         </div>
                     </li>
                     <li class="side-nav-item">
-                        <a href="{% url 'faculty:material_add' %}" class="side-nav-link">
-                            <i class="uil-comments-alt"></i>
+                        <a href="{% url 'faculty:material_add' %}" class="side-nav-link {% if current_url == 'material_add' %}active{% endif %}">
+                            <i class="ri-book-open-line"></i>
                             <span> Course Material </span>
                         </a>
                     </li>
                     
                      <li class="side-nav-item">
                         <a href="#logoutModal" class="side-nav-link">
-                            <i class="uil-sign-out-alt"></i>
+                            <i class="ri-logout-circle-r-line"></i>
                             <span> Logout </span>
                         </a>
                     </li>
@@ -375,6 +429,7 @@
                     
 
                 </ul>
+                {% endwith %}
                 <!--- End Sidemenu -->
 
                 <div class="clearfix"></div>
